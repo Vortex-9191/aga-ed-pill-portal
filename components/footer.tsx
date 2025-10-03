@@ -24,6 +24,11 @@ export function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/stations" className="text-muted-foreground hover:text-foreground transition-colors">
+                  駅名一覧
+                </Link>
+              </li>
+              <li>
                 <Link href="/specialties" className="text-muted-foreground hover:text-foreground transition-colors">
                   診療科一覧
                 </Link>
