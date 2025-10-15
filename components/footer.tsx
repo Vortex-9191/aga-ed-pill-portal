@@ -6,7 +6,7 @@ export function Footer() {
       <div className="container py-12 md:py-16">
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           <div>
-            <h3 className="mb-4 text-sm font-semibold text-foreground">クリニックを探す</h3>
+            <h3 className="mb-4 text-sm font-semibold text-foreground">精神科・心療内科を探す</h3>
             <ul className="space-y-3 text-sm">
               <li>
                 <Link href="/search" className="text-muted-foreground hover:text-foreground transition-colors">
@@ -33,47 +33,42 @@ export function Footer() {
                   駅名一覧
                 </Link>
               </li>
-              <li>
-                <Link href="/specialties" className="text-muted-foreground hover:text-foreground transition-colors">
-                  診療科一覧
-                </Link>
-              </li>
             </ul>
           </div>
 
           <div>
-            <h3 className="mb-4 text-sm font-semibold text-foreground">診療科</h3>
+            <h3 className="mb-4 text-sm font-semibold text-foreground">人気エリア</h3>
             <ul className="space-y-3 text-sm">
               <li>
                 <Link
-                  href="/specialties/internal-medicine"
+                  href="/cities/shinjuku-ku"
                   className="text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  内科
+                  新宿区
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/specialties/pediatrics"
+                  href="/cities/shibuya-ku"
                   className="text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  小児科
+                  渋谷区
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/specialties/dermatology"
+                  href="/cities/minato-ku"
                   className="text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  皮膚科
+                  港区
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/specialties/orthopedics"
+                  href="/cities/osaka-kita"
                   className="text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  整形外科
+                  大阪市北区
                 </Link>
               </li>
             </ul>
@@ -129,7 +124,7 @@ export function Footer() {
         </div>
 
         <div className="mt-12 border-t border-border pt-8 text-center text-sm text-muted-foreground">
-          <p>&copy; 2025 クリニック検索ポータル. All rights reserved.</p>
+          <p>&copy; 2025 全国精神科ドットコム. All rights reserved.</p>
         </div>
       </div>
     </footer>

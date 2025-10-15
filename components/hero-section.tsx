@@ -8,11 +8,11 @@ export function HeroSection() {
       <div className="container">
         <div className="mx-auto max-w-3xl text-center">
           <h1 className="mb-4 text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl text-balance">
-            <span className="text-[#FF6B6B]">クリニックを探す</span>
+            <span className="text-[#FF6B6B]">全国の精神科・心療内科を探す</span>
           </h1>
 
           <p className="mb-8 text-lg text-muted-foreground md:text-xl">
-            エリア・駅・診療科から、あなたに合ったクリニックを見つけよう
+            エリア・駅から、あなたに合った精神科・心療内科を見つけよう
           </p>
 
           <div className="mx-auto mb-12 max-w-2xl">
@@ -20,7 +20,7 @@ export function HeroSection() {
               <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
               <Input
                 type="search"
-                placeholder="エリア、駅名、診療科で検索..."
+                placeholder="エリア、駅名で検索..."
                 className="h-14 pl-12 pr-4 text-base rounded-full border-2 border-[#FF6B6B]/20 focus:border-[#FF6B6B] shadow-sm"
               />
             </div>
@@ -46,7 +46,7 @@ export function HeroSection() {
               className="rounded-full border-[#FF6B6B]/30 hover:bg-[#FFE5E5] hover:border-[#FF6B6B] bg-transparent"
               asChild
             >
-              <a href="/search?category=internal">診療科から探す</a>
+              <a href="/cities">市区町村から探す</a>
             </Button>
           </div>
         </div>
