@@ -10,6 +10,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { createClient } from "@/lib/supabase/server"
+import type { Metadata } from "next"
 
 const cityData: Record<
   string,
@@ -67,6 +68,20 @@ const cityData: Record<
     prefecture: "東京都",
     prefectureSlug: "tokyo",
   },
+}
+
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const city = cityData[params.slug] || {
+    name: "市区町村",
+    municipalityName: "市区町村",
+    prefecture: "都道府県",
+    prefectureSlug: "prefecture",
+  }
+
+  return {
+    title: `${city.name}の精神科・心療内科 | ${city.prefecture} | 全国精神科ドットコム`,
+    description: `${city.prefecture}${city.name}の精神科・心療内科クリニックを検索。${city.name}で評判の心療内科・精神科の診療時間、住所、アクセス、口コミ情報を掲載。`,
+  }
 }
 
 export default async function CityDetailPage({ params }: { params: { slug: string } }) {

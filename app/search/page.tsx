@@ -7,6 +7,33 @@ import { SlidersHorizontal } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { createClient } from "@/lib/supabase/server"
+import type { Metadata } from "next"
+
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: { q?: string; prefecture?: string }
+}): Promise<Metadata> {
+  const query = searchParams.q || ""
+  const prefecture = searchParams.prefecture || ""
+
+  if (query) {
+    return {
+      title: `「${query}」の精神科・心療内科検索結果 | 全国精神科ドットコム`,
+      description: `「${query}」に関連する精神科・心療内科クリニックの検索結果。全国の心療内科・精神科から、診療時間、住所、アクセス、口コミ情報を掲載。`,
+    }
+  } else if (prefecture) {
+    return {
+      title: `${prefecture}の精神科・心療内科 | 全国精神科ドットコム`,
+      description: `${prefecture}の精神科・心療内科クリニックを検索。${prefecture}で評判の心療内科・精神科の診療時間、住所、アクセス、口コミ情報を掲載。`,
+    }
+  }
+
+  return {
+    title: `精神科・心療内科検索 | 全国精神科ドットコム`,
+    description: `全国の精神科・心療内科クリニックを検索。地域、駅名から心療内科・精神科を探せます。診療時間、住所、アクセス、口コミ情報を掲載。`,
+  }
+}
 
 export default async function SearchPage({
   searchParams,

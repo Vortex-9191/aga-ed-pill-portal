@@ -12,6 +12,17 @@ import { ClinicCard } from "@/components/clinic-card"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { getStationInfo } from "@/lib/data/stations"
+import type { Metadata } from "next"
+
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const stationInfo = getStationInfo(params.slug)
+  const stationName = stationInfo?.ja || params.slug
+
+  return {
+    title: `${stationName}の精神科・心療内科 ${stationInfo?.prefecture ? `| ${stationInfo.prefecture}` : ""} | 全国精神科ドットコム`,
+    description: `${stationName}周辺の精神科・心療内科を検索。${stationInfo?.prefecture || ""}${stationName}から通える心療内科・精神科クリニックの診療時間、アクセス、口コミ情報を掲載。`,
+  }
+}
 
 export default async function StationDetailPage({ params }: { params: { slug: string } }) {
   const supabase = await createClient()

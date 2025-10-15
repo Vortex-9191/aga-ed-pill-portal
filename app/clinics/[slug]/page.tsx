@@ -7,6 +7,29 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { createClient } from "@/lib/supabase/server"
 import { notFound } from "next/navigation"
+import type { Metadata } from "next"
+
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const supabase = await createClient()
+  const { data: clinic } = await supabase.from("clinics").select("*").eq("slug", params.slug).single()
+
+  if (!clinic) {
+    return {
+      title: "クリニックが見つかりません | 全国精神科ドットコム",
+      description: "指定されたクリニックが見つかりませんでした。",
+    }
+  }
+
+  const specialties = clinic.featured_subjects
+    ? clinic.featured_subjects.split(",").map((s: string) => s.trim())
+    : []
+  const specialtiesText = specialties.length > 0 ? specialties.join("・") : "精神科・心療内科"
+
+  return {
+    title: `${clinic.clinic_name} | ${clinic.municipalities} ${specialtiesText} | 全国精神科ドットコム`,
+    description: `${clinic.prefecture}${clinic.municipalities}の${clinic.clinic_name}。${specialtiesText}の診療を行っています。${clinic.stations ? `${clinic.stations}。` : ""}診療時間、アクセス、口コミ情報を掲載。`,
+  }
+}
 
 export default async function ClinicDetailPage({ params }: { params: { slug: string } }) {
   const supabase = await createClient()
