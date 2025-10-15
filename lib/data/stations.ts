@@ -110,6 +110,7 @@ export const stationMap: Record<string, { ja: string; prefecture: string; lines:
   sapporo: { ja: "札幌駅", prefecture: "北海道", lines: ["JR函館本線", "札幌市営地下鉄南北線"] },
   goryokaku: { ja: "五稜郭駅", prefecture: "北海道", lines: ["JR函館本線"] },
   asahikawa: { ja: "旭川駅", prefecture: "北海道", lines: ["JR函館本線", "JR宗谷本線"] },
+  nakayama: { ja: "中山駅", prefecture: "北海道", lines: ["JR函館本線"] },
 
   // 宮城県
   sendai: { ja: "仙台駅", prefecture: "宮城県", lines: ["JR東北本線", "仙台市地下鉄南北線"] },
@@ -198,6 +199,7 @@ export const stationMap: Record<string, { ja: string; prefecture: string; lines:
   amakusa: { ja: "天草駅", prefecture: "熊本県", lines: ["天草エアライン"] },
   nagasaki: { ja: "長崎駅", prefecture: "長崎県", lines: ["JR長崎本線"] },
   sasebochuo: { ja: "佐世保中央駅", prefecture: "長崎県", lines: ["松浦鉄道西九州線"] },
+  nakasasebo: { ja: "中佐世保駅", prefecture: "長崎県", lines: ["松浦鉄道西九州線"] },
   naha: { ja: "那覇空港駅", prefecture: "沖縄県", lines: ["沖縄都市モノレール"] },
   okinawa: { ja: "沖縄市駅", prefecture: "沖縄県", lines: ["沖縄バス"] },
   okinawacity: { ja: "沖縄市", prefecture: "沖縄県", lines: [] },
@@ -218,10 +220,25 @@ export function getStationJapaneseName(slug: string): string {
   return info?.ja || slug
 }
 
+// Common hiragana to kanji conversions for station names
+const hiraganaToKanji: Record<string, string> = {
+  'さっぽろ': '札幌',
+  'なかやま': '中山',
+  'しもまつ': '下松',
+}
+
 // Normalize function to handle character variations
 function normalizeStationName(name: string): string {
-  return name
-    .trim()
+  let normalized = name.trim()
+
+  // Check for hiragana station names
+  for (const [hiragana, kanji] of Object.entries(hiraganaToKanji)) {
+    if (normalized.includes(hiragana)) {
+      normalized = normalized.replace(hiragana, kanji)
+    }
+  }
+
+  return normalized
     .replace(/ヶ/g, 'ケ')  // Normalize ヶ to ケ
     .replace(/ケ/g, 'ケ')  // Ensure consistent ケ
     .replace(/ヵ/g, 'カ')  // Normalize ヵ to カ

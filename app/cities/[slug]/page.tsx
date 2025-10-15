@@ -143,7 +143,7 @@ export default async function CityDetailPage({ params }: { params: { slug: strin
     if (clinic.stations) {
       // Split by common separators and clean up
       const stations = clinic.stations
-        .split(/[,、・\s]+/)
+        .split(/[,、・\/／\s]+/)  // Added / and ／ for splitting
         .map((s: string) => s.trim())
         .filter((s: string) => s.length > 0)
       stations.forEach((station: string) => relatedStationsSet.add(station))
