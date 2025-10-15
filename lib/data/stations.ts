@@ -218,27 +218,62 @@ export function getStationJapaneseName(slug: string): string {
   return info?.ja || slug
 }
 
+// Normalize function to handle character variations
+function normalizeStationName(name: string): string {
+  return name
+    .trim()
+    .replace(/ヶ/g, 'ケ')  // Normalize ヶ to ケ
+    .replace(/ケ/g, 'ケ')  // Ensure consistent ケ
+    .replace(/ヵ/g, 'カ')  // Normalize ヵ to カ
+    .replace(/〈/g, '(')   // Normalize special brackets
+    .replace(/〉/g, ')')
+}
+
 // Create reverse map: Japanese name -> English slug
 const reverseStationMap: Record<string, string> = {}
 Object.entries(stationMap).forEach(([slug, info]) => {
-  // Store both with and without 駅 suffix
+  // Store both with and without 駅 suffix, with normalized names
   const nameWithStation = info.ja
   const nameWithoutStation = info.ja.replace(/駅$/, '')
+
+  // Store original names
   reverseStationMap[nameWithStation] = slug
   reverseStationMap[nameWithoutStation] = slug
+
+  // Store normalized names
+  const normalizedWithStation = normalizeStationName(nameWithStation)
+  const normalizedWithoutStation = normalizeStationName(nameWithoutStation)
+  if (normalizedWithStation !== nameWithStation) {
+    reverseStationMap[normalizedWithStation] = slug
+  }
+  if (normalizedWithoutStation !== nameWithoutStation) {
+    reverseStationMap[normalizedWithoutStation] = slug
+  }
 })
 
 export function getStationSlug(japaneseName: string): string | undefined {
   // Try exact match first
-  const normalized = japaneseName.trim()
+  const trimmed = japaneseName.trim()
+  if (reverseStationMap[trimmed]) {
+    return reverseStationMap[trimmed]
+  }
+
+  // Try normalized match
+  const normalized = normalizeStationName(trimmed)
   if (reverseStationMap[normalized]) {
     return reverseStationMap[normalized]
   }
 
   // Try without 駅 suffix
-  const withoutStation = normalized.replace(/駅$/, '')
+  const withoutStation = trimmed.replace(/駅$/, '')
   if (reverseStationMap[withoutStation]) {
     return reverseStationMap[withoutStation]
+  }
+
+  // Try normalized without 駅 suffix
+  const normalizedWithoutStation = normalizeStationName(withoutStation)
+  if (reverseStationMap[normalizedWithoutStation]) {
+    return reverseStationMap[normalizedWithoutStation]
   }
 
   return undefined
