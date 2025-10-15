@@ -64,3 +64,29 @@ export function getStationJapaneseName(slug: string): string {
   const info = getStationInfo(slug)
   return info?.ja || slug
 }
+
+// Create reverse map: Japanese name -> English slug
+const reverseStationMap: Record<string, string> = {}
+Object.entries(stationMap).forEach(([slug, info]) => {
+  // Store both with and without 駅 suffix
+  const nameWithStation = info.ja
+  const nameWithoutStation = info.ja.replace(/駅$/, '')
+  reverseStationMap[nameWithStation] = slug
+  reverseStationMap[nameWithoutStation] = slug
+})
+
+export function getStationSlug(japaneseName: string): string | undefined {
+  // Try exact match first
+  const normalized = japaneseName.trim()
+  if (reverseStationMap[normalized]) {
+    return reverseStationMap[normalized]
+  }
+
+  // Try without 駅 suffix
+  const withoutStation = normalized.replace(/駅$/, '')
+  if (reverseStationMap[withoutStation]) {
+    return reverseStationMap[withoutStation]
+  }
+
+  return undefined
+}

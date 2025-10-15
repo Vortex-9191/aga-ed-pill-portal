@@ -14,6 +14,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { Train } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { getStationSlug } from "@/lib/data/stations"
 
 const cityData: Record<
   string,
@@ -192,8 +193,22 @@ export default async function CityDetailPage({ params }: { params: { slug: strin
                 <CardContent>
                   <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
                     {relatedStations.map((station) => {
-                      // Create slug from station name (remove 駅 suffix if present)
-                      const stationSlug = station.replace(/駅$/, "").toLowerCase()
+                      // Get proper English slug from Japanese station name
+                      const stationSlug = getStationSlug(station)
+
+                      // If no slug mapping found, don't render as link
+                      if (!stationSlug) {
+                        return (
+                          <div
+                            key={station}
+                            className="flex items-center gap-2 p-3 rounded-lg border border-border bg-muted/30"
+                          >
+                            <Train className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                            <span className="text-sm font-medium truncate">{station}</span>
+                          </div>
+                        )
+                      }
+
                       return (
                         <Link
                           key={station}
