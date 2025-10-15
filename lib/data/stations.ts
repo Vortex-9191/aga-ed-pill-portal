@@ -45,6 +45,21 @@ export const stationMap: Record<string, { ja: string; prefecture: string; lines:
   kumegawa: { ja: "久米川駅", prefecture: "東京都", lines: ["西武新宿線"] },
   keiokamata: { ja: "京急蒲田駅", prefecture: "東京都", lines: ["京急本線", "京急空港線"] },
 
+  // 渋谷区周辺の駅を追加
+  meijijingumae: { ja: "明治神宮前〈原宿〉駅", prefecture: "東京都", lines: ["東京メトロ千代田線", "東京メトロ副都心線"] },
+  omotesando: { ja: "表参道駅", prefecture: "東京都", lines: ["東京メトロ銀座線", "東京メトロ千代田線", "東京メトロ半蔵門線"] },
+  yoyogiuehara: { ja: "代々木上原駅", prefecture: "東京都", lines: ["小田急小田原線", "東京メトロ千代田線"] },
+  yoyogikoen: { ja: "代々木公園駅", prefecture: "東京都", lines: ["東京メトロ千代田線"] },
+  daikanyama: { ja: "代官山駅", prefecture: "東京都", lines: ["東急東横線"] },
+  hatsudai: { ja: "初台駅", prefecture: "東京都", lines: ["京王新線"] },
+  kitasando: { ja: "北参道駅", prefecture: "東京都", lines: ["東京メトロ副都心線"] },
+  sendagaya: { ja: "千駄ケ谷駅", prefecture: "東京都", lines: ["JR中央・総武線"] },
+  sangubashi: { ja: "参宮橋駅", prefecture: "東京都", lines: ["小田急小田原線"] },
+  hatagaya: { ja: "幡ヶ谷駅", prefecture: "東京都", lines: ["京王新線"] },
+  hiroo: { ja: "広尾駅", prefecture: "東京都", lines: ["東京メトロ日比谷線"] },
+  shinsen: { ja: "神泉駅", prefecture: "東京都", lines: ["京王井の頭線"] },
+  sasazuka: { ja: "笹塚駅", prefecture: "東京都", lines: ["京王線", "京王新線"] },
+
   // 神奈川県
   yokohama: { ja: "横浜駅", prefecture: "神奈川県", lines: ["JR東海道本線", "JR横須賀線", "東急東横線"] },
   kawasaki: { ja: "川崎駅", prefecture: "神奈川県", lines: ["JR東海道本線", "JR京浜東北線"] },
