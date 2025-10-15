@@ -9,68 +9,97 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { Button } from "@/components/ui/button"
+import { createClient } from "@/lib/supabase/server"
 
-const cityData: Record<string, { name: string; prefecture: string; prefectureSlug: string }> = {
-  "tokyo-23ku": { name: "東京23区", prefecture: "東京都", prefectureSlug: "tokyo" },
-  yokohama: { name: "横浜市", prefecture: "神奈川県", prefectureSlug: "kanagawa" },
-  osaka: { name: "大阪市", prefecture: "大阪府", prefectureSlug: "osaka" },
-  nagoya: { name: "名古屋市", prefecture: "愛知県", prefectureSlug: "aichi" },
+const cityData: Record<
+  string,
+  { name: string; municipalityName: string; prefecture: string; prefectureSlug: string }
+> = {
+  "shinjuku-ku": { name: "新宿区", municipalityName: "新宿区", prefecture: "東京都", prefectureSlug: "tokyo" },
+  "shibuya-ku": { name: "渋谷区", municipalityName: "渋谷区", prefecture: "東京都", prefectureSlug: "tokyo" },
+  "minato-ku": { name: "港区", municipalityName: "港区", prefecture: "東京都", prefectureSlug: "tokyo" },
+  "setagaya-ku": { name: "世田谷区", municipalityName: "世田谷区", prefecture: "東京都", prefectureSlug: "tokyo" },
+  "yokohama-naka": {
+    name: "横浜市中区",
+    municipalityName: "横浜市中区",
+    prefecture: "神奈川県",
+    prefectureSlug: "kanagawa",
+  },
+  "osaka-kita": {
+    name: "大阪市北区",
+    municipalityName: "大阪市北区",
+    prefecture: "大阪府",
+    prefectureSlug: "osaka",
+  },
+  "nagoya-naka": {
+    name: "名古屋市中区",
+    municipalityName: "名古屋市中区",
+    prefecture: "愛知県",
+    prefectureSlug: "aichi",
+  },
+  "fukuoka-hakata": {
+    name: "福岡市博多区",
+    municipalityName: "福岡市博多区",
+    prefecture: "福岡県",
+    prefectureSlug: "fukuoka",
+  },
+  "sapporo-chuo": {
+    name: "札幌市中央区",
+    municipalityName: "札幌市中央区",
+    prefecture: "北海道",
+    prefectureSlug: "hokkaido",
+  },
+  "kyoto-nakagyo": {
+    name: "京都市中京区",
+    municipalityName: "京都市中京区",
+    prefecture: "京都府",
+    prefectureSlug: "kyoto",
+  },
+  "shinagawa-ku": {
+    name: "品川区",
+    municipalityName: "品川区",
+    prefecture: "東京都",
+    prefectureSlug: "tokyo",
+  },
+  "chiyoda-ku": {
+    name: "千代田区",
+    municipalityName: "千代田区",
+    prefecture: "東京都",
+    prefectureSlug: "tokyo",
+  },
 }
 
-const mockClinics = [
-  {
-    id: "1",
-    name: "さくらクリニック",
-    specialties: ["内科", "小児科"],
-    address: "東京都渋谷区1-2-3",
-    station: "渋谷駅",
-    distance: "5分",
-    rating: 4.5,
-    reviews: 128,
-    image: "/modern-clinic-exterior.jpg",
-    tags: ["土日診療", "夜間診療", "予約可"],
-  },
-  {
-    id: "2",
-    name: "健康第一クリニック",
-    specialties: ["内科", "循環器科"],
-    address: "東京都新宿区4-5-6",
-    station: "新宿駅",
-    distance: "3分",
-    rating: 4.3,
-    reviews: 95,
-    image: "/general-clinic.jpg",
-    tags: ["駅近", "予約可"],
-  },
-  {
-    id: "3",
-    name: "みどり皮膚科",
-    specialties: ["皮膚科", "美容皮膚科"],
-    address: "東京都港区7-8-9",
-    station: "表参道駅",
-    distance: "2分",
-    rating: 4.7,
-    reviews: 203,
-    image: "/dermatology-clinic.png",
-    tags: ["女性医師", "予約可", "駅近"],
-  },
-  {
-    id: "4",
-    name: "スマイル歯科クリニック",
-    specialties: ["歯科", "矯正歯科"],
-    address: "東京都品川区10-11-12",
-    station: "品川駅",
-    distance: "4分",
-    rating: 4.6,
-    reviews: 167,
-    image: "/dental-clinic.png",
-    tags: ["土日診療", "予約可"],
-  },
-]
+export default async function CityDetailPage({ params }: { params: { slug: string } }) {
+  const supabase = await createClient()
+  const city = cityData[params.slug] || {
+    name: "市区町村",
+    municipalityName: "市区町村",
+    prefecture: "都道府県",
+    prefectureSlug: "prefecture",
+  }
 
-export default function CityDetailPage({ params }: { params: { slug: string } }) {
-  const city = cityData[params.slug] || { name: "市区町村", prefecture: "都道府県", prefectureSlug: "prefecture" }
+  const { data: clinics, error } = await supabase
+    .from("clinics")
+    .select("*")
+    .ilike("municipalities", `%${city.municipalityName}%`)
+    .order("created_at", { ascending: false })
+
+  if (error) {
+    console.error("[v0] Error fetching clinics:", error)
+  }
+
+  const clinicCards =
+    clinics?.map((clinic) => ({
+      id: clinic.id,
+      name: clinic.clinic_name,
+      slug: clinic.slug,
+      address: clinic.address,
+      station: clinic.stations || "",
+      specialties: clinic.featured_subjects ? clinic.featured_subjects.split(", ") : [],
+      phone: clinic.corp_tel,
+      prefecture: clinic.prefecture,
+      city: clinic.municipalities,
+    })) || []
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -103,19 +132,19 @@ export default function CityDetailPage({ params }: { params: { slug: string } })
           <div className="mb-8">
             <h2 className="mb-4 text-xl font-bold">
               クリニック一覧
-              <span className="ml-2 text-base font-normal text-muted-foreground">({mockClinics.length}件)</span>
+              <span className="ml-2 text-base font-normal text-muted-foreground">({clinicCards.length}件)</span>
             </h2>
-            <div className="grid gap-6 md:grid-cols-2">
-              {mockClinics.map((clinic) => (
-                <ClinicCard key={clinic.id} clinic={clinic} />
-              ))}
-            </div>
-          </div>
-
-          <div className="flex justify-center">
-            <Button variant="outline" size="lg">
-              さらに読み込む
-            </Button>
+            {clinicCards.length > 0 ? (
+              <div className="space-y-4">
+                {clinicCards.map((clinic) => (
+                  <ClinicCard key={clinic.id} clinic={clinic} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground">この地域のクリニックは現在登録されていません。</p>
+              </div>
+            )}
           </div>
         </div>
       </main>
