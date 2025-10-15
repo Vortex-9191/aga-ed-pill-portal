@@ -11,6 +11,9 @@ import {
 } from "@/components/ui/breadcrumb"
 import { createClient } from "@/lib/supabase/server"
 import type { Metadata } from "next"
+import Link from "next/link"
+import { Train } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 const cityData: Record<
   string,
@@ -116,6 +119,20 @@ export default async function CityDetailPage({ params }: { params: { slug: strin
       city: clinic.municipalities,
     })) || []
 
+  // Extract unique stations from clinics in this municipality
+  const relatedStationsSet = new Set<string>()
+  clinics?.forEach((clinic) => {
+    if (clinic.stations) {
+      // Split by common separators and clean up
+      const stations = clinic.stations
+        .split(/[,、・\s]+/)
+        .map((s: string) => s.trim())
+        .filter((s: string) => s.length > 0)
+      stations.forEach((station: string) => relatedStationsSet.add(station))
+    }
+  })
+  const relatedStations = Array.from(relatedStationsSet).slice(0, 20) // Limit to 20 stations
+
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
@@ -161,6 +178,38 @@ export default async function CityDetailPage({ params }: { params: { slug: strin
               </div>
             )}
           </div>
+
+          {/* Related Stations Section */}
+          {relatedStations.length > 0 && (
+            <div className="mb-8">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Train className="h-5 w-5" />
+                    {city.name}の関連駅
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+                    {relatedStations.map((station) => {
+                      // Create slug from station name (remove 駅 suffix if present)
+                      const stationSlug = station.replace(/駅$/, "").toLowerCase()
+                      return (
+                        <Link
+                          key={station}
+                          href={`/stations/${stationSlug}`}
+                          className="flex items-center gap-2 p-3 rounded-lg border border-border hover:bg-accent hover:border-primary transition-colors"
+                        >
+                          <Train className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                          <span className="text-sm font-medium truncate">{station}</span>
+                        </Link>
+                      )
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
         </div>
       </main>
       <Footer />

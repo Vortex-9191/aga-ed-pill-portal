@@ -1,4 +1,4 @@
-import { Train } from "lucide-react"
+import { Train, MapPin } from "lucide-react"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -13,6 +13,8 @@ import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { getStationInfo } from "@/lib/data/stations"
 import type { Metadata } from "next"
+import Link from "next/link"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const stationInfo = getStationInfo(params.slug)
@@ -57,6 +59,31 @@ export default async function StationDetailPage({ params }: { params: { slug: st
       prefecture: clinic.prefecture,
       city: clinic.municipalities,
     })) || []
+
+  // Extract unique municipalities from clinics at this station
+  const relatedMunicipalitiesSet = new Set<string>()
+  clinics?.forEach((clinic) => {
+    if (clinic.municipalities) {
+      relatedMunicipalitiesSet.add(clinic.municipalities.trim())
+    }
+  })
+  const relatedMunicipalities = Array.from(relatedMunicipalitiesSet).slice(0, 10) // Limit to 10 municipalities
+
+  // Mapping for municipality slugs (expand as needed)
+  const municipalitySlugMap: Record<string, string> = {
+    "新宿区": "shinjuku-ku",
+    "渋谷区": "shibuya-ku",
+    "港区": "minato-ku",
+    "世田谷区": "setagaya-ku",
+    "品川区": "shinagawa-ku",
+    "千代田区": "chiyoda-ku",
+    "横浜市中区": "yokohama-naka",
+    "大阪市北区": "osaka-kita",
+    "名古屋市中区": "nagoya-naka",
+    "福岡市博多区": "fukuoka-hakata",
+    "札幌市中央区": "sapporo-chuo",
+    "京都市中京区": "kyoto-nakagyo",
+  }
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -111,7 +138,7 @@ export default async function StationDetailPage({ params }: { params: { slug: st
         {/* クリニック一覧 */}
         <div className="container mx-auto px-4 py-12">
           {clinicCards.length > 0 ? (
-            <div className="space-y-6">
+            <div className="space-y-6 mb-12">
               {clinicCards.map((clinic) => (
                 <ClinicCard key={clinic.id} clinic={clinic} />
               ))}
@@ -120,6 +147,47 @@ export default async function StationDetailPage({ params }: { params: { slug: st
             <div className="text-center py-12">
               <p className="text-muted-foreground">この駅のクリニックは現在登録されていません。</p>
             </div>
+          )}
+
+          {/* Related Municipalities Section */}
+          {relatedMunicipalities.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MapPin className="h-5 w-5" />
+                  {stationName}周辺の市区町村
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+                  {relatedMunicipalities.map((municipality) => {
+                    const slug = municipalitySlugMap[municipality]
+                    if (!slug) {
+                      // If no slug mapping, display without link
+                      return (
+                        <div
+                          key={municipality}
+                          className="flex items-center gap-2 p-3 rounded-lg border border-border bg-muted/30"
+                        >
+                          <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                          <span className="text-sm font-medium truncate">{municipality}</span>
+                        </div>
+                      )
+                    }
+                    return (
+                      <Link
+                        key={municipality}
+                        href={`/cities/${slug}`}
+                        className="flex items-center gap-2 p-3 rounded-lg border border-border hover:bg-accent hover:border-primary transition-colors"
+                      >
+                        <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                        <span className="text-sm font-medium truncate">{municipality}</span>
+                      </Link>
+                    )
+                  })}
+                </div>
+              </CardContent>
+            </Card>
           )}
         </div>
       </main>
