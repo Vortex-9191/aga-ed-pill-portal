@@ -3,6 +3,14 @@ import { Footer } from "@/components/footer"
 import Link from "next/link"
 import { ChevronRight, MapPin } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
 
 const regions = [
   {
@@ -88,6 +96,23 @@ export default function AreasPage() {
     <div className="flex min-h-screen flex-col">
       <Header />
       <main className="flex-1">
+        {/* Breadcrumb */}
+        <div className="border-b border-border bg-muted/30">
+          <div className="container py-4">
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink href="/">ホーム</BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>エリア一覧</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+          </div>
+        </div>
+
         {/* Page Header */}
         <div className="border-b border-border bg-secondary/20">
           <div className="container py-12">

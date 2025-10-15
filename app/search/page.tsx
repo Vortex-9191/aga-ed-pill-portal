@@ -7,6 +7,14 @@ import { SlidersHorizontal } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { createClient } from "@/lib/supabase/server"
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
 import type { Metadata } from "next"
 
 export async function generateMetadata({
@@ -78,6 +86,23 @@ export default async function SearchPage({
     <div className="flex min-h-screen flex-col">
       <Header />
       <main className="flex-1 bg-background">
+        {/* Breadcrumb */}
+        <div className="border-b border-border bg-muted/30">
+          <div className="container py-4">
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink href="/">ホーム</BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>検索</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+          </div>
+        </div>
+
         {/* Search Header */}
         <div className="border-b border-border bg-card">
           <div className="container py-6">

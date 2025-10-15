@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { getStationSlug } from "@/lib/data/stations"
 
 const municipalities = [
   { name: "新宿区", slug: "shinjuku-ku" },
@@ -137,15 +138,29 @@ export function Footer() {
         <div className="mt-6">
           <h4 className="mb-3 text-xs font-semibold text-foreground">駅名から探す</h4>
           <div className="flex flex-wrap gap-2">
-            {stations.map((station) => (
-              <Link
-                key={station}
-                href={`/stations/${station.replace('駅', '')}`}
-                className="text-xs text-muted-foreground hover:text-foreground hover:underline"
-              >
-                {station}
-              </Link>
-            ))}
+            {stations.map((station) => {
+              const stationSlug = getStationSlug(station)
+
+              // If no slug mapping, render as plain text
+              if (!stationSlug) {
+                return (
+                  <span key={station} className="text-xs text-muted-foreground">
+                    {station}
+                  </span>
+                )
+              }
+
+              // Render as clickable link with English slug
+              return (
+                <Link
+                  key={station}
+                  href={`/stations/${stationSlug}`}
+                  className="text-xs text-muted-foreground hover:text-foreground hover:underline"
+                >
+                  {station}
+                </Link>
+              )
+            })}
           </div>
         </div>
 

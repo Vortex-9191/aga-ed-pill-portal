@@ -59,6 +59,7 @@ export const stationMap: Record<string, { ja: string; prefecture: string; lines:
   hiroo: { ja: "広尾駅", prefecture: "東京都", lines: ["東京メトロ日比谷線"] },
   shinsen: { ja: "神泉駅", prefecture: "東京都", lines: ["京王井の頭線"] },
   sasazuka: { ja: "笹塚駅", prefecture: "東京都", lines: ["京王線", "京王新線"] },
+  mita: { ja: "三田駅", prefecture: "東京都", lines: ["都営三田線", "都営浅草線"] },
 
   // 神奈川県
   yokohama: { ja: "横浜駅", prefecture: "神奈川県", lines: ["JR東海道本線", "JR横須賀線", "東急東横線"] },

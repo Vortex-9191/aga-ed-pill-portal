@@ -1,6 +1,16 @@
+import { Header } from "@/components/header"
+import { Footer } from "@/components/footer"
 import Link from "next/link"
 import { MapPin, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
 
 export default function StationsPage() {
   // 主要駅のモックデータ（都道府県別）
@@ -39,14 +49,33 @@ export default function StationsPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* ヘッダー */}
-      <div className="bg-white border-b">
-        <div className="container mx-auto px-4 py-8">
-          <h1 className="text-3xl font-bold text-coral mb-2">駅名から探す</h1>
-          <p className="text-muted-foreground">最寄り駅からクリニックを検索できます</p>
+    <div className="flex min-h-screen flex-col">
+      <Header />
+      <main className="flex-1">
+        {/* Breadcrumb */}
+        <div className="border-b border-border bg-muted/30">
+          <div className="container py-4">
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink href="/">ホーム</BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>駅名一覧</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+          </div>
         </div>
-      </div>
+
+        {/* ヘッダー */}
+        <div className="bg-white border-b">
+          <div className="container mx-auto px-4 py-8">
+            <h1 className="text-3xl font-bold text-coral mb-2">駅名から探す</h1>
+            <p className="text-muted-foreground">最寄り駅からクリニックを検索できます</p>
+          </div>
+        </div>
 
       {/* 駅一覧 */}
       <div className="container mx-auto px-4 py-12">
@@ -84,6 +113,8 @@ export default function StationsPage() {
           </Button>
         </div>
       </div>
+      </main>
+      <Footer />
     </div>
   )
 }
