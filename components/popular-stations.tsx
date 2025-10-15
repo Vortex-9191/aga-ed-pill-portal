@@ -2,18 +2,54 @@ import Link from "next/link"
 import { Train } from "lucide-react"
 
 const popularStations = [
-  { name: "新宿駅", slug: "shinjuku", clinics: 156, prefecture: "東京都" },
-  { name: "渋谷駅", slug: "shibuya", clinics: 142, prefecture: "東京都" },
-  { name: "池袋駅", slug: "ikebukuro", clinics: 128, prefecture: "東京都" },
-  { name: "横浜駅", slug: "yokohama", clinics: 98, prefecture: "神奈川県" },
-  { name: "大阪駅", slug: "osaka", clinics: 134, prefecture: "大阪府" },
-  { name: "梅田駅", slug: "umeda", clinics: 121, prefecture: "大阪府" },
-  { name: "名古屋駅", slug: "nagoya", clinics: 87, prefecture: "愛知県" },
-  { name: "札幌駅", slug: "sapporo", clinics: 76, prefecture: "北海道" },
-  { name: "福岡駅", slug: "fukuoka", clinics: 65, prefecture: "福岡県" },
-  { name: "京都駅", slug: "kyoto", clinics: 54, prefecture: "京都府" },
-  { name: "品川駅", slug: "shinagawa", clinics: 89, prefecture: "東京都" },
-  { name: "東京駅", slug: "tokyo", clinics: 112, prefecture: "東京都" },
+  { name: "三鷹駅", clinics: 13 },
+  { name: "仙台駅", clinics: 13 },
+  { name: "五反田駅", clinics: 11 },
+  { name: "京橋駅", clinics: 11 },
+  { name: "佐賀駅", clinics: 10 },
+  { name: "センター南駅", clinics: 9 },
+  { name: "三国ケ丘駅", clinics: 9 },
+  { name: "上大岡駅", clinics: 9 },
+  { name: "住吉駅", clinics: 9 },
+  { name: "中津駅", clinics: 8 },
+  { name: "代々木駅", clinics: 8 },
+  { name: "伊丹駅", clinics: 8 },
+  { name: "いわき駅", clinics: 7 },
+  { name: "ときわ台駅", clinics: 7 },
+  { name: "なんば駅", clinics: 7 },
+  { name: "三軒茶屋駅", clinics: 7 },
+  { name: "下北沢駅", clinics: 7 },
+  { name: "京都駅", clinics: 7 },
+  { name: "伊勢原駅", clinics: 7 },
+  { name: "つくば駅", clinics: 6 },
+  { name: "三ノ宮駅", clinics: 6 },
+  { name: "上飯田駅", clinics: 6 },
+  { name: "中央林間駅", clinics: 6 },
+  { name: "中目黒駅", clinics: 6 },
+  { name: "中野駅", clinics: 6 },
+  { name: "亀戸駅", clinics: 6 },
+  { name: "二俣川駅", clinics: 6 },
+  { name: "今池駅", clinics: 6 },
+  { name: "佐世保中央駅", clinics: 6 },
+  { name: "たまプラーザ駅", clinics: 5 },
+  { name: "バスセンター前駅", clinics: 5 },
+  { name: "三島駅", clinics: 5 },
+  { name: "三田駅", clinics: 5 },
+  { name: "丹波口駅", clinics: 5 },
+  { name: "久喜駅", clinics: 5 },
+  { name: "久米川駅", clinics: 5 },
+  { name: "九段下駅", clinics: 5 },
+  { name: "亀有駅", clinics: 5 },
+  { name: "五稜郭駅", clinics: 5 },
+  { name: "京急蒲田駅", clinics: 5 },
+  { name: "人形町駅", clinics: 5 },
+  { name: "伏見駅", clinics: 5 },
+  { name: "倉吉駅", clinics: 5 },
+  { name: "あざみ野駅", clinics: 4 },
+  { name: "センター北駅", clinics: 4 },
+  { name: "つつじケ丘駅", clinics: 4 },
+  { name: "ひばりケ丘駅", clinics: 4 },
+  { name: "一ノ関駅", clinics: 4 },
 ]
 
 export function PopularStations() {
@@ -25,22 +61,20 @@ export function PopularStations() {
           <p className="text-muted-foreground">主要駅周辺のクリニックを探せます</p>
         </div>
 
-        <div className="mx-auto max-w-5xl">
-          <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+        <div className="mx-auto max-w-6xl">
+          <div className="grid gap-2 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
             {popularStations.map((station) => (
               <Link
-                key={station.slug}
-                href={`/stations/${station.slug}`}
-                className="group flex items-center justify-between rounded-lg border border-border bg-card p-4 transition-all hover:border-[#FF6B6B] hover:shadow-md"
+                key={station.name}
+                href={`/stations/${station.name.replace('駅', '')}`}
+                className="group flex items-center gap-2 rounded-lg border border-border bg-card p-2 transition-all hover:border-[#FF6B6B] hover:shadow-sm text-sm"
               >
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FFE5E5] text-[#FF6B6B] transition-colors group-hover:bg-[#FF6B6B] group-hover:text-white">
-                    <Train className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <div className="font-medium text-foreground group-hover:text-[#FF6B6B]">{station.name}</div>
-                    <div className="text-xs text-muted-foreground">{station.clinics}件</div>
-                  </div>
+                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[#FFE5E5] text-[#FF6B6B] transition-colors group-hover:bg-[#FF6B6B] group-hover:text-white flex-shrink-0">
+                  <Train className="h-3 w-3" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-medium text-foreground group-hover:text-[#FF6B6B] truncate text-xs">{station.name}</div>
+                  <div className="text-[10px] text-muted-foreground">{station.clinics}件</div>
                 </div>
               </Link>
             ))}
