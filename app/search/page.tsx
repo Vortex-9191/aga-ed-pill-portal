@@ -2,9 +2,9 @@ import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { SearchFilters } from "@/components/search-filters"
 import { ClinicCard } from "@/components/clinic-card"
-import { Input } from "@/components/ui/input"
+import { SearchForm } from "@/components/search-form"
+import { SlidersHorizontal } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Search, SlidersHorizontal } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { createClient } from "@/lib/supabase/server"
 
@@ -15,7 +15,7 @@ export default async function SearchPage({
 }) {
   const supabase = await createClient()
   const query = searchParams.q || ""
-  const prefecture = searchParams.prefecture || "東京都"
+  const prefecture = searchParams.prefecture || ""
 
   let queryBuilder = supabase.from("clinics").select("*")
 
@@ -54,20 +54,7 @@ export default async function SearchPage({
         {/* Search Header */}
         <div className="border-b border-border bg-card">
           <div className="container py-6">
-            <div className="flex flex-col gap-4 md:flex-row md:items-center">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  type="text"
-                  placeholder="地域名、駅名、診療科で検索"
-                  className="h-12 pl-10"
-                  defaultValue="東京都"
-                />
-              </div>
-              <Button size="lg" className="md:w-auto">
-                検索
-              </Button>
-            </div>
+            <SearchForm />
           </div>
         </div>
 
@@ -87,7 +74,7 @@ export default async function SearchPage({
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <h1 className="text-2xl font-bold text-foreground">
-                    {prefecture}のクリニック{query && `「${query}」の検索結果`}
+                    {query ? `「${query}」の検索結果` : prefecture ? `${prefecture}のクリニック` : "クリニック検索"}
                   </h1>
                   <p className="mt-1 text-sm text-muted-foreground">{clinicCards.length}件の検索結果</p>
                 </div>

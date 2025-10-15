@@ -1,8 +1,22 @@
+"use client"
+
 import { Button } from "@/components/ui/button"
 import { Search } from "lucide-react"
 import { Input } from "@/components/ui/input"
+import { useState, FormEvent } from "react"
+import { useRouter } from "next/navigation"
 
 export function HeroSection() {
+  const [searchQuery, setSearchQuery] = useState("")
+  const router = useRouter()
+
+  const handleSearch = (e: FormEvent) => {
+    e.preventDefault()
+    if (searchQuery.trim()) {
+      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`)
+    }
+  }
+
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-[#FFF5F5] to-background py-16 md:py-24">
       <div className="container">
@@ -16,14 +30,22 @@ export function HeroSection() {
           </p>
 
           <div className="mx-auto mb-12 max-w-2xl">
-            <div className="relative">
-              <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+            <form onSubmit={handleSearch} className="relative">
+              <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground pointer-events-none" />
               <Input
                 type="search"
                 placeholder="エリア、駅名で検索..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 className="h-14 pl-12 pr-4 text-base rounded-full border-2 border-[#FF6B6B]/20 focus:border-[#FF6B6B] shadow-sm"
               />
-            </div>
+              <Button
+                type="submit"
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-[#FF6B6B] hover:bg-[#FF6B6B]/90"
+              >
+                検索
+              </Button>
+            </form>
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-3">
