@@ -20,58 +20,75 @@ const cityData: Record<
   string,
   { name: string; municipalityName: string; prefecture: string; prefectureSlug: string }
 > = {
+  // 東京都
   "shinjuku-ku": { name: "新宿区", municipalityName: "新宿区", prefecture: "東京都", prefectureSlug: "tokyo" },
   "shibuya-ku": { name: "渋谷区", municipalityName: "渋谷区", prefecture: "東京都", prefectureSlug: "tokyo" },
   "minato-ku": { name: "港区", municipalityName: "港区", prefecture: "東京都", prefectureSlug: "tokyo" },
   "setagaya-ku": { name: "世田谷区", municipalityName: "世田谷区", prefecture: "東京都", prefectureSlug: "tokyo" },
-  "yokohama-naka": {
-    name: "横浜市中区",
-    municipalityName: "横浜市中区",
-    prefecture: "神奈川県",
-    prefectureSlug: "kanagawa",
-  },
-  "osaka-kita": {
-    name: "大阪市北区",
-    municipalityName: "大阪市北区",
-    prefecture: "大阪府",
-    prefectureSlug: "osaka",
-  },
-  "nagoya-naka": {
-    name: "名古屋市中区",
-    municipalityName: "名古屋市中区",
-    prefecture: "愛知県",
-    prefectureSlug: "aichi",
-  },
-  "fukuoka-hakata": {
-    name: "福岡市博多区",
-    municipalityName: "福岡市博多区",
-    prefecture: "福岡県",
-    prefectureSlug: "fukuoka",
-  },
-  "sapporo-chuo": {
-    name: "札幌市中央区",
-    municipalityName: "札幌市中央区",
-    prefecture: "北海道",
-    prefectureSlug: "hokkaido",
-  },
-  "kyoto-nakagyo": {
-    name: "京都市中京区",
-    municipalityName: "京都市中京区",
-    prefecture: "京都府",
-    prefectureSlug: "kyoto",
-  },
-  "shinagawa-ku": {
-    name: "品川区",
-    municipalityName: "品川区",
-    prefecture: "東京都",
-    prefectureSlug: "tokyo",
-  },
-  "chiyoda-ku": {
-    name: "千代田区",
-    municipalityName: "千代田区",
-    prefecture: "東京都",
-    prefectureSlug: "tokyo",
-  },
+  "shinagawa-ku": { name: "品川区", municipalityName: "品川区", prefecture: "東京都", prefectureSlug: "tokyo" },
+  "chiyoda-ku": { name: "千代田区", municipalityName: "千代田区", prefecture: "東京都", prefectureSlug: "tokyo" },
+  "meguro-ku": { name: "目黒区", municipalityName: "目黒区", prefecture: "東京都", prefectureSlug: "tokyo" },
+  "adachi-ku": { name: "足立区", municipalityName: "足立区", prefecture: "東京都", prefectureSlug: "tokyo" },
+  "hachioji": { name: "八王子市", municipalityName: "八王子市", prefecture: "東京都", prefectureSlug: "tokyo" },
+
+  // 神奈川県
+  "yokohama-naka": { name: "横浜市中区", municipalityName: "横浜市中区", prefecture: "神奈川県", prefectureSlug: "kanagawa" },
+  "yokohama-asahi": { name: "横浜市旭区", municipalityName: "横浜市旭区", prefecture: "神奈川県", prefectureSlug: "kanagawa" },
+  "hiratsuka": { name: "平塚市", municipalityName: "平塚市", prefecture: "神奈川県", prefectureSlug: "kanagawa" },
+  "atsugi": { name: "厚木市", municipalityName: "厚木市", prefecture: "神奈川県", prefectureSlug: "kanagawa" },
+
+  // 大阪府
+  "osaka-kita": { name: "大阪市北区", municipalityName: "大阪市北区", prefecture: "大阪府", prefectureSlug: "osaka" },
+
+  // 愛知県
+  "nagoya-naka": { name: "名古屋市中区", municipalityName: "名古屋市中区", prefecture: "愛知県", prefectureSlug: "aichi" },
+  "toyohashi": { name: "豊橋市", municipalityName: "豊橋市", prefecture: "愛知県", prefectureSlug: "aichi" },
+  "kasugai": { name: "春日井市", municipalityName: "春日井市", prefecture: "愛知県", prefectureSlug: "aichi" },
+
+  // 福岡県
+  "fukuoka-hakata": { name: "福岡市博多区", municipalityName: "福岡市博多区", prefecture: "福岡県", prefectureSlug: "fukuoka" },
+  "fukuoka-nishi": { name: "福岡市西区", municipalityName: "福岡市西区", prefecture: "福岡県", prefectureSlug: "fukuoka" },
+  "fukuoka-minami": { name: "福岡市南区", municipalityName: "福岡市南区", prefecture: "福岡県", prefectureSlug: "fukuoka" },
+  "kitakyushu-moji": { name: "北九州市門司区", municipalityName: "北九州市門司区", prefecture: "福岡県", prefectureSlug: "fukuoka" },
+
+  // 北海道
+  "sapporo-chuo": { name: "札幌市中央区", municipalityName: "札幌市中央区", prefecture: "北海道", prefectureSlug: "hokkaido" },
+  "asahikawa": { name: "旭川市", municipalityName: "旭川市", prefecture: "北海道", prefectureSlug: "hokkaido" },
+
+  // 京都府
+  "kyoto-nakagyo": { name: "京都市中京区", municipalityName: "京都市中京区", prefecture: "京都府", prefectureSlug: "kyoto" },
+
+  // その他主要都市
+  "hamamatsu-chuo": { name: "浜松市中央区", municipalityName: "浜松市中央区", prefecture: "静岡県", prefectureSlug: "shizuoka" },
+  "kanazawa": { name: "金沢市", municipalityName: "金沢市", prefecture: "石川県", prefectureSlug: "ishikawa" },
+  "oita": { name: "大分市", municipalityName: "大分市", prefecture: "大分県", prefectureSlug: "oita" },
+  "gifu": { name: "岐阜市", municipalityName: "岐阜市", prefecture: "岐阜県", prefectureSlug: "gifu" },
+  "kagoshima": { name: "鹿児島市", municipalityName: "鹿児島市", prefecture: "鹿児島県", prefectureSlug: "kagoshima" },
+  "kochi": { name: "高知市", municipalityName: "高知市", prefecture: "高知県", prefectureSlug: "kochi" },
+  "toyama": { name: "富山市", municipalityName: "富山市", prefecture: "富山県", prefectureSlug: "toyama" },
+  "takasaki": { name: "高崎市", municipalityName: "高崎市", prefecture: "群馬県", prefectureSlug: "gunma" },
+  "yamagata": { name: "山形市", municipalityName: "山形市", prefecture: "山形県", prefectureSlug: "yamagata" },
+  "fukui": { name: "福井市", municipalityName: "福井市", prefecture: "福井県", prefectureSlug: "fukui" },
+  "tsu": { name: "津市", municipalityName: "津市", prefecture: "三重県", prefectureSlug: "mie" },
+  "miyazaki": { name: "宮崎市", municipalityName: "宮崎市", prefecture: "宮崎県", prefectureSlug: "miyazaki" },
+  "ube": { name: "宇部市", municipalityName: "宇部市", prefecture: "山口県", prefectureSlug: "yamaguchi" },
+  "yonago": { name: "米子市", municipalityName: "米子市", prefecture: "鳥取県", prefectureSlug: "tottori" },
+  "tokorozawa": { name: "所沢市", municipalityName: "所沢市", prefecture: "埼玉県", prefectureSlug: "saitama" },
+  "kawagoe": { name: "川越市", municipalityName: "川越市", prefecture: "埼玉県", prefectureSlug: "saitama" },
+  "nagaoka": { name: "長岡市", municipalityName: "長岡市", prefecture: "新潟県", prefectureSlug: "niigata" },
+  "nagano": { name: "長野市", municipalityName: "長野市", prefecture: "長野県", prefectureSlug: "nagano" },
+  "okayama-kita": { name: "岡山市北区", municipalityName: "岡山市北区", prefecture: "岡山県", prefectureSlug: "okayama" },
+  "kumamoto-higashi": { name: "熊本市東区", municipalityName: "熊本市東区", prefecture: "熊本県", prefectureSlug: "kumamoto" },
+  "akita": { name: "秋田市", municipalityName: "秋田市", prefecture: "秋田県", prefectureSlug: "akita" },
+  "amakusa": { name: "天草市", municipalityName: "天草市", prefecture: "熊本県", prefectureSlug: "kumamoto" },
+  "tsukuba": { name: "つくば市", municipalityName: "つくば市", prefecture: "茨城県", prefectureSlug: "ibaraki" },
+  "matsue": { name: "松江市", municipalityName: "松江市", prefecture: "島根県", prefectureSlug: "shimane" },
+  "matsumoto": { name: "松本市", municipalityName: "松本市", prefecture: "長野県", prefectureSlug: "nagano" },
+  "takaoka": { name: "高岡市", municipalityName: "高岡市", prefecture: "富山県", prefectureSlug: "toyama" },
+  "matsuyama": { name: "松山市", municipalityName: "松山市", prefecture: "愛媛県", prefectureSlug: "ehime" },
+  "sakata": { name: "酒田市", municipalityName: "酒田市", prefecture: "山形県", prefectureSlug: "yamagata" },
+  "okinawa": { name: "沖縄市", municipalityName: "沖縄市", prefecture: "沖縄県", prefectureSlug: "okinawa" },
+  "fukushima": { name: "福島市", municipalityName: "福島市", prefecture: "福島県", prefectureSlug: "fukushima" },
 }
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
