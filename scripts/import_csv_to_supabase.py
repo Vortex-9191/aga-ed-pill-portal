@@ -27,12 +27,9 @@ data = list(reader)
 
 print(f"[v0] Total clinics to import: {len(data)}")
 
-# Function to create slug from clinic name
-def create_slug(name, no):
-    # Remove special characters and convert to lowercase
-    slug = re.sub(r'[^\w\s-]', '', name.lower())
-    slug = re.sub(r'[-\s]+', '-', slug)
-    return f"{slug}-{no}"
+# Function to create slug from number only
+def create_slug(no):
+    return str(no)
 
 # Import data in batches
 batch_size = 100
@@ -45,20 +42,20 @@ for i in range(0, len(data), batch_size):
     
     for row in batch:
         try:
-            # Convert CSV row to database record
+            # Convert CSV row to database record matching UI schema
             record = {
                 'no': int(row['no']) if row['no'] else None,
                 'clinic_name': row['clinic_name'],
-                'url': row['URL'] if row['URL'] else None,
+                'slug': create_slug(row['no']),
+                'address': row['address'],
                 'prefecture': row['prefecture'],
                 'municipalities': row['municipalities'],
-                'stations': row['stations'],
-                'address': row['address'],
-                'non_medical_response': row['non-medical-response'] if row['non-medical-response'] else None,
-                'featured_subjects': row['featured-subjects'] if row['featured-subjects'] else None,
-                'clinic_spec': row['clinic_spec'] if row['clinic_spec'] else None,
-                'corp_tel': row['corp_tel'] if row['corp_tel'] else None,
-                'slug': create_slug(row['clinic_name'], row['no'])
+                'stations': row['stations'] if row['stations'] and row['stations'] != '-' else None,
+                'url': row['URL'] if row['URL'] and row['URL'] != '-' else None,
+                'featured_subjects': row['featured-subjects'] if row['featured-subjects'] and row['featured-subjects'] != '-' else None,
+                'clinic_spec': row['clinic_spec'] if row['clinic_spec'] and row['clinic_spec'] != '-' else None,
+                'corp_tel': row['corp_tel'] if row['corp_tel'] and row['corp_tel'] != '-' else None,
+                'non_medical_response': row['non-medical-response'] if row['non-medical-response'] and row['non-medical-response'] != '-' else None
             }
             records.append(record)
         except Exception as e:

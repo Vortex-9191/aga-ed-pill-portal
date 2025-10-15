@@ -1,28 +1,48 @@
--- Create clinics table matching CSV structure
-create table if not exists public.clinics (
+-- 1. すべてのポリシーを削除
+DROP POLICY IF EXISTS "Allow public read access to clinics" ON public.clinics;
+DROP POLICY IF EXISTS "Allow authenticated insert" ON public.clinics;
+DROP POLICY IF EXISTS "Allow authenticated update" ON public.clinics;
+DROP POLICY IF EXISTS "Allow authenticated delete" ON public.clinics;
+DROP POLICY IF EXISTS "Allow insert for tsukasa.okimori@gmail.com" ON public.clinics;
+DROP POLICY IF EXISTS "Allow update for tsukasa.okimori@gmail.com" ON public.clinics;
+DROP POLICY IF EXISTS "Allow delete for tsukasa.okimori@gmail.com" ON public.clinics;
+
+-- 2. トリガーを削除
+DROP TRIGGER IF EXISTS set_updated_at ON public.clinics;
+
+-- 3. 関数を削除
+DROP FUNCTION IF EXISTS public.handle_updated_at();
+
+-- 4. テーブルを削除
+DROP TABLE IF EXISTS public.clinics CASCADE;
+
+-- Create clinics table matching UI expectations
+create table public.clinics (
   id uuid primary key default gen_random_uuid(),
   no integer unique not null,
   clinic_name text not null,
-  url text,
+  slug text unique not null,
+  address text not null,
   prefecture text not null,
   municipalities text not null,
-  station text not null,
-  address text not null,
-  non_medical_response text,
+  stations text,
+  url text,
   featured_subjects text,
   clinic_spec text,
   corp_tel text,
-  slug text unique not null,
+  non_medical_response text,
+  rating numeric,
+  review_count integer default 0,
   created_at timestamp with time zone default now(),
   updated_at timestamp with time zone default now()
 );
 
 -- Create indexes for faster queries
-create index if not exists idx_clinics_station on public.clinics(station);
+create index if not exists idx_clinics_no on public.clinics(no);
+create index if not exists idx_clinics_stations on public.clinics(stations);
 create index if not exists idx_clinics_prefecture on public.clinics(prefecture);
 create index if not exists idx_clinics_municipalities on public.clinics(municipalities);
 create index if not exists idx_clinics_slug on public.clinics(slug);
-create index if not exists idx_clinics_no on public.clinics(no);
 
 -- Enable Row Level Security
 alter table public.clinics enable row level security;
@@ -32,18 +52,21 @@ create policy "Allow public read access to clinics"
   on public.clinics for select
   using (true);
 
--- Only authenticated users can insert/update/delete (for admin purposes)
-create policy "Allow authenticated insert"
+-- Only tsukasa.okimori@gmail.com can insert/update/delete
+create policy "Allow insert for tsukasa.okimori@gmail.com"
   on public.clinics for insert
-  with check (auth.role() = 'authenticated');
+  to authenticated
+  with check (auth.jwt() ->> 'email' = 'tsukasa.okimori@gmail.com');
 
-create policy "Allow authenticated update"
+create policy "Allow update for tsukasa.okimori@gmail.com"
   on public.clinics for update
-  using (auth.role() = 'authenticated');
+  to authenticated
+  using (auth.jwt() ->> 'email' = 'tsukasa.okimori@gmail.com');
 
-create policy "Allow authenticated delete"
+create policy "Allow delete for tsukasa.okimori@gmail.com"
   on public.clinics for delete
-  using (auth.role() = 'authenticated');
+  to authenticated
+  using (auth.jwt() ->> 'email' = 'tsukasa.okimori@gmail.com');
 
 -- Create updated_at trigger
 create or replace function public.handle_updated_at()

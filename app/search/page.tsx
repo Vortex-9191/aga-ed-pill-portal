@@ -6,72 +6,47 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Search, SlidersHorizontal } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { createClient } from "@/lib/supabase/server"
 
-// Mock data
-const mockClinics = [
-  {
-    id: "1",
-    name: "さくらクリニック",
-    slug: "sakura-clinic",
-    address: "東京都渋谷区渋谷1-2-3 渋谷ビル2F",
-    station: "渋谷駅",
-    distance: "3分",
-    specialties: ["内科", "小児科"],
-    rating: 4.5,
-    reviewCount: 128,
-    openNow: true,
-    features: ["当日受診可能", "オンライン診療対応", "土日祝日診療"],
-    phone: "03-1234-5678",
-    hours: "9:00-18:00",
-  },
-  {
-    id: "2",
-    name: "みどり総合クリニック",
-    slug: "midori-clinic",
-    address: "東京都新宿区新宿2-3-4 新宿タワー1F",
-    station: "新宿駅",
-    distance: "5分",
-    specialties: ["内科", "皮膚科", "整形外科"],
-    rating: 4.3,
-    reviewCount: 95,
-    openNow: false,
-    features: ["駐車場あり", "バリアフリー", "クレジットカード可"],
-    phone: "03-2345-6789",
-    hours: "9:00-17:00",
-  },
-  {
-    id: "3",
-    name: "ひまわり小児科クリニック",
-    slug: "himawari-clinic",
-    address: "東京都世田谷区三軒茶屋1-1-1",
-    station: "三軒茶屋駅",
-    distance: "2分",
-    specialties: ["小児科"],
-    rating: 4.8,
-    reviewCount: 203,
-    openNow: true,
-    features: ["キッズスペースあり", "当日受診可能", "土日祝日診療"],
-    phone: "03-3456-7890",
-    hours: "9:00-19:00",
-  },
-  {
-    id: "4",
-    name: "あおぞら内科クリニック",
-    slug: "aozora-clinic",
-    address: "東京都品川区大崎2-2-2 大崎プラザ3F",
-    station: "大崎駅",
-    distance: "4分",
-    specialties: ["内科", "循環器内科"],
-    rating: 4.2,
-    reviewCount: 67,
-    openNow: true,
-    features: ["オンライン診療対応", "夜間診療", "クレジットカード可"],
-    phone: "03-4567-8901",
-    hours: "9:00-20:00",
-  },
-]
+export default async function SearchPage({
+  searchParams,
+}: {
+  searchParams: { q?: string; prefecture?: string }
+}) {
+  const supabase = await createClient()
+  const query = searchParams.q || ""
+  const prefecture = searchParams.prefecture || "東京都"
 
-export default function SearchPage() {
+  let queryBuilder = supabase.from("clinics").select("*")
+
+  if (prefecture) {
+    queryBuilder = queryBuilder.eq("prefecture", prefecture)
+  }
+
+  if (query) {
+    queryBuilder = queryBuilder.or(
+      `clinic_name.ilike.%${query}%,address.ilike.%${query}%,stations.ilike.%${query}%,featured_subjects.ilike.%${query}%`
+    )
+  }
+
+  const { data: clinics, error } = await queryBuilder.order("created_at", { ascending: false }).limit(50)
+
+  if (error) {
+    console.error("[v0] Error fetching clinics:", error)
+  }
+
+  const clinicCards =
+    clinics?.map((clinic) => ({
+      id: clinic.id,
+      name: clinic.clinic_name,
+      slug: clinic.slug,
+      address: clinic.address,
+      station: clinic.stations || "",
+      specialties: clinic.featured_subjects ? clinic.featured_subjects.split(", ") : [],
+      phone: clinic.corp_tel,
+      prefecture: clinic.prefecture,
+      city: clinic.municipalities,
+    })) || []
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
@@ -111,8 +86,10 @@ export default function SearchPage() {
               {/* Results Header */}
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <h1 className="text-2xl font-bold text-foreground">東京都のクリニック</h1>
-                  <p className="mt-1 text-sm text-muted-foreground">{mockClinics.length}件の検索結果</p>
+                  <h1 className="text-2xl font-bold text-foreground">
+                    {prefecture}のクリニック{query && `「${query}」の検索結果`}
+                  </h1>
+                  <p className="mt-1 text-sm text-muted-foreground">{clinicCards.length}件の検索結果</p>
                 </div>
 
                 <div className="flex items-center gap-3">
@@ -136,9 +113,15 @@ export default function SearchPage() {
 
               {/* Clinic Cards */}
               <div className="space-y-4">
-                {mockClinics.map((clinic) => (
-                  <ClinicCard key={clinic.id} clinic={clinic} />
-                ))}
+                {clinicCards.length > 0 ? (
+                  clinicCards.map((clinic) => <ClinicCard key={clinic.id} clinic={clinic} />)
+                ) : (
+                  <div className="text-center py-12">
+                    <p className="text-muted-foreground">
+                      検索条件に一致するクリニックが見つかりませんでした。
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* Pagination */}

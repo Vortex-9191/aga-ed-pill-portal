@@ -22,7 +22,7 @@ export default async function StationDetailPage({ params }: { params: { slug: st
   const { data: clinics, error } = await supabase
     .from("clinics")
     .select("*")
-    .ilike("station", `%${japaneseStationName}%`)
+    .ilike("stations", `%${japaneseStationName}%`)
     .order("created_at", { ascending: false })
 
   if (error) {
@@ -37,15 +37,14 @@ export default async function StationDetailPage({ params }: { params: { slug: st
   const clinicCards =
     clinics?.map((clinic) => ({
       id: clinic.id,
-      name: clinic.name,
+      name: clinic.clinic_name,
       slug: clinic.slug,
       address: clinic.address,
-      station: clinic.station,
-      specialties: clinic.specialties || [],
-      phone: clinic.phone,
-      website: clinic.website,
+      station: clinic.stations || '',
+      specialties: clinic.featured_subjects ? clinic.featured_subjects.split(', ') : [],
+      phone: clinic.corp_tel,
       prefecture: clinic.prefecture,
-      city: clinic.city,
+      city: clinic.municipalities,
     })) || []
 
   return (
