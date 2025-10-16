@@ -12,6 +12,14 @@ import {
 } from "@/components/ui/breadcrumb"
 import { getTopStations } from "@/lib/db-stats"
 import { getStationSlug } from "@/lib/data/stations"
+import type { Metadata } from "next"
+
+export const metadata: Metadata = {
+  robots: {
+    index: false,
+    follow: false,
+  },
+}
 
 export default async function StationsPage() {
   // Get all stations with 2+ clinics from database

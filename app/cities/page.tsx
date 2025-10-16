@@ -12,6 +12,14 @@ import {
 } from "@/components/ui/breadcrumb"
 import { getTopMunicipalities } from "@/lib/db-stats"
 import { getMunicipalitySlug } from "@/lib/data/municipalities"
+import type { Metadata } from "next"
+
+export const metadata: Metadata = {
+  robots: {
+    index: false,
+    follow: false,
+  },
+}
 
 export default async function CitiesPage() {
   // Get all municipalities with 3+ clinics from database
