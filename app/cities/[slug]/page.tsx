@@ -148,17 +148,27 @@ export default async function CityDetailPage({
   }
 
   const clinicCards =
-    clinics?.map((clinic) => ({
-      id: clinic.id,
-      name: clinic.clinic_name,
-      slug: clinic.slug,
-      address: clinic.address,
-      station: clinic.stations || "",
-      specialties: clinic.featured_subjects ? clinic.featured_subjects.split(", ") : [],
-      phone: clinic.corp_tel,
-      prefecture: clinic.prefecture,
-      city: clinic.municipalities,
-    })) || []
+    clinics?.map((clinic) => {
+      // Get first weekday with hours for display
+      const weekdays = ['月曜', '火曜', '水曜', '木曜', '金曜', '土曜', '日曜']
+      const firstHours = weekdays.find(day => clinic[day] && clinic[day] !== '-')
+      const hoursPreview = firstHours ? `${firstHours}: ${clinic[firstHours]}` : null
+
+      return {
+        id: clinic.id,
+        name: clinic.clinic_name,
+        slug: clinic.slug,
+        address: clinic.address,
+        station: clinic.stations || "",
+        specialties: clinic.featured_subjects ? clinic.featured_subjects.split(", ") : [],
+        phone: clinic.corp_tel,
+        prefecture: clinic.prefecture,
+        city: clinic.municipalities,
+        rating: clinic.口コミ評価,
+        reviewCount: clinic.口コミ件数,
+        hours: hoursPreview,
+      }
+    }) || []
 
   // Extract unique stations from clinics in this municipality
   const relatedStationsSet = new Set<string>()
