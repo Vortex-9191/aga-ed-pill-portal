@@ -16,6 +16,9 @@ import { getMunicipalitySlug } from "@/lib/data/municipalities"
 import type { Metadata } from "next"
 import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Pagination } from "@/components/pagination"
+
+const ITEMS_PER_PAGE = 15
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const stationInfo = getStationInfo(params.slug)
@@ -27,17 +30,37 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   }
 }
 
-export default async function StationDetailPage({ params }: { params: { slug: string } }) {
+export default async function StationDetailPage({
+  params,
+  searchParams
+}: {
+  params: { slug: string }
+  searchParams: { page?: string }
+}) {
   const supabase = await createClient()
 
   const stationInfo = getStationInfo(params.slug)
   const japaneseStationName = stationInfo?.ja || params.slug
+
+  const currentPage = Number(searchParams.page) || 1
+
+  // Get total count
+  const { count: totalCount } = await supabase
+    .from("clinics")
+    .select("*", { count: "exact", head: true })
+    .ilike("stations", `%${japaneseStationName}%`)
+
+  // Calculate pagination
+  const totalPages = Math.ceil((totalCount || 0) / ITEMS_PER_PAGE)
+  const from = (currentPage - 1) * ITEMS_PER_PAGE
+  const to = from + ITEMS_PER_PAGE - 1
 
   const { data: clinics, error } = await supabase
     .from("clinics")
     .select("*")
     .ilike("stations", `%${japaneseStationName}%`)
     .order("created_at", { ascending: false })
+    .range(from, to)
 
   if (error) {
     console.error("[v0] Error fetching clinics:", error)
@@ -116,18 +139,27 @@ export default async function StationDetailPage({ params }: { params: { slug: st
                 )}
               </div>
             </div>
-            <p className="text-sm text-muted-foreground">{clinicCount}件のクリニックが見つかりました</p>
+            <p className="text-sm text-muted-foreground">
+              {totalCount || 0}件中 {from + 1}〜{Math.min(to + 1, totalCount || 0)}件を表示
+            </p>
           </div>
         </div>
 
         {/* クリニック一覧 */}
         <div className="container mx-auto px-4 py-12">
           {clinicCards.length > 0 ? (
-            <div className="space-y-6 mb-12">
-              {clinicCards.map((clinic) => (
-                <ClinicCard key={clinic.id} clinic={clinic} />
-              ))}
-            </div>
+            <>
+              <div className="space-y-6 mb-12">
+                {clinicCards.map((clinic) => (
+                  <ClinicCard key={clinic.id} clinic={clinic} />
+                ))}
+              </div>
+              {totalPages > 1 && (
+                <div className="pb-8">
+                  <Pagination currentPage={currentPage} totalPages={totalPages} />
+                </div>
+              )}
+            </>
           ) : (
             <div className="text-center py-12">
               <p className="text-muted-foreground">この駅のクリニックは現在登録されていません。</p>

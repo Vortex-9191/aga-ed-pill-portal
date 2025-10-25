@@ -15,6 +15,9 @@ import Link from "next/link"
 import { Train } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { getStationSlug } from "@/lib/data/stations"
+import { Pagination } from "@/components/pagination"
+
+const ITEMS_PER_PAGE = 15
 
 const cityData: Record<
   string,
@@ -105,7 +108,13 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   }
 }
 
-export default async function CityDetailPage({ params }: { params: { slug: string } }) {
+export default async function CityDetailPage({
+  params,
+  searchParams
+}: {
+  params: { slug: string }
+  searchParams: { page?: string }
+}) {
   const supabase = await createClient()
   const city = cityData[params.slug] || {
     name: "市区町村",
@@ -114,11 +123,25 @@ export default async function CityDetailPage({ params }: { params: { slug: strin
     prefectureSlug: "prefecture",
   }
 
+  const currentPage = Number(searchParams.page) || 1
+
+  // Get total count
+  const { count: totalCount } = await supabase
+    .from("clinics")
+    .select("*", { count: "exact", head: true })
+    .ilike("municipalities", `%${city.municipalityName}%`)
+
+  // Calculate pagination
+  const totalPages = Math.ceil((totalCount || 0) / ITEMS_PER_PAGE)
+  const from = (currentPage - 1) * ITEMS_PER_PAGE
+  const to = from + ITEMS_PER_PAGE - 1
+
   const { data: clinics, error } = await supabase
     .from("clinics")
     .select("*")
     .ilike("municipalities", `%${city.municipalityName}%`)
     .order("created_at", { ascending: false })
+    .range(from, to)
 
   if (error) {
     console.error("[v0] Error fetching clinics:", error)
@@ -141,13 +164,29 @@ export default async function CityDetailPage({ params }: { params: { slug: strin
   const relatedStationsSet = new Set<string>()
   clinics?.forEach((clinic) => {
     if (clinic.stations) {
-      // Extract station names by looking for Japanese characters followed by駅
-      const stationMatches = clinic.stations.match(/([ぁ-んァ-ヶー一-龠]+)駅/g)
+      // Extract station names - improved regex to handle numbers and various formats
+      // Matches: 梅田駅, 新宿三丁目駅, etc.
+      const stationMatches = clinic.stations.match(/([ぁ-んァ-ヶー一-龠0-9０-９ヶ]+)駅/g)
       if (stationMatches) {
         stationMatches.forEach((match: string) => {
-          // Remove 駅 suffix to get just the station name
-          const stationName = match.replace(/駅$/, '')
-          if (stationName.length > 0) {
+          // Remove 駅 suffix and common prefixes like JR, 地下鉄, etc.
+          let stationName = match.replace(/駅$/, '')
+          stationName = stationName.replace(/^(JR|地下鉄|東京メトロ|都営|私鉄|阪急|阪神|近鉄|南海|京阪|地下鉄|市営)\s*/, '')
+
+          if (stationName.length > 0 && stationName.length < 20) { // Reasonable length check
+            relatedStationsSet.add(stationName)
+          }
+        })
+      }
+
+      // Also try to extract from access info patterns like "〇〇駅から徒歩"
+      const accessMatches = clinic.stations.match(/([ぁ-んァ-ヶー一-龠0-9０-９]+)駅(?:から|より|徒歩|まで)/g)
+      if (accessMatches) {
+        accessMatches.forEach((match: string) => {
+          let stationName = match.replace(/駅(から|より|徒歩|まで).*$/, '').replace(/駅$/, '')
+          stationName = stationName.replace(/^(JR|地下鉄|東京メトロ|都営|私鉄|阪急|阪神|近鉄|南海|京阪|地下鉄|市営)\s*/, '')
+
+          if (stationName.length > 0 && stationName.length < 20) {
             relatedStationsSet.add(stationName)
           }
         })
@@ -187,14 +226,23 @@ export default async function CityDetailPage({ params }: { params: { slug: strin
           <div className="mb-8">
             <h2 className="mb-4 text-xl font-bold">
               クリニック一覧
-              <span className="ml-2 text-base font-normal text-muted-foreground">({clinicCards.length}件)</span>
+              <span className="ml-2 text-base font-normal text-muted-foreground">
+                ({totalCount || 0}件中 {from + 1}〜{Math.min(to + 1, totalCount || 0)}件を表示)
+              </span>
             </h2>
             {clinicCards.length > 0 ? (
-              <div className="space-y-4">
-                {clinicCards.map((clinic) => (
-                  <ClinicCard key={clinic.id} clinic={clinic} />
-                ))}
-              </div>
+              <>
+                <div className="space-y-4">
+                  {clinicCards.map((clinic) => (
+                    <ClinicCard key={clinic.id} clinic={clinic} />
+                  ))}
+                </div>
+                {totalPages > 1 && (
+                  <div className="pt-8">
+                    <Pagination currentPage={currentPage} totalPages={totalPages} />
+                  </div>
+                )}
+              </>
             ) : (
               <div className="text-center py-12">
                 <p className="text-muted-foreground">この地域のクリニックは現在登録されていません。</p>
