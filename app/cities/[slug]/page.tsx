@@ -141,12 +141,17 @@ export default async function CityDetailPage({ params }: { params: { slug: strin
   const relatedStationsSet = new Set<string>()
   clinics?.forEach((clinic) => {
     if (clinic.stations) {
-      // Split by common separators and clean up
-      const stations = clinic.stations
-        .split(/[,、・\/／\s]+/)  // Added / and ／ for splitting
-        .map((s: string) => s.trim())
-        .filter((s: string) => s.length > 0)
-      stations.forEach((station: string) => relatedStationsSet.add(station))
+      // Extract station names by looking for Japanese characters followed by駅
+      const stationMatches = clinic.stations.match(/([ぁ-んァ-ヶー一-龠]+)駅/g)
+      if (stationMatches) {
+        stationMatches.forEach((match: string) => {
+          // Remove 駅 suffix to get just the station name
+          const stationName = match.replace(/駅$/, '')
+          if (stationName.length > 0) {
+            relatedStationsSet.add(stationName)
+          }
+        })
+      }
     }
   })
   const relatedStations = Array.from(relatedStationsSet).slice(0, 20) // Limit to 20 stations

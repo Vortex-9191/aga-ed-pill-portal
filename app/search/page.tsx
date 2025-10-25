@@ -3,6 +3,7 @@ import { Footer } from "@/components/footer"
 import { SearchFilters } from "@/components/search-filters"
 import { ClinicCard } from "@/components/clinic-card"
 import { SearchForm } from "@/components/search-form"
+import { Pagination } from "@/components/pagination"
 import { SlidersHorizontal } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -16,6 +17,8 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import type { Metadata } from "next"
+
+const ITEMS_PER_PAGE = 15
 
 export async function generateMetadata({
   searchParams,
@@ -46,13 +49,15 @@ export async function generateMetadata({
 export default async function SearchPage({
   searchParams,
 }: {
-  searchParams: { q?: string; prefecture?: string }
+  searchParams: { q?: string; prefecture?: string; page?: string }
 }) {
   const supabase = await createClient()
   const query = searchParams.q || ""
   const prefecture = searchParams.prefecture || ""
+  const currentPage = Number(searchParams.page) || 1
 
-  let queryBuilder = supabase.from("clinics").select("*")
+  // Build base query
+  let queryBuilder = supabase.from("clinics").select("*", { count: "exact" })
 
   if (prefecture) {
     queryBuilder = queryBuilder.eq("prefecture", prefecture)
@@ -64,7 +69,18 @@ export default async function SearchPage({
     )
   }
 
-  const { data: clinics, error } = await queryBuilder.order("created_at", { ascending: false }).limit(50)
+  // Get total count
+  const { count: totalCount } = await queryBuilder
+
+  // Calculate pagination
+  const totalPages = Math.ceil((totalCount || 0) / ITEMS_PER_PAGE)
+  const from = (currentPage - 1) * ITEMS_PER_PAGE
+  const to = from + ITEMS_PER_PAGE - 1
+
+  // Fetch paginated data
+  const { data: clinics, error } = await queryBuilder
+    .order("created_at", { ascending: false })
+    .range(from, to)
 
   if (error) {
     console.error("[v0] Error fetching clinics:", error)
@@ -128,7 +144,9 @@ export default async function SearchPage({
                   <h1 className="text-2xl font-bold text-foreground">
                     {query ? `「${query}」の検索結果` : prefecture ? `${prefecture}のクリニック` : "クリニック検索"}
                   </h1>
-                  <p className="mt-1 text-sm text-muted-foreground">{clinicCards.length}件の検索結果</p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {totalCount || 0}件中 {from + 1}〜{Math.min(to + 1, totalCount || 0)}件を表示
+                  </p>
                 </div>
 
                 <div className="flex items-center gap-3">
@@ -164,15 +182,11 @@ export default async function SearchPage({
               </div>
 
               {/* Pagination */}
-              <div className="flex justify-center gap-2 pt-8">
-                <Button variant="outline" disabled>
-                  前へ
-                </Button>
-                <Button variant="default">1</Button>
-                <Button variant="outline">2</Button>
-                <Button variant="outline">3</Button>
-                <Button variant="outline">次へ</Button>
-              </div>
+              {totalPages > 1 && (
+                <div className="pt-8">
+                  <Pagination currentPage={currentPage} totalPages={totalPages} />
+                </div>
+              )}
             </div>
           </div>
         </div>

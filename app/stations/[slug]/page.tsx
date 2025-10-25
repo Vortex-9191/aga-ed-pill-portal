@@ -12,6 +12,7 @@ import { ClinicCard } from "@/components/clinic-card"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { getStationInfo } from "@/lib/data/stations"
+import { getMunicipalitySlug } from "@/lib/data/municipalities"
 import type { Metadata } from "next"
 import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -68,22 +69,6 @@ export default async function StationDetailPage({ params }: { params: { slug: st
     }
   })
   const relatedMunicipalities = Array.from(relatedMunicipalitiesSet).slice(0, 10) // Limit to 10 municipalities
-
-  // Mapping for municipality slugs (expand as needed)
-  const municipalitySlugMap: Record<string, string> = {
-    "新宿区": "shinjuku-ku",
-    "渋谷区": "shibuya-ku",
-    "港区": "minato-ku",
-    "世田谷区": "setagaya-ku",
-    "品川区": "shinagawa-ku",
-    "千代田区": "chiyoda-ku",
-    "横浜市中区": "yokohama-naka",
-    "大阪市北区": "osaka-kita",
-    "名古屋市中区": "nagoya-naka",
-    "福岡市博多区": "fukuoka-hakata",
-    "札幌市中央区": "sapporo-chuo",
-    "京都市中京区": "kyoto-nakagyo",
-  }
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -161,7 +146,7 @@ export default async function StationDetailPage({ params }: { params: { slug: st
               <CardContent>
                 <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
                   {relatedMunicipalities.map((municipality) => {
-                    const slug = municipalitySlugMap[municipality]
+                    const slug = getMunicipalitySlug(municipality)
                     if (!slug) {
                       // If no slug mapping, display without link
                       return (
