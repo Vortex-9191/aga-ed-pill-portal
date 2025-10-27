@@ -4,32 +4,42 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { Check, ChevronDown, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Label } from "@/components/ui/label"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 
-const prefectures = ["東京都", "大阪府", "神奈川県", "愛知県", "福岡県", "北海道", "埼玉県", "千葉県"]
+interface FacetOption {
+  name?: string
+  value?: string
+  label?: string
+  count: number
+}
 
-const specialties = ["心療内科", "精神科", "児童精神科", "老年精神科"]
+interface SearchFiltersProps {
+  facets: {
+    prefectures: FacetOption[]
+    specialties: FacetOption[]
+    features: FacetOption[]
+    ratings: Array<{ value: string; label: string; count: number }>
+    weekend: number
+    evening: number
+    director: number
+  }
+}
 
-const ratingOptions = [
-  { label: "⭐ 4.5以上", value: "4.5" },
-  { label: "⭐ 4.0以上", value: "4.0" },
-  { label: "⭐ 3.5以上", value: "3.5" },
-]
-
-export function SearchFilters() {
+export function SearchFilters({ facets }: SearchFiltersProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
 
   const selectedPrefecture = searchParams.get("prefecture") || ""
   const selectedSpecialty = searchParams.get("specialty") || ""
   const selectedRating = searchParams.get("rating") || ""
+  const selectedWeekend = searchParams.get("weekend") || ""
+  const selectedEvening = searchParams.get("evening") || ""
+  const selectedDirector = searchParams.get("director") || ""
 
   const updateFilter = (key: string, value: string) => {
     const params = new URLSearchParams(searchParams.toString())
 
-    if (value) {
+    if (value && params.get(key) !== value) {
       params.set(key, value)
     } else {
       params.delete(key)
@@ -50,7 +60,8 @@ export function SearchFilters() {
     router.push(`/search?${params.toString()}`)
   }
 
-  const hasFilters = selectedPrefecture || selectedSpecialty || selectedRating
+  const hasFilters =
+    selectedPrefecture || selectedSpecialty || selectedRating || selectedWeekend || selectedEvening || selectedDirector
 
   return (
     <Card>
@@ -67,50 +78,58 @@ export function SearchFilters() {
 
         <div className="space-y-4">
           {/* Prefecture Filter */}
-          <Collapsible defaultOpen>
-            <CollapsibleTrigger className="flex w-full items-center justify-between py-2 text-sm font-medium text-foreground hover:text-accent transition-colors">
-              都道府県
-              <ChevronDown className="h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
-            </CollapsibleTrigger>
-            <CollapsibleContent className="space-y-2 pt-2">
-              {prefectures.map((prefecture) => (
-                <button
-                  key={prefecture}
-                  onClick={() => updateFilter("prefecture", selectedPrefecture === prefecture ? "" : prefecture)}
-                  className={`flex items-center w-full text-sm py-2 px-3 rounded hover:bg-accent/10 transition-colors ${
-                    selectedPrefecture === prefecture ? "bg-accent/20 font-medium" : ""
-                  }`}
-                >
-                  {prefecture}
-                </button>
-              ))}
-            </CollapsibleContent>
-          </Collapsible>
-
-          <div className="border-t border-border" />
+          {facets.prefectures.length > 0 && (
+            <>
+              <Collapsible defaultOpen>
+                <CollapsibleTrigger className="flex w-full items-center justify-between py-2 text-sm font-medium text-foreground hover:text-accent transition-colors">
+                  都道府県
+                  <ChevronDown className="h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
+                </CollapsibleTrigger>
+                <CollapsibleContent className="space-y-1 pt-2 max-h-64 overflow-y-auto">
+                  {facets.prefectures.map((pref) => (
+                    <button
+                      key={pref.name}
+                      onClick={() => updateFilter("prefecture", selectedPrefecture === pref.name ? "" : pref.name!)}
+                      className={`flex items-center justify-between w-full text-sm py-2 px-3 rounded hover:bg-accent/10 transition-colors ${
+                        selectedPrefecture === pref.name ? "bg-accent/20 font-medium" : ""
+                      }`}
+                    >
+                      <span>{pref.name}</span>
+                      <span className="text-xs text-muted-foreground">{pref.count}</span>
+                    </button>
+                  ))}
+                </CollapsibleContent>
+              </Collapsible>
+              <div className="border-t border-border" />
+            </>
+          )}
 
           {/* Specialty Filter */}
-          <Collapsible defaultOpen>
-            <CollapsibleTrigger className="flex w-full items-center justify-between py-2 text-sm font-medium text-foreground hover:text-accent transition-colors">
-              診療科目
-              <ChevronDown className="h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
-            </CollapsibleTrigger>
-            <CollapsibleContent className="space-y-2 pt-2">
-              {specialties.map((specialty) => (
-                <button
-                  key={specialty}
-                  onClick={() => updateFilter("specialty", selectedSpecialty === specialty ? "" : specialty)}
-                  className={`flex items-center w-full text-sm py-2 px-3 rounded hover:bg-accent/10 transition-colors ${
-                    selectedSpecialty === specialty ? "bg-accent/20 font-medium" : ""
-                  }`}
-                >
-                  {specialty}
-                </button>
-              ))}
-            </CollapsibleContent>
-          </Collapsible>
-
-          <div className="border-t border-border" />
+          {facets.specialties.length > 0 && (
+            <>
+              <Collapsible defaultOpen>
+                <CollapsibleTrigger className="flex w-full items-center justify-between py-2 text-sm font-medium text-foreground hover:text-accent transition-colors">
+                  診療科目
+                  <ChevronDown className="h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
+                </CollapsibleTrigger>
+                <CollapsibleContent className="space-y-1 pt-2">
+                  {facets.specialties.map((spec) => (
+                    <button
+                      key={spec.name}
+                      onClick={() => updateFilter("specialty", selectedSpecialty === spec.name ? "" : spec.name!)}
+                      className={`flex items-center justify-between w-full text-sm py-2 px-3 rounded hover:bg-accent/10 transition-colors ${
+                        selectedSpecialty === spec.name ? "bg-accent/20 font-medium" : ""
+                      }`}
+                    >
+                      <span>{spec.name}</span>
+                      <span className="text-xs text-muted-foreground">{spec.count}</span>
+                    </button>
+                  ))}
+                </CollapsibleContent>
+              </Collapsible>
+              <div className="border-t border-border" />
+            </>
+          )}
 
           {/* Rating Filter */}
           <Collapsible defaultOpen>
@@ -118,20 +137,93 @@ export function SearchFilters() {
               口コミ評価
               <ChevronDown className="h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
             </CollapsibleTrigger>
-            <CollapsibleContent className="space-y-2 pt-2">
-              {ratingOptions.map((option) => (
+            <CollapsibleContent className="space-y-1 pt-2">
+              {facets.ratings.map((option) => (
                 <button
                   key={option.value}
                   onClick={() => updateFilter("rating", selectedRating === option.value ? "" : option.value)}
-                  className={`flex items-center w-full text-sm py-2 px-3 rounded hover:bg-accent/10 transition-colors ${
+                  className={`flex items-center justify-between w-full text-sm py-2 px-3 rounded hover:bg-accent/10 transition-colors ${
                     selectedRating === option.value ? "bg-accent/20 font-medium" : ""
                   }`}
                 >
-                  {option.label}
+                  <span>{option.label}</span>
+                  <span className="text-xs text-muted-foreground">{option.count}</span>
                 </button>
               ))}
             </CollapsibleContent>
           </Collapsible>
+
+          <div className="border-t border-border" />
+
+          {/* Time-based filters */}
+          <Collapsible defaultOpen>
+            <CollapsibleTrigger className="flex w-full items-center justify-between py-2 text-sm font-medium text-foreground hover:text-accent transition-colors">
+              診療時間
+              <ChevronDown className="h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
+            </CollapsibleTrigger>
+            <CollapsibleContent className="space-y-1 pt-2">
+              <button
+                onClick={() => updateFilter("weekend", selectedWeekend ? "" : "true")}
+                className={`flex items-center justify-between w-full text-sm py-2 px-3 rounded hover:bg-accent/10 transition-colors ${
+                  selectedWeekend ? "bg-accent/20 font-medium" : ""
+                }`}
+              >
+                <span>土日診療</span>
+                <span className="text-xs text-muted-foreground">{facets.weekend}</span>
+              </button>
+              <button
+                onClick={() => updateFilter("evening", selectedEvening ? "" : "true")}
+                className={`flex items-center justify-between w-full text-sm py-2 px-3 rounded hover:bg-accent/10 transition-colors ${
+                  selectedEvening ? "bg-accent/20 font-medium" : ""
+                }`}
+              >
+                <span>夜間診療（18時以降）</span>
+                <span className="text-xs text-muted-foreground">{facets.evening}</span>
+              </button>
+            </CollapsibleContent>
+          </Collapsible>
+
+          <div className="border-t border-border" />
+
+          {/* Other filters */}
+          <Collapsible defaultOpen>
+            <CollapsibleTrigger className="flex w-full items-center justify-between py-2 text-sm font-medium text-foreground hover:text-accent transition-colors">
+              その他
+              <ChevronDown className="h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
+            </CollapsibleTrigger>
+            <CollapsibleContent className="space-y-1 pt-2">
+              <button
+                onClick={() => updateFilter("director", selectedDirector ? "" : "true")}
+                className={`flex items-center justify-between w-full text-sm py-2 px-3 rounded hover:bg-accent/10 transition-colors ${
+                  selectedDirector ? "bg-accent/20 font-medium" : ""
+                }`}
+              >
+                <span>院長名あり</span>
+                <span className="text-xs text-muted-foreground">{facets.director}</span>
+              </button>
+            </CollapsibleContent>
+          </Collapsible>
+
+          {/* Features - only show if we have data */}
+          {facets.features.length > 0 && (
+            <>
+              <div className="border-t border-border" />
+              <Collapsible>
+                <CollapsibleTrigger className="flex w-full items-center justify-between py-2 text-sm font-medium text-foreground hover:text-accent transition-colors">
+                  特徴・こだわり
+                  <ChevronDown className="h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
+                </CollapsibleTrigger>
+                <CollapsibleContent className="space-y-1 pt-2 max-h-48 overflow-y-auto">
+                  {facets.features.map((feature) => (
+                    <div key={feature.name} className="flex items-center justify-between text-sm py-1 px-3">
+                      <span className="text-muted-foreground">{feature.name}</span>
+                      <span className="text-xs text-muted-foreground">{feature.count}</span>
+                    </div>
+                  ))}
+                </CollapsibleContent>
+              </Collapsible>
+            </>
+          )}
         </div>
       </CardContent>
     </Card>

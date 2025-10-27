@@ -49,14 +49,29 @@ export async function generateMetadata({
 export default async function SearchPage({
   searchParams,
 }: {
-  searchParams: { q?: string; prefecture?: string; specialty?: string; rating?: string; page?: string }
+  searchParams: {
+    q?: string
+    prefecture?: string
+    specialty?: string
+    rating?: string
+    weekend?: string
+    evening?: string
+    director?: string
+    page?: string
+  }
 }) {
   const supabase = await createClient()
   const query = searchParams.q || ""
   const prefecture = searchParams.prefecture || ""
   const specialty = searchParams.specialty || ""
   const rating = searchParams.rating || ""
+  const weekend = searchParams.weekend
+  const evening = searchParams.evening
+  const hasDirector = searchParams.director
   const currentPage = Number(searchParams.page) || 1
+
+  // Get facet aggregation data (for counts)
+  const { data: allClinics } = await supabase.from("clinics").select("prefecture, featured_subjects, rating, hours_saturday, hours_sunday, hours_monday, hours_tuesday, hours_wednesday, hours_thursday, hours_friday, director_name, features")
 
   // Build base query
   let queryBuilder = supabase.from("clinics").select("*", { count: "exact" })
@@ -72,6 +87,21 @@ export default async function SearchPage({
   if (rating) {
     const minRating = parseFloat(rating)
     queryBuilder = queryBuilder.gte("rating", minRating)
+  }
+
+  if (weekend) {
+    queryBuilder = queryBuilder.or("hours_saturday.not.is.null,hours_sunday.not.is.null")
+  }
+
+  if (evening) {
+    // Check if any weekday has hours containing "18:" or later
+    queryBuilder = queryBuilder.or(
+      "hours_monday.ilike.%18:%,hours_monday.ilike.%19:%,hours_monday.ilike.%20:%,hours_tuesday.ilike.%18:%,hours_tuesday.ilike.%19:%,hours_tuesday.ilike.%20:%,hours_wednesday.ilike.%18:%,hours_wednesday.ilike.%19:%,hours_wednesday.ilike.%20:%,hours_thursday.ilike.%18:%,hours_thursday.ilike.%19:%,hours_thursday.ilike.%20:%,hours_friday.ilike.%18:%,hours_friday.ilike.%19:%,hours_friday.ilike.%20:%"
+    )
+  }
+
+  if (hasDirector) {
+    queryBuilder = queryBuilder.not("director_name", "is", null)
   }
 
   if (query) {
@@ -128,6 +158,95 @@ export default async function SearchPage({
         directorName: clinic.director_name,
       }
     }) || []
+
+  // Calculate facet data
+  const prefectureMap = new Map<string, number>()
+  const specialtyMap = new Map<string, number>()
+  const featureMap = new Map<string, number>()
+  let weekendCount = 0
+  let eveningCount = 0
+  let directorCount = 0
+  let rating45Count = 0
+  let rating40Count = 0
+  let rating35Count = 0
+
+  allClinics?.forEach((clinic) => {
+    // Prefecture
+    if (clinic.prefecture) {
+      prefectureMap.set(clinic.prefecture, (prefectureMap.get(clinic.prefecture) || 0) + 1)
+    }
+
+    // Specialties
+    if (clinic.featured_subjects) {
+      clinic.featured_subjects.split(",").forEach((s: string) => {
+        const specialty = s.trim()
+        if (specialty) {
+          specialtyMap.set(specialty, (specialtyMap.get(specialty) || 0) + 1)
+        }
+      })
+    }
+
+    // Features
+    if (clinic.features) {
+      clinic.features.split(",").forEach((f: string) => {
+        const feature = f.trim()
+        if (feature && feature !== "-") {
+          featureMap.set(feature, (featureMap.get(feature) || 0) + 1)
+        }
+      })
+    }
+
+    // Weekend
+    if (clinic.hours_saturday || clinic.hours_sunday) {
+      weekendCount++
+    }
+
+    // Evening (18:00以降)
+    const hasEvening = [
+      clinic.hours_monday,
+      clinic.hours_tuesday,
+      clinic.hours_wednesday,
+      clinic.hours_thursday,
+      clinic.hours_friday,
+    ].some((hours) => hours && (hours.includes("18:") || hours.includes("19:") || hours.includes("20:")))
+    if (hasEvening) {
+      eveningCount++
+    }
+
+    // Director
+    if (clinic.director_name) {
+      directorCount++
+    }
+
+    // Ratings
+    if (clinic.rating >= 4.5) rating45Count++
+    if (clinic.rating >= 4.0) rating40Count++
+    if (clinic.rating >= 3.5) rating35Count++
+  })
+
+  const facetData = {
+    prefectures: Array.from(prefectureMap.entries())
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 20),
+    specialties: Array.from(specialtyMap.entries())
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 15),
+    features: Array.from(featureMap.entries())
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10),
+    ratings: [
+      { value: "4.5", label: "⭐ 4.5以上", count: rating45Count },
+      { value: "4.0", label: "⭐ 4.0以上", count: rating40Count },
+      { value: "3.5", label: "⭐ 3.5以上", count: rating35Count },
+    ],
+    weekend: weekendCount,
+    evening: eveningCount,
+    director: directorCount,
+  }
+
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
@@ -162,7 +281,7 @@ export default async function SearchPage({
             {/* Filters Sidebar */}
             <aside className="hidden lg:block">
               <div className="sticky top-24">
-                <SearchFilters />
+                <SearchFilters facets={facetData} />
               </div>
             </aside>
 
