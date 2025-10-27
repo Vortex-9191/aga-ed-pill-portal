@@ -44,18 +44,27 @@ export default async function ClinicDetailPage({ params }: { params: { slug: str
   const specialties = clinic.featured_subjects ? clinic.featured_subjects.split(",").map((s: string) => s.trim()) : []
 
   // Parse business hours by weekday
-  const weekdays = ['月曜', '火曜', '水曜', '木曜', '金曜', '土曜', '日曜', '祝']
-  const businessHours: Record<string, string> = {}
-  weekdays.forEach((day) => {
-    if (clinic[day]) {
-      businessHours[day] = clinic[day]
+  const weekdaysMap = [
+    { en: 'hours_monday', jp: '月曜' },
+    { en: 'hours_tuesday', jp: '火曜' },
+    { en: 'hours_wednesday', jp: '水曜' },
+    { en: 'hours_thursday', jp: '木曜' },
+    { en: 'hours_friday', jp: '金曜' },
+    { en: 'hours_saturday', jp: '土曜' },
+    { en: 'hours_sunday', jp: '日曜' },
+    { en: 'hours_holiday', jp: '祝' },
+  ]
+  const businessHours: Array<{ day: string; hours: string }> = []
+  weekdaysMap.forEach(({ en, jp }) => {
+    if (clinic[en] && clinic[en] !== '-') {
+      businessHours.push({ day: jp, hours: clinic[en] })
     }
   })
 
   // Parse specialist info
-  const specialists = clinic.専門医 ? clinic.専門医.split(',').map((s: string) => s.trim()).filter(Boolean) : []
-  const diseases = clinic.対応可能な疾患 ? clinic.対応可能な疾患.split(',').map((s: string) => s.trim()).filter(Boolean) : []
-  const treatments = clinic.専門的な治療 ? clinic.専門的な治療.split(',').map((s: string) => s.trim()).filter(Boolean) : []
+  const specialists = clinic.specialist_doctors ? clinic.specialist_doctors.split(',').map((s: string) => s.trim()).filter(Boolean) : []
+  const diseases = clinic.treatable_diseases ? clinic.treatable_diseases.split(',').map((s: string) => s.trim()).filter(Boolean) : []
+  const treatments = clinic.specialized_treatments ? clinic.specialized_treatments.split(',').map((s: string) => s.trim()).filter(Boolean) : []
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -100,26 +109,26 @@ export default async function ClinicDetailPage({ params }: { params: { slug: str
                 )}
 
                 {/* Ratings */}
-                {(clinic.口コミ評価 || clinic.口コミ件数) && (
+                {(clinic.rating || clinic.review_count) && (
                   <div className="flex items-center gap-3 mb-4">
-                    {clinic.口コミ評価 && (
+                    {clinic.rating && (
                       <div className="flex items-center gap-1">
                         <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                        <span className="text-lg font-semibold">{clinic.口コミ評価.toFixed(1)}</span>
+                        <span className="text-lg font-semibold">{clinic.rating.toFixed(1)}</span>
                       </div>
                     )}
-                    {clinic.口コミ件数 && clinic.口コミ件数 > 0 && (
+                    {clinic.review_count && clinic.review_count > 0 && (
                       <span className="text-muted-foreground">
-                        ({clinic.口コミ件数}件の口コミ)
+                        ({clinic.review_count}件の口コミ)
                       </span>
                     )}
                   </div>
                 )}
 
-                {clinic.院長名 && (
+                {clinic.director_name && (
                   <div className="flex items-center gap-2 text-sm mb-3">
                     <User className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-muted-foreground">院長: <span className="text-foreground font-medium">{clinic.院長名}</span></span>
+                    <span className="text-muted-foreground">院長: <span className="text-foreground font-medium">{clinic.director_name}</span></span>
                   </div>
                 )}
 
@@ -171,10 +180,10 @@ export default async function ClinicDetailPage({ params }: { params: { slug: str
                 <CardContent className="p-6">
                   <h3 className="text-lg font-semibold text-foreground mb-4">基本情報</h3>
                   <dl className="space-y-4">
-                    {clinic.院長名 && (
+                    {clinic.director_name && (
                       <div>
                         <dt className="text-sm font-medium text-muted-foreground mb-1">院長名</dt>
-                        <dd className="text-foreground">{clinic.院長名}</dd>
+                        <dd className="text-foreground">{clinic.director_name}</dd>
                       </div>
                     )}
                     <div>
@@ -211,31 +220,31 @@ export default async function ClinicDetailPage({ params }: { params: { slug: str
                         <dd className="text-foreground">{clinic.non_medical_response}</dd>
                       </div>
                     )}
-                    {clinic.ホームページ && (
+                    {clinic.homepage_url && (
                       <div>
                         <dt className="text-sm font-medium text-muted-foreground mb-1">ホームページ</dt>
                         <dd>
                           <a
-                            href={clinic.ホームページ}
+                            href={clinic.homepage_url}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-primary hover:underline"
                           >
-                            {clinic.ホームページ}
+                            {clinic.homepage_url}
                           </a>
                         </dd>
                       </div>
                     )}
-                    {clinic.休診日 && clinic.休診日 !== '-' && (
+                    {clinic.closed_days && clinic.closed_days !== '-' && (
                       <div>
                         <dt className="text-sm font-medium text-muted-foreground mb-1">休診日</dt>
-                        <dd className="text-foreground">{clinic.休診日}</dd>
+                        <dd className="text-foreground">{clinic.closed_days}</dd>
                       </div>
                     )}
-                    {clinic.備考 && clinic.備考 !== '-' && (
+                    {clinic.notes && clinic.notes !== '-' && (
                       <div>
                         <dt className="text-sm font-medium text-muted-foreground mb-1">備考</dt>
-                        <dd className="text-foreground whitespace-pre-wrap">{clinic.備考}</dd>
+                        <dd className="text-foreground whitespace-pre-wrap">{clinic.notes}</dd>
                       </div>
                     )}
                   </dl>
@@ -243,7 +252,7 @@ export default async function ClinicDetailPage({ params }: { params: { slug: str
               </Card>
 
               {/* Business Hours */}
-              {Object.keys(businessHours).length > 0 && (
+              {businessHours.length > 0 && (
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
@@ -261,13 +270,11 @@ export default async function ClinicDetailPage({ params }: { params: { slug: str
                           </tr>
                         </thead>
                         <tbody>
-                          {weekdays.map((day) => (
-                            businessHours[day] && businessHours[day] !== '-' && (
-                              <tr key={day} className="border-b last:border-0">
-                                <td className="py-3 px-3 font-medium">{day}</td>
-                                <td className="py-3 px-3 text-muted-foreground">{businessHours[day]}</td>
-                              </tr>
-                            )
+                          {businessHours.map(({ day, hours }) => (
+                            <tr key={day} className="border-b last:border-0">
+                              <td className="py-3 px-3 font-medium">{day}</td>
+                              <td className="py-3 px-3 text-muted-foreground">{hours}</td>
+                            </tr>
                           ))}
                         </tbody>
                       </table>
@@ -321,7 +328,7 @@ export default async function ClinicDetailPage({ params }: { params: { slug: str
               )}
 
               {/* Features/Characteristics */}
-              {clinic.特徴 && clinic.特徴 !== '-' && (
+              {clinic.features && clinic.features !== '-' && (
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
@@ -330,7 +337,7 @@ export default async function ClinicDetailPage({ params }: { params: { slug: str
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap">{clinic.特徴}</p>
+                    <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap">{clinic.features}</p>
                   </CardContent>
                 </Card>
               )}
