@@ -3,59 +3,122 @@ import { Footer } from "@/components/footer"
 import { ClinicCard } from "@/components/clinic-card"
 import Link from "next/link"
 import { ChevronRight, MapPin } from "lucide-react"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Card, CardContent } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { createClient } from "@/lib/supabase/server"
+import { notFound } from "next/navigation"
+import type { Metadata } from "next"
 
-const mockClinics = [
-  {
-    id: "1",
-    name: "さくらクリニック",
-    slug: "sakura-clinic",
-    address: "東京都渋谷区渋谷1-2-3 渋谷ビル2F",
-    station: "渋谷駅",
-    distance: "3分",
-    specialties: ["内科", "小児科"],
-    rating: 4.5,
-    reviewCount: 128,
-    openNow: true,
-    features: ["当日受診可能", "オンライン診療対応", "土日祝日診療"],
-    phone: "03-1234-5678",
-    hours: "9:00-18:00",
-  },
-  {
-    id: "2",
-    name: "渋谷駅前クリニック",
-    slug: "shibuya-ekimae-clinic",
-    address: "東京都渋谷区渋谷2-1-1 渋谷駅前ビル3F",
-    station: "渋谷駅",
-    distance: "1分",
-    specialties: ["内科", "皮膚科"],
-    rating: 4.6,
-    reviewCount: 156,
-    openNow: true,
-    features: ["駅近", "夜間診療", "クレジットカード可"],
-    phone: "03-2345-6789",
-    hours: "9:00-20:00",
-  },
-  {
-    id: "3",
-    name: "ひまわり小児科クリニック",
-    slug: "himawari-clinic",
-    address: "東京都渋谷区渋谷3-4-5",
-    station: "渋谷駅",
-    distance: "5分",
-    specialties: ["小児科"],
-    rating: 4.8,
-    reviewCount: 203,
-    openNow: true,
-    features: ["キッズスペースあり", "当日受診可能", "土日祝日診療"],
-    phone: "03-3456-7890",
-    hours: "9:00-19:00",
-  },
-]
+// Prefecture slug to name mapping
+const prefectureMap: Record<string, string> = {
+  hokkaido: "北海道", aomori: "青森県", iwate: "岩手県", miyagi: "宮城県",
+  akita: "秋田県", yamagata: "山形県", fukushima: "福島県", ibaraki: "茨城県",
+  tochigi: "栃木県", gunma: "群馬県", saitama: "埼玉県", chiba: "千葉県",
+  tokyo: "東京都", kanagawa: "神奈川県", niigata: "新潟県", toyama: "富山県",
+  ishikawa: "石川県", fukui: "福井県", yamanashi: "山梨県", nagano: "長野県",
+  gifu: "岐阜県", shizuoka: "静岡県", aichi: "愛知県", mie: "三重県",
+  shiga: "滋賀県", kyoto: "京都府", osaka: "大阪府", hyogo: "兵庫県",
+  nara: "奈良県", wakayama: "和歌山県", tottori: "鳥取県", shimane: "島根県",
+  okayama: "岡山県", hiroshima: "広島県", yamaguchi: "山口県", tokushima: "徳島県",
+  kagawa: "香川県", ehime: "愛媛県", kochi: "高知県", fukuoka: "福岡県",
+  saga: "佐賀県", nagasaki: "長崎県", kumamoto: "熊本県", oita: "大分県",
+  miyazaki: "宮崎県", kagoshima: "鹿児島県", okinawa: "沖縄県",
+}
 
-export default function CityPage({ params }: { params: { prefecture: string; city: string } }) {
-  const prefectureName = "東京都"
-  const cityName = "渋谷区"
+export async function generateMetadata({
+  params,
+}: {
+  params: { prefecture: string; city: string }
+}): Promise<Metadata> {
+  const prefectureName = prefectureMap[params.prefecture] || "都道府県"
+  const cityName = decodeURIComponent(params.city)
+
+  return {
+    title: `${prefectureName}${cityName}の精神科・心療内科 | 全国精神科ドットコム`,
+    description: `${prefectureName}${cityName}の精神科・心療内科クリニック一覧。診療時間、住所、アクセス、口コミ情報を掲載。`,
+  }
+}
+
+const ITEMS_PER_PAGE = 15
+
+export default async function CityPage({
+  params,
+  searchParams,
+}: {
+  params: { prefecture: string; city: string }
+  searchParams: { page?: string; rating?: string }
+}) {
+  const prefectureName = prefectureMap[params.prefecture]
+  const cityName = decodeURIComponent(params.city)
+
+  if (!prefectureName) {
+    notFound()
+  }
+
+  const supabase = await createClient()
+  const currentPage = Number(searchParams.page) || 1
+
+  // Build query
+  let clinicsQuery = supabase
+    .from("clinics")
+    .select("*", { count: "exact" })
+    .eq("prefecture", prefectureName)
+    .eq("municipalities", cityName)
+
+  // Apply rating filter
+  if (searchParams.rating) {
+    const minRating = parseFloat(searchParams.rating)
+    clinicsQuery = clinicsQuery.gte("rating", minRating)
+  }
+
+  // Get total count
+  const { count: totalCount } = await clinicsQuery
+
+  // Get paginated data
+  const from = (currentPage - 1) * ITEMS_PER_PAGE
+  const to = from + ITEMS_PER_PAGE - 1
+
+  const { data: clinics, error } = await clinicsQuery
+    .order("rating", { ascending: false, nullsLast: true })
+    .range(from, to)
+
+  if (error) {
+    console.error("[v0] Error fetching clinics:", error)
+  }
+
+  const totalPages = Math.ceil((totalCount || 0) / ITEMS_PER_PAGE)
+
+  // Transform data
+  const clinicCards =
+    clinics?.map((clinic) => {
+      const weekdays = [
+        { en: "hours_monday", jp: "月曜" },
+        { en: "hours_tuesday", jp: "火曜" },
+        { en: "hours_wednesday", jp: "水曜" },
+        { en: "hours_thursday", jp: "木曜" },
+        { en: "hours_friday", jp: "金曜" },
+        { en: "hours_saturday", jp: "土曜" },
+        { en: "hours_sunday", jp: "日曜" },
+      ]
+      const firstHours = weekdays.find((day) => clinic[day.en] && clinic[day.en] !== "-")
+      const hoursPreview = firstHours ? `${firstHours.jp}: ${clinic[firstHours.en]}` : null
+
+      return {
+        id: clinic.id,
+        name: clinic.clinic_name,
+        slug: clinic.slug,
+        address: clinic.address,
+        station: clinic.stations || "",
+        specialties: clinic.featured_subjects ? clinic.featured_subjects.split(", ") : [],
+        phone: clinic.corp_tel,
+        prefecture: clinic.prefecture,
+        city: clinic.municipalities,
+        rating: clinic.rating,
+        reviewCount: clinic.review_count,
+        hours: hoursPreview,
+        directorName: clinic.director_name,
+      }
+    }) || []
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -87,33 +150,90 @@ export default function CityPage({ params }: { params: { prefecture: string; cit
           <div className="container py-12">
             <div className="flex items-center gap-3 mb-4">
               <MapPin className="h-8 w-8 text-accent" />
-              <h1 className="text-3xl font-bold text-foreground md:text-4xl">{cityName}のクリニック</h1>
+              <h1 className="text-3xl font-bold text-foreground md:text-4xl">
+                {cityName}のクリニック
+              </h1>
             </div>
-            <p className="text-lg text-muted-foreground">{mockClinics.length}件のクリニックが見つかりました</p>
+            <p className="text-lg text-muted-foreground">{totalCount || 0}件のクリニック</p>
           </div>
         </div>
 
-        {/* Results */}
         <div className="container py-12">
-          <div className="mb-6 flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-foreground">クリニック一覧</h2>
-            <Select defaultValue="recommended">
-              <SelectTrigger className="w-[180px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="recommended">おすすめ順</SelectItem>
-                <SelectItem value="rating">評価が高い順</SelectItem>
-                <SelectItem value="reviews">口コミが多い順</SelectItem>
-                <SelectItem value="distance">距離が近い順</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          <div className="grid gap-8 lg:grid-cols-[280px_1fr]">
+            {/* Facet Sidebar */}
+            <aside className="hidden lg:block">
+              <div className="sticky top-24">
+                <Card>
+                  <CardContent className="p-6">
+                    <h2 className="text-lg font-semibold text-foreground mb-4">絞り込み検索</h2>
 
-          <div className="space-y-4">
-            {mockClinics.map((clinic) => (
-              <ClinicCard key={clinic.id} clinic={clinic} />
-            ))}
+                    {/* Rating Filter */}
+                    <div className="mb-6">
+                      <h3 className="text-sm font-medium text-foreground mb-3">口コミ評価</h3>
+                      <div className="space-y-2">
+                        {[4.5, 4.0, 3.5, 3.0].map((rating) => (
+                          <Link
+                            key={rating}
+                            href={`/areas/${params.prefecture}/${params.city}?rating=${rating}`}
+                            className={`block text-sm py-1 px-2 rounded hover:bg-accent/10 transition-colors ${
+                              searchParams.rating === rating.toString() ? "bg-accent/20 font-medium" : ""
+                            }`}
+                          >
+                            ⭐ {rating}以上
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+
+                    {searchParams.rating && (
+                      <Link href={`/areas/${params.prefecture}/${params.city}`}>
+                        <Button variant="outline" size="sm" className="w-full">
+                          フィルタークリア
+                        </Button>
+                      </Link>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+            </aside>
+
+            {/* Clinic List */}
+            <div>
+              <div className="mb-6 flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">
+                  {totalCount || 0}件中 {from + 1}〜{Math.min(to + 1, totalCount || 0)}件を表示
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                {clinicCards.length > 0 ? (
+                  clinicCards.map((clinic) => <ClinicCard key={clinic.id} clinic={clinic} />)
+                ) : (
+                  <div className="text-center py-12">
+                    <p className="text-muted-foreground">クリニックが見つかりませんでした。</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="mt-8 flex items-center justify-center gap-2">
+                  {currentPage > 1 && (
+                    <Link href={`/areas/${params.prefecture}/${params.city}?page=${currentPage - 1}`}>
+                      <Button variant="outline">前へ</Button>
+                    </Link>
+                  )}
+                  <span className="text-sm text-muted-foreground">
+                    {currentPage} / {totalPages}
+                  </span>
+                  {currentPage < totalPages && (
+                    <Link href={`/areas/${params.prefecture}/${params.city}?page=${currentPage + 1}`}>
+                      <Button variant="outline">次へ</Button>
+                    </Link>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </main>
