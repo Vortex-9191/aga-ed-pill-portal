@@ -368,6 +368,31 @@ export default async function ClinicDetailPage({ params }: { params: { slug: str
                   </div>
                 </CardContent>
               </Card>
+
+              {/* Google Maps */}
+              {clinic.address && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <MapPin className="h-5 w-5" />
+                      アクセスマップ
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-0">
+                    <iframe
+                      width="100%"
+                      height="300"
+                      style={{ border: 0 }}
+                      loading="lazy"
+                      allowFullScreen
+                      referrerPolicy="no-referrer-when-downgrade"
+                      src={`https://www.google.com/maps/embed/v1/place?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&q=${encodeURIComponent(
+                        clinic.address
+                      )}`}
+                    />
+                  </CardContent>
+                </Card>
+              )}
             </aside>
           </div>
         </div>
