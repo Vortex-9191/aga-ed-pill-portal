@@ -89,9 +89,17 @@ export default async function SearchPage({
   const clinicCards =
     clinics?.map((clinic) => {
       // Get first weekday with hours for display
-      const weekdays = ['月曜', '火曜', '水曜', '木曜', '金曜', '土曜', '日曜']
-      const firstHours = weekdays.find(day => clinic[day] && clinic[day] !== '-')
-      const hoursPreview = firstHours ? `${firstHours}: ${clinic[firstHours]}` : null
+      const weekdays = [
+        { en: 'hours_monday', jp: '月曜' },
+        { en: 'hours_tuesday', jp: '火曜' },
+        { en: 'hours_wednesday', jp: '水曜' },
+        { en: 'hours_thursday', jp: '木曜' },
+        { en: 'hours_friday', jp: '金曜' },
+        { en: 'hours_saturday', jp: '土曜' },
+        { en: 'hours_sunday', jp: '日曜' },
+      ]
+      const firstHours = weekdays.find(day => clinic[day.en] && clinic[day.en] !== '-')
+      const hoursPreview = firstHours ? `${firstHours.jp}: ${clinic[firstHours.en]}` : null
 
       return {
         id: clinic.id,
@@ -103,8 +111,8 @@ export default async function SearchPage({
         phone: clinic.corp_tel,
         prefecture: clinic.prefecture,
         city: clinic.municipalities,
-        rating: clinic.口コミ評価,
-        reviewCount: clinic.口コミ件数,
+        rating: clinic.rating,
+        reviewCount: clinic.review_count,
         hours: hoursPreview,
       }
     }) || []
