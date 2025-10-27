@@ -114,6 +114,7 @@ export default async function SearchPage({
         rating: clinic.rating,
         reviewCount: clinic.review_count,
         hours: hoursPreview,
+        directorName: clinic.director_name,
       }
     }) || []
   return (
