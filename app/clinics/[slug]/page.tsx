@@ -133,6 +133,7 @@ export default async function ClinicDetailPage({ params }: { params: { slug: str
                     <div>
                       <p>{clinic.address}</p>
                       {clinic.stations && <p className="mt-1">{clinic.stations}</p>}
+                      {clinic.access_info && <p className="mt-1 text-xs">{clinic.access_info}</p>}
                     </div>
                   </div>
                 </div>
@@ -184,6 +185,12 @@ export default async function ClinicDetailPage({ params }: { params: { slug: str
                       <div>
                         <dt className="text-sm font-medium text-muted-foreground mb-1">最寄り駅</dt>
                         <dd className="text-foreground">{clinic.stations}</dd>
+                      </div>
+                    )}
+                    {clinic.access_info && (
+                      <div>
+                        <dt className="text-sm font-medium text-muted-foreground mb-1">アクセス</dt>
+                        <dd className="text-foreground text-sm">{clinic.access_info}</dd>
                       </div>
                     )}
                     {clinic.corp_tel && (
