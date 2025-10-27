@@ -49,11 +49,13 @@ export async function generateMetadata({
 export default async function SearchPage({
   searchParams,
 }: {
-  searchParams: { q?: string; prefecture?: string; page?: string }
+  searchParams: { q?: string; prefecture?: string; specialty?: string; rating?: string; page?: string }
 }) {
   const supabase = await createClient()
   const query = searchParams.q || ""
   const prefecture = searchParams.prefecture || ""
+  const specialty = searchParams.specialty || ""
+  const rating = searchParams.rating || ""
   const currentPage = Number(searchParams.page) || 1
 
   // Build base query
@@ -61,6 +63,15 @@ export default async function SearchPage({
 
   if (prefecture) {
     queryBuilder = queryBuilder.eq("prefecture", prefecture)
+  }
+
+  if (specialty) {
+    queryBuilder = queryBuilder.ilike("featured_subjects", `%${specialty}%`)
+  }
+
+  if (rating) {
+    const minRating = parseFloat(rating)
+    queryBuilder = queryBuilder.gte("rating", minRating)
   }
 
   if (query) {
