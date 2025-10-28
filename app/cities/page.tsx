@@ -32,7 +32,12 @@ export default async function CitiesPage({
   const currentPage = Number(searchParams.page) || 1
 
   // Get all municipalities with 3+ clinics from database
-  const allMunicipalities = await getTopMunicipalities(1000) // Get up to 1000 municipalities
+  const municipalities = await getTopMunicipalities(1000) // Get up to 1000 municipalities
+
+  // Sort by Japanese 50-on order (あいうえお順)
+  const allMunicipalities = municipalities.sort((a, b) =>
+    a.name.localeCompare(b.name, 'ja')
+  )
 
   // Calculate pagination
   const totalMunicipalities = allMunicipalities.length

@@ -32,7 +32,12 @@ export default async function StationsPage({
   const currentPage = Number(searchParams.page) || 1
 
   // Get all stations with 2+ clinics from database
-  const allStations = await getTopStations(5000) // Get up to 5000 stations
+  const stations = await getTopStations(5000) // Get up to 5000 stations
+
+  // Sort by Japanese 50-on order (あいうえお順)
+  const allStations = stations.sort((a, b) =>
+    a.name.localeCompare(b.name, 'ja')
+  )
 
   // Calculate pagination
   const totalStations = allStations.length
