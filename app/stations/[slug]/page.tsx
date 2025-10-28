@@ -55,7 +55,7 @@ export default async function StationDetailPage({
   // Get all clinics for this station (for facet generation)
   const { data: allClinics } = await supabase
     .from("clinics")
-    .select("featured_subjects, hours_saturday, hours_sunday, hours_monday, hours_tuesday, hours_wednesday, hours_thursday, hours_friday, director_name, features")
+    .select("featured_subjects, hours_saturday, hours_sunday, hours_monday, hours_tuesday, hours_wednesday, hours_thursday, hours_friday, director_name, features, municipalities, prefecture")
     .ilike("stations", `%${japaneseStationName}%`)
 
   // Build query with filters
@@ -204,14 +204,42 @@ export default async function StationDetailPage({
       }
     }) || []
 
-  // Extract unique municipalities from clinics at this station
-  const relatedMunicipalitiesSet = new Set<string>()
-  clinics?.forEach((clinic) => {
-    if (clinic.municipalities) {
-      relatedMunicipalitiesSet.add(clinic.municipalities.trim())
+  // Extract municipalities with counts and prefecture info from all clinics at this station
+  const municipalityMap = new Map<string, { name: string; count: number; prefecture: string }>()
+  allClinics?.forEach((clinic: any) => {
+    if (clinic.municipalities && clinic.prefecture) {
+      const key = clinic.municipalities.trim()
+      const existing = municipalityMap.get(key)
+      if (existing) {
+        existing.count++
+      } else {
+        municipalityMap.set(key, {
+          name: key,
+          count: 1,
+          prefecture: clinic.prefecture
+        })
+      }
     }
   })
-  const relatedMunicipalities = Array.from(relatedMunicipalitiesSet).slice(0, 10) // Limit to 10 municipalities
+  const relatedMunicipalities = Array.from(municipalityMap.values())
+    .sort((a, b) => b.count - a.count) // Sort by clinic count
+    .slice(0, 10) // Limit to top 10
+
+  // Prefecture slug mapping
+  const prefectureSlugMap: Record<string, string> = {
+    "北海道": "hokkaido", "青森県": "aomori", "岩手県": "iwate", "宮城県": "miyagi",
+    "秋田県": "akita", "山形県": "yamagata", "福島県": "fukushima", "茨城県": "ibaraki",
+    "栃木県": "tochigi", "群馬県": "gunma", "埼玉県": "saitama", "千葉県": "chiba",
+    "東京都": "tokyo", "神奈川県": "kanagawa", "新潟県": "niigata", "富山県": "toyama",
+    "石川県": "ishikawa", "福井県": "fukui", "山梨県": "yamanashi", "長野県": "nagano",
+    "岐阜県": "gifu", "静岡県": "shizuoka", "愛知県": "aichi", "三重県": "mie",
+    "滋賀県": "shiga", "京都府": "kyoto", "大阪府": "osaka", "兵庫県": "hyogo",
+    "奈良県": "nara", "和歌山県": "wakayama", "鳥取県": "tottori", "島根県": "shimane",
+    "岡山県": "okayama", "広島県": "hiroshima", "山口県": "yamaguchi", "徳島県": "tokushima",
+    "香川県": "kagawa", "愛媛県": "ehime", "高知県": "kochi", "福岡県": "fukuoka",
+    "佐賀県": "saga", "長崎県": "nagasaki", "熊本県": "kumamoto", "大分県": "oita",
+    "宮崎県": "miyazaki", "鹿児島県": "kagoshima", "沖縄県": "okinawa",
+  }
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -304,7 +332,7 @@ export default async function StationDetailPage({
 
           {/* Related Municipalities Section */}
           {relatedMunicipalities.length > 0 && (
-            <Card>
+            <Card className="mt-8">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <MapPin className="h-5 w-5" />
@@ -312,29 +340,41 @@ export default async function StationDetailPage({
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+                <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                   {relatedMunicipalities.map((municipality) => {
-                    const slug = getMunicipalitySlug(municipality)
-                    if (!slug) {
+                    const citySlug = getMunicipalitySlug(municipality.name)
+                    const prefectureSlug = prefectureSlugMap[municipality.prefecture]
+
+                    if (!citySlug || !prefectureSlug) {
                       // If no slug mapping, display without link
                       return (
                         <div
-                          key={municipality}
-                          className="flex items-center gap-2 p-3 rounded-lg border border-border bg-muted/30"
+                          key={municipality.name}
+                          className="flex items-center justify-between p-4 rounded-lg border border-border bg-muted/30"
                         >
-                          <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                          <span className="text-sm font-medium truncate">{municipality}</span>
+                          <div className="flex items-center gap-3">
+                            <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                            <span className="text-sm font-medium">{municipality.name}</span>
+                          </div>
+                          <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
+                            {municipality.count}件
+                          </span>
                         </div>
                       )
                     }
                     return (
                       <Link
-                        key={municipality}
-                        href={`/cities/${slug}`}
-                        className="flex items-center gap-2 p-3 rounded-lg border border-border hover:bg-accent hover:border-primary transition-colors"
+                        key={municipality.name}
+                        href={`/areas/${prefectureSlug}/${encodeURIComponent(municipality.name)}`}
+                        className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-accent hover:border-coral transition-colors group"
                       >
-                        <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                        <span className="text-sm font-medium truncate">{municipality}</span>
+                        <div className="flex items-center gap-3">
+                          <MapPin className="h-4 w-4 text-muted-foreground group-hover:text-coral flex-shrink-0 transition-colors" />
+                          <span className="text-sm font-medium group-hover:text-coral transition-colors">{municipality.name}</span>
+                        </div>
+                        <span className="text-xs text-muted-foreground bg-muted group-hover:bg-coral/10 px-2 py-1 rounded transition-colors">
+                          {municipality.count}件
+                        </span>
                       </Link>
                     )
                   })}
