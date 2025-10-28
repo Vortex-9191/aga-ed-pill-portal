@@ -1,7 +1,6 @@
 import Link from "next/link"
 import { MapPin, ChevronRight } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
-import { getMunicipalitySlug } from "@/lib/data/municipalities"
 
 // Prefecture slug mapping
 const prefectureSlugMap: Record<string, string> = {
@@ -71,16 +70,14 @@ export async function PrefecturesWithCities() {
   })
 
   // Get top 3 municipalities per prefecture
-  const prefecturesWithTopCities = new Map<string, Array<{ name: string; count: number; slug: string }>>()
+  const prefecturesWithTopCities = new Map<string, Array<{ name: string; count: number }>>()
 
   prefectureData.forEach((municipalities, prefecture) => {
     const topCities = Array.from(municipalities.entries())
       .map(([name, count]) => ({
         name,
-        count,
-        slug: getMunicipalitySlug(name)
+        count
       }))
-      .filter(city => city.slug) // Only include cities with valid slugs
       .sort((a, b) => b.count - a.count)
       .slice(0, 3)
 
