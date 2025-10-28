@@ -234,6 +234,7 @@ export default async function PrefecturePage({
 
   const facetData = {
     prefectures: [], // Not needed for prefecture page
+    cities: uniqueCities,
     specialties: Array.from(specialtyMap.entries())
       .map(([name, count]) => ({ name, count }))
       .sort((a, b) => b.count - a.count)

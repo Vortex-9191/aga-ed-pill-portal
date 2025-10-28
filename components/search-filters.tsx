@@ -1,10 +1,12 @@
 "use client"
 
 import { useRouter, useSearchParams, usePathname } from "next/navigation"
-import { Check, ChevronDown, X } from "lucide-react"
+import { Check, ChevronDown, X, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import { Input } from "@/components/ui/input"
+import { useState } from "react"
 
 interface FacetOption {
   name?: string
@@ -16,6 +18,7 @@ interface FacetOption {
 interface SearchFiltersProps {
   facets: {
     prefectures: FacetOption[]
+    cities?: string[]
     stations?: FacetOption[]
     specialties: FacetOption[]
     features: FacetOption[]
@@ -29,14 +32,21 @@ export function SearchFilters({ facets }: SearchFiltersProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const pathname = usePathname()
+  const [citySearch, setCitySearch] = useState("")
 
   const selectedPrefecture = searchParams.get("prefecture") || ""
+  const selectedCity = searchParams.get("city") || ""
   const selectedStation = searchParams.get("station") || ""
   const selectedSpecialty = searchParams.get("specialty") || ""
   const selectedFeature = searchParams.get("feature") || ""
   const selectedWeekend = searchParams.get("weekend") || ""
   const selectedEvening = searchParams.get("evening") || ""
   const selectedDirector = searchParams.get("director") || ""
+
+  // Filter cities based on search
+  const filteredCities = facets.cities?.filter(city =>
+    city.toLowerCase().includes(citySearch.toLowerCase())
+  ) || []
 
   const updateFilter = (key: string, value: string) => {
     const params = new URLSearchParams(searchParams.toString())
@@ -65,7 +75,23 @@ export function SearchFilters({ facets }: SearchFiltersProps) {
   }
 
   const hasFilters =
-    selectedPrefecture || selectedStation || selectedSpecialty || selectedFeature || selectedWeekend || selectedEvening || selectedDirector
+    selectedPrefecture || selectedCity || selectedStation || selectedSpecialty || selectedFeature || selectedWeekend || selectedEvening || selectedDirector
+
+  // Prevent page scroll when scrolling inside facet
+  const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+    const target = e.currentTarget
+    const scrollTop = target.scrollTop
+    const scrollHeight = target.scrollHeight
+    const height = target.clientHeight
+    const delta = e.deltaY
+
+    const isAtTop = delta < 0 && scrollTop === 0
+    const isAtBottom = delta > 0 && scrollTop + height >= scrollHeight
+
+    if (isAtTop || isAtBottom) {
+      e.preventDefault()
+    }
+  }
 
   return (
     <Card>
@@ -89,7 +115,7 @@ export function SearchFilters({ facets }: SearchFiltersProps) {
                   都道府県
                   <ChevronDown className="h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
                 </CollapsibleTrigger>
-                <CollapsibleContent className="space-y-1 pt-2 max-h-64 overflow-y-auto">
+                <CollapsibleContent className="space-y-1 pt-2 max-h-64 overflow-y-auto" onWheel={handleWheel}>
                   {facets.prefectures.map((pref) => (
                     <button
                       key={pref.name}
@@ -108,6 +134,50 @@ export function SearchFilters({ facets }: SearchFiltersProps) {
             </>
           )}
 
+          {/* City Filter */}
+          {facets.cities && facets.cities.length > 0 && (
+            <>
+              <Collapsible defaultOpen>
+                <CollapsibleTrigger className="flex w-full items-center justify-between py-2 text-sm font-medium text-foreground hover:text-accent transition-colors">
+                  市区町村
+                  <ChevronDown className="h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
+                </CollapsibleTrigger>
+                <CollapsibleContent className="pt-2">
+                  <div className="mb-2">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                      <Input
+                        type="text"
+                        placeholder="市区町村を検索..."
+                        value={citySearch}
+                        onChange={(e) => setCitySearch(e.target.value)}
+                        className="pl-9 h-9 text-sm"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-1 max-h-64 overflow-y-auto" onWheel={handleWheel}>
+                    {filteredCities.length > 0 ? (
+                      filteredCities.map((city) => (
+                        <button
+                          key={city}
+                          onClick={() => updateFilter("city", selectedCity === city ? "" : city)}
+                          className={`flex items-center justify-between w-full text-sm py-2 px-3 rounded hover:bg-accent/10 transition-colors ${
+                            selectedCity === city ? "bg-accent/20 font-medium" : ""
+                          }`}
+                        >
+                          <span>{city}</span>
+                        </button>
+                      ))
+                    ) : (
+                      <p className="text-xs text-muted-foreground px-3 py-2">該当なし</p>
+                    )}
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+              <div className="border-t border-border" />
+            </>
+          )}
+
           {/* Station Filter */}
           {facets.stations && facets.stations.length > 0 && (
             <>
@@ -116,7 +186,7 @@ export function SearchFilters({ facets }: SearchFiltersProps) {
                   最寄り駅
                   <ChevronDown className="h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
                 </CollapsibleTrigger>
-                <CollapsibleContent className="space-y-1 pt-2 max-h-64 overflow-y-auto">
+                <CollapsibleContent className="space-y-1 pt-2 max-h-64 overflow-y-auto" onWheel={handleWheel}>
                   {facets.stations.map((station) => (
                     <button
                       key={station.name}
@@ -220,7 +290,7 @@ export function SearchFilters({ facets }: SearchFiltersProps) {
                   特徴・こだわり
                   <ChevronDown className="h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
                 </CollapsibleTrigger>
-                <CollapsibleContent className="space-y-1 pt-2 max-h-48 overflow-y-auto">
+                <CollapsibleContent className="space-y-1 pt-2 max-h-48 overflow-y-auto" onWheel={handleWheel}>
                   {facets.features.map((feature) => (
                     <button
                       key={feature.name}
