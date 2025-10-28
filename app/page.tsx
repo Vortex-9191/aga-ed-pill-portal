@@ -2,8 +2,7 @@ import { Header } from "@/components/header"
 import { HeroSection } from "@/components/hero-section"
 import { PopularAreas } from "@/components/popular-areas"
 import { Footer } from "@/components/footer"
-import { PopularStations } from "@/components/popular-stations"
-import { AllPrefectures } from "@/components/all-prefectures"
+import { PrefecturesWithCities } from "@/components/prefectures-with-cities"
 
 export default function HomePage() {
   return (
@@ -12,8 +11,7 @@ export default function HomePage() {
       <main className="flex-1">
         <HeroSection />
         <PopularAreas />
-        <AllPrefectures />
-        <PopularStations />
+        <PrefecturesWithCities />
       </main>
       <Footer />
     </div>
