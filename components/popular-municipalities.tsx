@@ -1,22 +1,62 @@
 import Link from "next/link"
 import { MapPin } from "lucide-react"
+import { createClient } from "@/lib/supabase/server"
+import { getMunicipalitySlug } from "@/lib/data/municipalities"
 
-const popularMunicipalities = [
-  { name: "新宿区", slug: "shinjuku-ku", clinics: 245, prefecture: "東京都" },
-  { name: "渋谷区", slug: "shibuya-ku", clinics: 218, prefecture: "東京都" },
-  { name: "港区", slug: "minato-ku", clinics: 198, prefecture: "東京都" },
-  { name: "世田谷区", slug: "setagaya-ku", clinics: 187, prefecture: "東京都" },
-  { name: "横浜市中区", slug: "yokohama-naka", clinics: 156, prefecture: "神奈川県" },
-  { name: "大阪市北区", slug: "osaka-kita", clinics: 234, prefecture: "大阪府" },
-  { name: "名古屋市中区", slug: "nagoya-naka", clinics: 143, prefecture: "愛知県" },
-  { name: "福岡市博多区", slug: "fukuoka-hakata", clinics: 128, prefecture: "福岡県" },
-  { name: "札幌市中央区", slug: "sapporo-chuo", clinics: 112, prefecture: "北海道" },
-  { name: "京都市中京区", slug: "kyoto-nakagyo", clinics: 98, prefecture: "京都府" },
-  { name: "品川区", slug: "shinagawa-ku", clinics: 165, prefecture: "東京都" },
-  { name: "千代田区", slug: "chiyoda-ku", clinics: 142, prefecture: "東京都" },
-]
+// Prefecture slug mapping
+const prefectureSlugMap: Record<string, string> = {
+  "北海道": "hokkaido", "青森県": "aomori", "岩手県": "iwate", "宮城県": "miyagi",
+  "秋田県": "akita", "山形県": "yamagata", "福島県": "fukushima", "茨城県": "ibaraki",
+  "栃木県": "tochigi", "群馬県": "gunma", "埼玉県": "saitama", "千葉県": "chiba",
+  "東京都": "tokyo", "神奈川県": "kanagawa", "新潟県": "niigata", "富山県": "toyama",
+  "石川県": "ishikawa", "福井県": "fukui", "山梨県": "yamanashi", "長野県": "nagano",
+  "岐阜県": "gifu", "静岡県": "shizuoka", "愛知県": "aichi", "三重県": "mie",
+  "滋賀県": "shiga", "京都府": "kyoto", "大阪府": "osaka", "兵庫県": "hyogo",
+  "奈良県": "nara", "和歌山県": "wakayama", "鳥取県": "tottori", "島根県": "shimane",
+  "岡山県": "okayama", "広島県": "hiroshima", "山口県": "yamaguchi", "徳島県": "tokushima",
+  "香川県": "kagawa", "愛媛県": "ehime", "高知県": "kochi", "福岡県": "fukuoka",
+  "佐賀県": "saga", "長崎県": "nagasaki", "熊本県": "kumamoto", "大分県": "oita",
+  "宮崎県": "miyazaki", "鹿児島県": "kagoshima", "沖縄県": "okinawa",
+}
 
-export function PopularMunicipalities() {
+export async function PopularMunicipalities() {
+  const supabase = await createClient()
+
+  // Get top 10 municipalities by clinic count
+  const { data: municipalitiesData } = await supabase
+    .from("clinics")
+    .select("municipalities, prefecture")
+    .not("municipalities", "is", null)
+    .not("prefecture", "is", null)
+
+  // Count clinics per municipality
+  const municipalityMap = new Map<string, { prefecture: string; count: number }>()
+  municipalitiesData?.forEach((clinic) => {
+    const key = `${clinic.prefecture}|${clinic.municipalities}`
+    const existing = municipalityMap.get(key)
+    if (existing) {
+      existing.count++
+    } else {
+      municipalityMap.set(key, { prefecture: clinic.prefecture, count: 1 })
+    }
+  })
+
+  // Sort and get top 10
+  const topMunicipalities = Array.from(municipalityMap.entries())
+    .map(([key, value]) => {
+      const [prefecture, municipality] = key.split("|")
+      return {
+        name: municipality,
+        prefecture,
+        clinics: value.count,
+        slug: getMunicipalitySlug(municipality),
+        prefectureSlug: prefectureSlugMap[prefecture]
+      }
+    })
+    .filter((m) => m.slug && m.prefectureSlug) // Only include municipalities with valid slugs
+    .sort((a, b) => b.clinics - a.clinics)
+    .slice(0, 10)
+
   return (
     <section className="py-16 md:py-20">
       <div className="container">
@@ -27,10 +67,10 @@ export function PopularMunicipalities() {
 
         <div className="mx-auto max-w-5xl">
           <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-            {popularMunicipalities.map((municipality) => (
+            {topMunicipalities.map((municipality) => (
               <Link
-                key={municipality.slug}
-                href={`/cities/${municipality.slug}`}
+                key={`${municipality.prefectureSlug}-${municipality.slug}`}
+                href={`/areas/${municipality.prefectureSlug}/${encodeURIComponent(municipality.name)}`}
                 className="group flex items-center justify-between rounded-lg border border-border bg-card p-4 transition-all hover:border-[#FF6B6B] hover:shadow-md"
               >
                 <div className="flex items-center gap-3">
@@ -48,10 +88,10 @@ export function PopularMunicipalities() {
 
           <div className="mt-8 text-center">
             <Link
-              href="/cities"
+              href="/areas"
               className="inline-flex items-center gap-2 text-[#FF6B6B] hover:underline font-medium"
             >
-              すべての市区町村を見る
+              すべてのエリアを見る
               <span>→</span>
             </Link>
           </div>
