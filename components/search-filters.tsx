@@ -18,7 +18,6 @@ interface SearchFiltersProps {
     prefectures: FacetOption[]
     specialties: FacetOption[]
     features: FacetOption[]
-    ratings: Array<{ value: string; label: string; count: number }>
     weekend: number
     evening: number
     director: number
@@ -31,7 +30,6 @@ export function SearchFilters({ facets }: SearchFiltersProps) {
 
   const selectedPrefecture = searchParams.get("prefecture") || ""
   const selectedSpecialty = searchParams.get("specialty") || ""
-  const selectedRating = searchParams.get("rating") || ""
   const selectedWeekend = searchParams.get("weekend") || ""
   const selectedEvening = searchParams.get("evening") || ""
   const selectedDirector = searchParams.get("director") || ""
@@ -61,7 +59,7 @@ export function SearchFilters({ facets }: SearchFiltersProps) {
   }
 
   const hasFilters =
-    selectedPrefecture || selectedSpecialty || selectedRating || selectedWeekend || selectedEvening || selectedDirector
+    selectedPrefecture || selectedSpecialty || selectedWeekend || selectedEvening || selectedDirector
 
   return (
     <Card>
@@ -130,30 +128,6 @@ export function SearchFilters({ facets }: SearchFiltersProps) {
               <div className="border-t border-border" />
             </>
           )}
-
-          {/* Rating Filter */}
-          <Collapsible defaultOpen>
-            <CollapsibleTrigger className="flex w-full items-center justify-between py-2 text-sm font-medium text-foreground hover:text-accent transition-colors">
-              口コミ評価
-              <ChevronDown className="h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
-            </CollapsibleTrigger>
-            <CollapsibleContent className="space-y-1 pt-2">
-              {facets.ratings.map((option) => (
-                <button
-                  key={option.value}
-                  onClick={() => updateFilter("rating", selectedRating === option.value ? "" : option.value)}
-                  className={`flex items-center justify-between w-full text-sm py-2 px-3 rounded hover:bg-accent/10 transition-colors ${
-                    selectedRating === option.value ? "bg-accent/20 font-medium" : ""
-                  }`}
-                >
-                  <span>{option.label}</span>
-                  <span className="text-xs text-muted-foreground">{option.count}</span>
-                </button>
-              ))}
-            </CollapsibleContent>
-          </Collapsible>
-
-          <div className="border-t border-border" />
 
           {/* Time-based filters */}
           <Collapsible defaultOpen>

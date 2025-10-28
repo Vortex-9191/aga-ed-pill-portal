@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { MapPin, Phone, ChevronRight, Star, Clock, User } from "lucide-react"
+import { MapPin, Phone, ChevronRight, Clock, User } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -15,8 +15,6 @@ interface ClinicCardProps {
     phone: string | null
     prefecture: string
     city: string
-    rating?: number | null
-    reviewCount?: number | null
     hours?: string | null
     directorName?: string | null
   }
@@ -34,21 +32,6 @@ export function ClinicCard({ clinic }: ClinicCardProps) {
                   {clinic.name}
                 </h3>
               </Link>
-              {(clinic.rating || clinic.reviewCount) && (
-                <div className="flex items-center gap-2 mt-1">
-                  {clinic.rating && (
-                    <div className="flex items-center gap-1">
-                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                      <span className="text-sm font-medium">{clinic.rating.toFixed(1)}</span>
-                    </div>
-                  )}
-                  {clinic.reviewCount && clinic.reviewCount > 0 && (
-                    <span className="text-sm text-muted-foreground">
-                      ({clinic.reviewCount}件の口コミ)
-                    </span>
-                  )}
-                </div>
-              )}
             </div>
 
             {clinic.directorName && (

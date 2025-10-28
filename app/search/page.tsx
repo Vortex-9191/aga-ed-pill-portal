@@ -53,7 +53,6 @@ export default async function SearchPage({
     q?: string
     prefecture?: string
     specialty?: string
-    rating?: string
     weekend?: string
     evening?: string
     director?: string
@@ -64,14 +63,13 @@ export default async function SearchPage({
   const query = searchParams.q || ""
   const prefecture = searchParams.prefecture || ""
   const specialty = searchParams.specialty || ""
-  const rating = searchParams.rating || ""
   const weekend = searchParams.weekend
   const evening = searchParams.evening
   const hasDirector = searchParams.director
   const currentPage = Number(searchParams.page) || 1
 
   // Get facet aggregation data (for counts)
-  const { data: allClinics } = await supabase.from("clinics").select("prefecture, featured_subjects, rating, hours_saturday, hours_sunday, hours_monday, hours_tuesday, hours_wednesday, hours_thursday, hours_friday, director_name, features")
+  const { data: allClinics } = await supabase.from("clinics").select("prefecture, featured_subjects, hours_saturday, hours_sunday, hours_monday, hours_tuesday, hours_wednesday, hours_thursday, hours_friday, director_name, features")
 
   // Build base query
   let queryBuilder = supabase.from("clinics").select("*", { count: "exact" })
@@ -82,11 +80,6 @@ export default async function SearchPage({
 
   if (specialty) {
     queryBuilder = queryBuilder.ilike("featured_subjects", `%${specialty}%`)
-  }
-
-  if (rating) {
-    const minRating = parseFloat(rating)
-    queryBuilder = queryBuilder.gte("rating", minRating)
   }
 
   if (weekend) {
@@ -152,8 +145,6 @@ export default async function SearchPage({
         phone: clinic.corp_tel,
         prefecture: clinic.prefecture,
         city: clinic.municipalities,
-        rating: clinic.rating,
-        reviewCount: clinic.review_count,
         hours: hoursPreview,
         directorName: clinic.director_name,
       }
@@ -166,9 +157,6 @@ export default async function SearchPage({
   let weekendCount = 0
   let eveningCount = 0
   let directorCount = 0
-  let rating45Count = 0
-  let rating40Count = 0
-  let rating35Count = 0
 
   allClinics?.forEach((clinic) => {
     // Prefecture
@@ -217,11 +205,6 @@ export default async function SearchPage({
     if (clinic.director_name) {
       directorCount++
     }
-
-    // Ratings
-    if (clinic.rating >= 4.5) rating45Count++
-    if (clinic.rating >= 4.0) rating40Count++
-    if (clinic.rating >= 3.5) rating35Count++
   })
 
   const facetData = {
@@ -237,11 +220,6 @@ export default async function SearchPage({
       .map(([name, count]) => ({ name, count }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 10),
-    ratings: [
-      { value: "4.5", label: "⭐ 4.5以上", count: rating45Count },
-      { value: "4.0", label: "⭐ 4.0以上", count: rating40Count },
-      { value: "3.5", label: "⭐ 3.5以上", count: rating35Count },
-    ],
     weekend: weekendCount,
     evening: eveningCount,
     director: directorCount,

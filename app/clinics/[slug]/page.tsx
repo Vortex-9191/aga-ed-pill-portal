@@ -1,7 +1,7 @@
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import Link from "next/link"
-import { ChevronRight, Phone, ExternalLink, MapPin, Clock, Star, User, Stethoscope, Heart } from "lucide-react"
+import { ChevronRight, Phone, ExternalLink, MapPin, Clock, User, Stethoscope, Heart } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -105,23 +105,6 @@ export default async function ClinicDetailPage({ params }: { params: { slug: str
                         {specialty}
                       </Badge>
                     ))}
-                  </div>
-                )}
-
-                {/* Ratings */}
-                {(clinic.rating || clinic.review_count) && (
-                  <div className="flex items-center gap-3 mb-4">
-                    {clinic.rating && (
-                      <div className="flex items-center gap-1">
-                        <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                        <span className="text-lg font-semibold">{clinic.rating.toFixed(1)}</span>
-                      </div>
-                    )}
-                    {clinic.review_count && clinic.review_count > 0 && (
-                      <span className="text-muted-foreground">
-                        ({clinic.review_count}件の口コミ)
-                      </span>
-                    )}
                   </div>
                 )}
 

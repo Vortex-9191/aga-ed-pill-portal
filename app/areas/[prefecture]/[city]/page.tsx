@@ -6,6 +6,7 @@ import { ChevronRight, MapPin } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { createClient } from "@/lib/supabase/server"
+import { SearchFilters } from "@/components/search-filters"
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
 
@@ -46,7 +47,14 @@ export default async function CityPage({
   searchParams,
 }: {
   params: { prefecture: string; city: string }
-  searchParams: { page?: string; rating?: string }
+  searchParams: {
+    page?: string
+    specialty?: string
+    feature?: string
+    weekend?: string
+    evening?: string
+    director?: string
+  }
 }) {
   const prefectureName = prefectureMap[params.prefecture]
   const cityName = decodeURIComponent(params.city)
@@ -58,6 +66,13 @@ export default async function CityPage({
   const supabase = await createClient()
   const currentPage = Number(searchParams.page) || 1
 
+  // Get all clinics for this city (for facet generation)
+  const { data: allClinics } = await supabase
+    .from("clinics")
+    .select("featured_subjects, hours_saturday, hours_sunday, hours_monday, hours_tuesday, hours_wednesday, hours_thursday, hours_friday, director_name, features")
+    .eq("prefecture", prefectureName)
+    .eq("municipalities", cityName)
+
   // Build query
   let clinicsQuery = supabase
     .from("clinics")
@@ -65,10 +80,27 @@ export default async function CityPage({
     .eq("prefecture", prefectureName)
     .eq("municipalities", cityName)
 
-  // Apply rating filter
-  if (searchParams.rating) {
-    const minRating = parseFloat(searchParams.rating)
-    clinicsQuery = clinicsQuery.gte("rating", minRating)
+  // Apply filters
+  if (searchParams.specialty) {
+    clinicsQuery = clinicsQuery.ilike("featured_subjects", `%${searchParams.specialty}%`)
+  }
+
+  if (searchParams.feature) {
+    clinicsQuery = clinicsQuery.ilike("features", `%${searchParams.feature}%`)
+  }
+
+  if (searchParams.weekend) {
+    clinicsQuery = clinicsQuery.or("hours_saturday.not.is.null,hours_sunday.not.is.null")
+  }
+
+  if (searchParams.evening) {
+    clinicsQuery = clinicsQuery.or(
+      "hours_monday.ilike.%18:%,hours_monday.ilike.%19:%,hours_monday.ilike.%20:%,hours_tuesday.ilike.%18:%,hours_tuesday.ilike.%19:%,hours_tuesday.ilike.%20:%,hours_wednesday.ilike.%18:%,hours_wednesday.ilike.%19:%,hours_wednesday.ilike.%20:%,hours_thursday.ilike.%18:%,hours_thursday.ilike.%19:%,hours_thursday.ilike.%20:%,hours_friday.ilike.%18:%,hours_friday.ilike.%19:%,hours_friday.ilike.%20:%"
+    )
+  }
+
+  if (searchParams.director) {
+    clinicsQuery = clinicsQuery.not("director_name", "is", null)
   }
 
   // Get total count
@@ -87,6 +119,72 @@ export default async function CityPage({
   }
 
   const totalPages = Math.ceil((totalCount || 0) / ITEMS_PER_PAGE)
+
+  // Calculate facet data
+  const specialtyMap = new Map<string, number>()
+  const featureMap = new Map<string, number>()
+  let weekendCount = 0
+  let eveningCount = 0
+  let directorCount = 0
+
+  allClinics?.forEach((clinic) => {
+    // Specialties
+    if (clinic.featured_subjects) {
+      clinic.featured_subjects.split(",").forEach((s: string) => {
+        const specialty = s.trim()
+        if (specialty) {
+          specialtyMap.set(specialty, (specialtyMap.get(specialty) || 0) + 1)
+        }
+      })
+    }
+
+    // Features
+    if (clinic.features) {
+      clinic.features.split(",").forEach((f: string) => {
+        const feature = f.trim()
+        if (feature && feature !== "-") {
+          featureMap.set(feature, (featureMap.get(feature) || 0) + 1)
+        }
+      })
+    }
+
+    // Weekend
+    if (clinic.hours_saturday || clinic.hours_sunday) {
+      weekendCount++
+    }
+
+    // Evening (18:00以降)
+    const hasEvening = [
+      clinic.hours_monday,
+      clinic.hours_tuesday,
+      clinic.hours_wednesday,
+      clinic.hours_thursday,
+      clinic.hours_friday,
+    ].some((hours) => hours && (hours.includes("18:") || hours.includes("19:") || hours.includes("20:")))
+    if (hasEvening) {
+      eveningCount++
+    }
+
+    // Director
+    if (clinic.director_name) {
+      directorCount++
+    }
+  })
+
+  const facetData = {
+    prefectures: [], // Not needed for city page
+    specialties: Array.from(specialtyMap.entries())
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 15),
+    features: Array.from(featureMap.entries())
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10),
+    weekend: weekendCount,
+    evening: eveningCount,
+    director: directorCount,
+  }
 
   // Transform data
   const clinicCards =
@@ -113,8 +211,6 @@ export default async function CityPage({
         phone: clinic.corp_tel,
         prefecture: clinic.prefecture,
         city: clinic.municipalities,
-        rating: clinic.rating,
-        reviewCount: clinic.review_count,
         hours: hoursPreview,
         directorName: clinic.director_name,
       }
@@ -163,37 +259,7 @@ export default async function CityPage({
             {/* Facet Sidebar */}
             <aside className="hidden lg:block">
               <div className="sticky top-24">
-                <Card>
-                  <CardContent className="p-6">
-                    <h2 className="text-lg font-semibold text-foreground mb-4">絞り込み検索</h2>
-
-                    {/* Rating Filter */}
-                    <div className="mb-6">
-                      <h3 className="text-sm font-medium text-foreground mb-3">口コミ評価</h3>
-                      <div className="space-y-2">
-                        {[4.5, 4.0, 3.5, 3.0].map((rating) => (
-                          <Link
-                            key={rating}
-                            href={`/areas/${params.prefecture}/${params.city}?rating=${rating}`}
-                            className={`block text-sm py-1 px-2 rounded hover:bg-accent/10 transition-colors ${
-                              searchParams.rating === rating.toString() ? "bg-accent/20 font-medium" : ""
-                            }`}
-                          >
-                            ⭐ {rating}以上
-                          </Link>
-                        ))}
-                      </div>
-                    </div>
-
-                    {searchParams.rating && (
-                      <Link href={`/areas/${params.prefecture}/${params.city}`}>
-                        <Button variant="outline" size="sm" className="w-full">
-                          フィルタークリア
-                        </Button>
-                      </Link>
-                    )}
-                  </CardContent>
-                </Card>
+                <SearchFilters facets={facetData} />
               </div>
             </aside>
 
