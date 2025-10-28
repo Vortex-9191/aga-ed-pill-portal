@@ -60,9 +60,33 @@ export const stationMap: Record<string, { ja: string; prefecture: string; lines:
   shinsen: { ja: "神泉駅", prefecture: "東京都", lines: ["京王井の頭線"] },
   sasazuka: { ja: "笹塚駅", prefecture: "東京都", lines: ["京王線", "京王新線"] },
   mita: { ja: "三田駅", prefecture: "東京都", lines: ["都営三田線", "都営浅草線"] },
+  machida: { ja: "町田駅", prefecture: "東京都", lines: ["JR横浜線", "小田急小田原線"] },
+  kokubunji: { ja: "国分寺駅", prefecture: "東京都", lines: ["JR中央線", "JR武蔵野線", "西武国分寺線"] },
+  hachiioji: { ja: "八王子駅", prefecture: "東京都", lines: ["JR中央線", "JR横浜線", "JR八高線"] },
+  iidabashi: { ja: "飯田橋駅", prefecture: "東京都", lines: ["JR中央線", "東京メトロ東西線", "東京メトロ有楽町線"] },
+  koenjiminami: { ja: "高円寺駅", prefecture: "東京都", lines: ["JR中央線"] },
+  kamata: { ja: "蒲田駅", prefecture: "東京都", lines: ["JR京浜東北線", "東急池上線", "東急多摩川線"] },
+  ochanomizu: { ja: "御茶ノ水駅", prefecture: "東京都", lines: ["JR中央線", "東京メトロ丸ノ内線", "東京メトロ千代田線"] },
+  nihonbashi: { ja: "日本橋駅", prefecture: "東京都", lines: ["東京メトロ銀座線", "東京メトロ東西線", "東京メトロ半蔵門線"] },
+  tachikawa: { ja: "立川駅", prefecture: "東京都", lines: ["JR中央線", "JR南武線", "JR青梅線"] },
+  ginza: { ja: "銀座駅", prefecture: "東京都", lines: ["東京メトロ銀座線", "東京メトロ丸ノ内線", "東京メトロ日比谷線"] },
+  asagaya: { ja: "阿佐ケ谷駅", prefecture: "東京都", lines: ["JR中央線"] },
+  kinshicho: { ja: "錦糸町駅", prefecture: "東京都", lines: ["JR総武線", "東京メトロ半蔵門線"] },
+  toranomon: { ja: "虎ノ門駅", prefecture: "東京都", lines: ["東京メトロ銀座線"] },
+  kyodo: { ja: "経堂駅", prefecture: "東京都", lines: ["小田急小田原線"] },
+  jiyugaoka: { ja: "自由が丘駅", prefecture: "東京都", lines: ["東急東横線", "東急大井町線"] },
+  mizonokuchi: { ja: "溝の口駅", prefecture: "東京都", lines: ["JR南武線", "東急田園都市線"] },
+  kasukabe: { ja: "春日部駅", prefecture: "埼玉県", lines: ["東武伊勢崎線", "東武野田線"] },
+  akasaka: { ja: "赤坂駅", prefecture: "東京都", lines: ["東京メトロ千代田線"] },
+  tsurumi: { ja: "鶴見駅", prefecture: "神奈川県", lines: ["JR京浜東北線", "JR鶴見線"] },
+  amagasaki: { ja: "尼崎駅", prefecture: "兵庫県", lines: ["JR東海道本線", "JR福知山線"] },
+  youga: { ja: "用賀駅", prefecture: "東京都", lines: ["東急田園都市線"] },
+  ookayama: { ja: "大岡山駅", prefecture: "東京都", lines: ["東急目黒線", "東急大井町線"] },
 
   // 神奈川県
   yokohama: { ja: "横浜駅", prefecture: "神奈川県", lines: ["JR東海道本線", "JR横須賀線", "東急東横線"] },
+  motomachi: { ja: "元町駅", prefecture: "神奈川県", lines: ["東急東横線"] },
+  motosumiyoshi: { ja: "元住吉駅", prefecture: "神奈川県", lines: ["東急東横線"] },
   kawasaki: { ja: "川崎駅", prefecture: "神奈川県", lines: ["JR東海道本線", "JR京浜東北線"] },
   centersouth: { ja: "センター南駅", prefecture: "神奈川県", lines: ["横浜市営地下鉄ブルーライン", "横浜市営地下鉄グリーンライン"] },
   kamioooka: { ja: "上大岡駅", prefecture: "神奈川県", lines: ["京急本線", "横浜市営地下鉄ブルーライン"] },
@@ -77,6 +101,14 @@ export const stationMap: Record<string, { ja: string; prefecture: string; lines:
   isehara: { ja: "伊勢原駅", prefecture: "神奈川県", lines: ["小田急小田原線"] },
   hiratsuka: { ja: "平塚駅", prefecture: "神奈川県", lines: ["JR東海道本線"] },
   atsugi: { ja: "厚木駅", prefecture: "神奈川県", lines: ["小田急小田原線"] },
+  honatsugi: { ja: "本厚木駅", prefecture: "神奈川県", lines: ["小田急小田原線"] },
+  fujisawa: { ja: "藤沢駅", prefecture: "神奈川県", lines: ["JR東海道本線", "小田急江ノ島線", "江ノ島電鉄"] },
+  sagamiono: { ja: "相模大野駅", prefecture: "神奈川県", lines: ["小田急小田原線", "小田急江ノ島線"] },
+  shinyokohama: { ja: "新横浜駅", prefecture: "神奈川県", lines: ["JR東海道新幹線", "JR横浜線", "横浜市営地下鉄ブルーライン"] },
+  totsuka: { ja: "戸塚駅", prefecture: "神奈川県", lines: ["JR東海道本線", "JR横須賀線", "横浜市営地下鉄ブルーライン"] },
+  chigasaki: { ja: "茅ケ崎駅", prefecture: "神奈川県", lines: ["JR東海道本線", "JR相模線"] },
+  okubo: { ja: "大久保駅", prefecture: "神奈川県", lines: ["JR中央線"] },
+  oohashi: { ja: "大橋駅", prefecture: "東京都", lines: ["東急田園都市線"] },
 
   // 大阪府
   kyobashi: { ja: "京橋駅", prefecture: "大阪府", lines: ["JR大阪環状線", "JR東西線", "京阪本線"] },
@@ -86,16 +118,23 @@ export const stationMap: Record<string, { ja: string; prefecture: string; lines:
   namba: { ja: "なんば駅", prefecture: "大阪府", lines: ["南海本線", "大阪メトロ御堂筋線"] },
   osaka: { ja: "大阪駅", prefecture: "大阪府", lines: ["JR東海道本線", "JR大阪環状線"] },
   umeda: { ja: "梅田駅", prefecture: "大阪府", lines: ["阪急神戸線", "阪急宝塚線", "阪急京都線"] },
+  osakaumeda: { ja: "大阪梅田駅", prefecture: "大阪府", lines: ["阪急神戸線", "阪急宝塚線", "阪急京都線"] },
   tennoji: { ja: "天王寺駅", prefecture: "大阪府", lines: ["JR大阪環状線", "JR阪和線", "大阪メトロ御堂筋線"] },
   uehommachi: { ja: "上本町駅", prefecture: "大阪府", lines: ["近鉄大阪線", "近鉄奈良線"] },
   kujo: { ja: "九条駅", prefecture: "大阪府", lines: ["大阪メトロ中央線", "阪神なんば線"] },
-  sumiyoshi: { ja: "住道駅", prefecture: "大阪府", lines: ["JR学研都市線"] },
+  juso: { ja: "十三駅", prefecture: "大阪府", lines: ["阪急京都線", "阪急宝塚線", "阪急神戸線"] },
+  takatsuki: { ja: "高槻駅", prefecture: "大阪府", lines: ["JR東海道本線"] },
+  ibarakishi: { ja: "茨木市駅", prefecture: "大阪府", lines: ["阪急京都線"] },
+  minamimorimacho: { ja: "南森町駅", prefecture: "大阪府", lines: ["大阪メトロ堺筋線", "大阪メトロ谷町線"] },
+  izumifuchu: { ja: "和泉府中駅", prefecture: "大阪府", lines: ["JR阪和線"] },
+  okamachi: { ja: "岡町駅", prefecture: "大阪府", lines: ["阪急宝塚線"] },
 
   // 愛知県
   nagoya: { ja: "名古屋駅", prefecture: "愛知県", lines: ["JR東海道本線", "JR中央本線", "名古屋市営地下鉄東山線"] },
   imaike: { ja: "今池駅", prefecture: "愛知県", lines: ["名古屋市営地下鉄東山線", "名古屋市営地下鉄桜通線"] },
   kamiiida: { ja: "上飯田駅", prefecture: "愛知県", lines: ["名古屋市営地下鉄上飯田線", "名鉄小牧線"] },
   issya: { ja: "一社駅", prefecture: "愛知県", lines: ["名古屋市営地下鉄東山線"] },
+  kawana: { ja: "川名駅", prefecture: "愛知県", lines: ["名古屋市営地下鉄鶴舞線"] },
 
   // 福岡県
   hakata: { ja: "博多駅", prefecture: "福岡県", lines: ["JR鹿児島本線", "福岡市地下鉄空港線"] },
@@ -108,6 +147,8 @@ export const stationMap: Record<string, { ja: string; prefecture: string; lines:
 
   // 北海道
   sapporo: { ja: "札幌駅", prefecture: "北海道", lines: ["JR函館本線", "札幌市営地下鉄南北線"] },
+  sapporoeki: { ja: "さっぽろ駅", prefecture: "北海道", lines: ["札幌市営地下鉄南北線", "札幌市営地下鉄東豊線", "札幌市営地下鉄東西線"] },
+  odori: { ja: "大通駅", prefecture: "北海道", lines: ["札幌市営地下鉄南北線", "札幌市営地下鉄東西線", "札幌市営地下鉄東豊線"] },
   goryokaku: { ja: "五稜郭駅", prefecture: "北海道", lines: ["JR函館本線"] },
   asahikawa: { ja: "旭川駅", prefecture: "北海道", lines: ["JR函館本線", "JR宗谷本線"] },
   nakayama: { ja: "中山駅", prefecture: "北海道", lines: ["JR函館本線"] },
@@ -118,6 +159,7 @@ export const stationMap: Record<string, { ja: string; prefecture: string; lines:
   // 広島県
   hiroshima: { ja: "広島駅", prefecture: "広島県", lines: ["JR山陽本線", "JR芸備線"] },
   mihara: { ja: "三原駅", prefecture: "広島県", lines: ["JR山陽本線", "JR呉線"] },
+  kure: { ja: "呉駅", prefecture: "広島県", lines: ["JR呉線"] },
 
   // 京都府
   kyoto: { ja: "京都駅", prefecture: "京都府", lines: ["JR東海道本線", "JR奈良線", "近鉄京都線"] },
@@ -125,12 +167,30 @@ export const stationMap: Record<string, { ja: string; prefecture: string; lines:
   fushimi: { ja: "伏見駅", prefecture: "京都府", lines: ["京阪本線", "近鉄京都線"] },
   imadegawa: { ja: "今出川駅", prefecture: "京都府", lines: ["京都市営地下鉄烏丸線"] },
   sanjo: { ja: "三条駅", prefecture: "京都府", lines: ["京都市営地下鉄東西線", "京阪本線"] },
+  shijo: { ja: "四条駅", prefecture: "京都府", lines: ["京都市営地下鉄烏丸線"] },
+  karasuma: { ja: "烏丸駅", prefecture: "京都府", lines: ["阪急京都線"] },
+  karasumaoike: { ja: "烏丸御池駅", prefecture: "京都府", lines: ["京都市営地下鉄烏丸線", "京都市営地下鉄東西線"] },
   nijo: { ja: "二条駅", prefecture: "京都府", lines: ["JR山陰本線", "京都市営地下鉄東西線"] },
   fushimimomoyama: { ja: "伏見桃山駅", prefecture: "京都府", lines: ["京阪本線", "近鉄京都線"] },
 
   // 兵庫県
   itami: { ja: "伊丹駅", prefecture: "兵庫県", lines: ["JR福知山線", "阪急伊丹線"] },
   sannomiya: { ja: "三ノ宮駅", prefecture: "兵庫県", lines: ["JR東海道本線", "阪急神戸線", "阪神本線"] },
+
+  // 和歌山県
+  wakayama: { ja: "和歌山駅", prefecture: "和歌山県", lines: ["JR紀勢本線", "JR和歌山線"] },
+
+  // 奈良県
+  yamatoyagi: { ja: "大和八木駅", prefecture: "奈良県", lines: ["近鉄大阪線", "近鉄橿原線"] },
+
+  // 新潟県
+  nagaoka: { ja: "長岡駅", prefecture: "新潟県", lines: ["JR上越新幹線", "JR信越本線"] },
+
+  // 三重県
+  kintetsuyokaichi: { ja: "近鉄四日市駅", prefecture: "三重県", lines: ["近鉄名古屋線"] },
+
+  // 福島県
+  koriyama: { ja: "郡山駅", prefecture: "福島県", lines: ["JR東北本線", "JR磐越西線", "JR磐越東線"] },
 
   // 岩手県
   ichinoseki: { ja: "一ノ関駅", prefecture: "岩手県", lines: ["JR東北本線", "JR大船渡線"] },
@@ -147,15 +207,20 @@ export const stationMap: Record<string, { ja: string; prefecture: string; lines:
 
   // 埼玉県
   saitamashintoshin: { ja: "さいたま新都心駅", prefecture: "埼玉県", lines: ["JR京浜東北線", "JR埼京線"] },
+  omiya: { ja: "大宮駅", prefecture: "埼玉県", lines: ["JR東北本線", "JR高崎線", "JR京浜東北線"] },
   kuki: { ja: "久喜駅", prefecture: "埼玉県", lines: ["JR東北本線", "東武伊勢崎線"] },
   ageo: { ja: "上尾駅", prefecture: "埼玉県", lines: ["JR高崎線"] },
-  sengen台: { ja: "せんげん台駅", prefecture: "埼玉県", lines: ["東武伊勢崎線"] },
+  sengendai: { ja: "せんげん台駅", prefecture: "埼玉県", lines: ["東武伊勢崎線"] },
   fujimino: { ja: "ふじみ野駅", prefecture: "埼玉県", lines: ["東武東上線"] },
   tokorozawa: { ja: "所沢駅", prefecture: "埼玉県", lines: ["西武池袋線", "西武新宿線"] },
   kawagoe: { ja: "川越駅", prefecture: "埼玉県", lines: ["JR川越線", "東武東上線"] },
+  utsunomiya: { ja: "宇都宮駅", prefecture: "栃木県", lines: ["JR東北本線", "JR日光線"] },
 
   // 千葉県
   ohanajaya: { ja: "お花茶屋駅", prefecture: "東京都", lines: ["京成本線"] },
+  ichikawa: { ja: "市川駅", prefecture: "千葉県", lines: ["JR総武線"] },
+  funabashi: { ja: "船橋駅", prefecture: "千葉県", lines: ["JR総武線", "東武野田線"] },
+  kashiwa: { ja: "柏駅", prefecture: "千葉県", lines: ["JR常磐線", "東武野田線"] },
 
   // その他の県
   kurashiki: { ja: "倉敷駅", prefecture: "岡山県", lines: ["JR山陽本線", "JR伯備線"] },
@@ -168,6 +233,8 @@ export const stationMap: Record<string, { ja: string; prefecture: string; lines:
   nagano: { ja: "長野駅", prefecture: "長野県", lines: ["JR北陸新幹線", "しなの鉄道北しなの線"] },
   matsumoto: { ja: "松本駅", prefecture: "長野県", lines: ["JR篠ノ井線", "JR大糸線"] },
   ueda: { ja: "上田駅", prefecture: "長野県", lines: ["JR北陸新幹線", "しなの鉄道線"] },
+  shizuoka: { ja: "静岡駅", prefecture: "静岡県", lines: ["JR東海道本線", "JR東海道新幹線"] },
+  numazu: { ja: "沼津駅", prefecture: "静岡県", lines: ["JR東海道本線", "JR御殿場線"] },
   mishima: { ja: "三島駅", prefecture: "静岡県", lines: ["JR東海道新幹線", "JR東海道本線"] },
   mishimahirokoji: { ja: "三島広小路駅", prefecture: "静岡県", lines: ["伊豆箱根鉄道駿豆線"] },
   tsu: { ja: "津駅", prefecture: "三重県", lines: ["JR紀勢本線", "JR名松線", "近鉄名古屋線"] },
@@ -187,6 +254,8 @@ export const stationMap: Record<string, { ja: string; prefecture: string; lines:
   imabari: { ja: "今治駅", prefecture: "愛媛県", lines: ["JR予讃線"] },
   yawatahama: { ja: "八幡浜駅", prefecture: "愛媛県", lines: ["JR予讃線"] },
   iyoozu: { ja: "伊予大洲駅", prefecture: "愛媛県", lines: ["JR予讃線"] },
+  niihama: { ja: "新居浜駅", prefecture: "愛媛県", lines: ["JR予讃線"] },
+  saijo: { ja: "西条駅", prefecture: "愛媛県", lines: ["JR予讃線"] },
   tokushima: { ja: "徳島駅", prefecture: "徳島県", lines: ["JR高徳線", "JR徳島線"] },
   kochi: { ja: "高知駅", prefecture: "高知県", lines: ["JR土讃線", "JR土佐線"] },
   marugame: { ja: "丸亀駅", prefecture: "香川県", lines: ["JR予讃線"] },
