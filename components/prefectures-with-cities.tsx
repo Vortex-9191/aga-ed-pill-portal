@@ -53,7 +53,9 @@ export async function PrefecturesWithCities() {
     .from("clinics")
     .select("municipalities, prefecture")
     .not("municipalities", "is", null)
+    .not("municipalities", "eq", "")
     .not("prefecture", "is", null)
+    .not("prefecture", "eq", "")
 
   // Group municipalities by prefecture and count clinics
   const prefectureData = new Map<string, Map<string, number>>()

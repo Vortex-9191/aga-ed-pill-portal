@@ -59,7 +59,9 @@ export default function CitiesPage() {
         .from("clinics")
         .select("municipalities, prefecture")
         .not("municipalities", "is", null)
+        .not("municipalities", "eq", "")
         .not("prefecture", "is", null)
+        .not("prefecture", "eq", "")
 
       // Count clinics per municipality
       const municipalityMap = new Map<string, { prefecture: string; count: number }>()
