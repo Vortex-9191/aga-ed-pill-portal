@@ -47,6 +47,7 @@ export default function StationsPage() {
         .select("stations, prefecture")
         .not("stations", "is", null)
         .not("prefecture", "is", null)
+        .limit(50000) // Explicitly set high limit to fetch all clinics
 
       // Count clinics per station and track prefecture
       const stationMap = new Map<string, { prefectures: Set<string>; count: number }>()

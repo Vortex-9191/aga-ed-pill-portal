@@ -49,13 +49,20 @@ export async function PrefecturesWithCities() {
   const supabase = await createClient()
 
   // Get all clinics with municipalities and prefecture
-  const { data: clinicsData } = await supabase
+  const { data: clinicsData, error } = await supabase
     .from("clinics")
     .select("municipalities, prefecture")
     .not("municipalities", "is", null)
     .not("municipalities", "eq", "")
     .not("prefecture", "is", null)
     .not("prefecture", "eq", "")
+    .limit(50000) // Explicitly set high limit to fetch all clinics
+
+  if (error) {
+    console.error('Error fetching clinics for prefecture data:', error)
+  }
+
+  console.log(`[PrefecturesWithCities] Fetched ${clinicsData?.length || 0} clinics total`)
 
   // Group municipalities by prefecture and count clinics
   const prefectureData = new Map<string, Map<string, number>>()
@@ -82,6 +89,17 @@ export async function PrefecturesWithCities() {
       }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 3)
+
+    // Debug log for 茨城県
+    if (prefecture === '茨城県') {
+      console.log('[PrefecturesWithCities] 茨城県 all municipalities:')
+      Array.from(municipalities.entries())
+        .sort((a, b) => b[1] - a[1])
+        .forEach(([name, count]) => {
+          console.log(`  ${name}: ${count}件`)
+        })
+      console.log('[PrefecturesWithCities] 茨城県 top 3:', topCities)
+    }
 
     if (topCities.length > 0) {
       prefecturesWithTopCities.set(prefecture, topCities)

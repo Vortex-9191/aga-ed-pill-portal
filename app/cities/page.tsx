@@ -62,6 +62,7 @@ export default function CitiesPage() {
         .not("municipalities", "eq", "")
         .not("prefecture", "is", null)
         .not("prefecture", "eq", "")
+        .limit(50000) // Explicitly set high limit to fetch all clinics
 
       // Count clinics per municipality
       const municipalityMap = new Map<string, { prefecture: string; count: number }>()
