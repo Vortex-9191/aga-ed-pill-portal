@@ -2,13 +2,14 @@ import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { ClinicCard } from "@/components/clinic-card"
 import Link from "next/link"
-import { ChevronRight, MapPin } from "lucide-react"
-import { Card, CardContent } from "@/components/ui/card"
+import { ChevronRight, MapPin, Train } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { createClient } from "@/lib/supabase/server"
 import { SearchFilters } from "@/components/search-filters"
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
+import { getStationSlug } from "@/lib/data/stations"
 
 // Prefecture slug to name mapping
 const prefectureMap: Record<string, string> = {
@@ -69,7 +70,7 @@ export default async function CityPage({
   // Get all clinics for this city (for facet generation)
   const { data: allClinics } = await supabase
     .from("clinics")
-    .select("featured_subjects, hours_saturday, hours_sunday, hours_monday, hours_tuesday, hours_wednesday, hours_thursday, hours_friday, director_name, features")
+    .select("featured_subjects, hours_saturday, hours_sunday, hours_monday, hours_tuesday, hours_wednesday, hours_thursday, hours_friday, director_name, features, stations")
     .eq("prefecture", prefectureName)
     .eq("municipalities", cityName)
 
@@ -186,6 +187,24 @@ export default async function CityPage({
     director: directorCount,
   }
 
+  // Extract stations with counts from all clinics in this city
+  const stationMap = new Map<string, number>()
+  allClinics?.forEach((clinic) => {
+    if (clinic.stations) {
+      // Stations are comma-separated in the database
+      const stations = clinic.stations.split(",").map((s: string) => s.trim())
+      stations.forEach((station: string) => {
+        if (station && station !== "-") {
+          stationMap.set(station, (stationMap.get(station) || 0) + 1)
+        }
+      })
+    }
+  })
+  const relatedStations = Array.from(stationMap.entries())
+    .map(([name, count]) => ({ name, count }))
+    .sort((a, b) => b.count - a.count) // Sort by clinic count
+    .slice(0, 10) // Limit to top 10
+
   // Transform data
   const clinicCards =
     clinics?.map((clinic) => {
@@ -301,6 +320,58 @@ export default async function CityPage({
               )}
             </div>
           </div>
+
+          {/* Related Stations Section */}
+          {relatedStations.length > 0 && (
+            <Card className="mt-8">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Train className="h-5 w-5" />
+                  {cityName}のクリニック最寄り駅
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                  {relatedStations.map((station) => {
+                    const stationSlug = getStationSlug(station.name)
+
+                    if (!stationSlug) {
+                      // If no slug mapping, display without link
+                      return (
+                        <div
+                          key={station.name}
+                          className="flex items-center justify-between p-4 rounded-lg border border-border bg-muted/30"
+                        >
+                          <div className="flex items-center gap-3">
+                            <Train className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                            <span className="text-sm font-medium">{station.name}</span>
+                          </div>
+                          <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
+                            {station.count}件
+                          </span>
+                        </div>
+                      )
+                    }
+                    return (
+                      <Link
+                        key={station.name}
+                        href={`/stations/${stationSlug}`}
+                        className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-accent hover:border-coral transition-colors group"
+                      >
+                        <div className="flex items-center gap-3">
+                          <Train className="h-4 w-4 text-muted-foreground group-hover:text-coral flex-shrink-0 transition-colors" />
+                          <span className="text-sm font-medium group-hover:text-coral transition-colors">{station.name}</span>
+                        </div>
+                        <span className="text-xs text-muted-foreground bg-muted group-hover:bg-coral/10 px-2 py-1 rounded transition-colors">
+                          {station.count}件
+                        </span>
+                      </Link>
+                    )
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </main>
       <Footer />
