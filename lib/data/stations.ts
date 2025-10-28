@@ -415,7 +415,19 @@ Object.entries(stationMap).forEach(([slug, info]) => {
   }
 })
 
-export function getStationSlug(japaneseName: string): string | undefined {
+/**
+ * Generate a URL-safe slug from station name
+ * For stations not in the predefined map, encode the Japanese name
+ */
+export function generateStationSlug(japaneseName: string): string {
+  const trimmed = japaneseName.trim().replace(/駅$/, '')
+  return encodeURIComponent(trimmed)
+}
+
+/**
+ * Get station slug - returns predefined slug if available, otherwise generates one
+ */
+export function getStationSlug(japaneseName: string): string {
   // Try exact match first
   const trimmed = japaneseName.trim()
   if (reverseStationMap[trimmed]) {
@@ -440,5 +452,25 @@ export function getStationSlug(japaneseName: string): string | undefined {
     return reverseStationMap[normalizedWithoutStation]
   }
 
-  return undefined
+  // If not found in predefined map, generate slug from Japanese name
+  return generateStationSlug(japaneseName)
+}
+
+/**
+ * Decode station slug back to Japanese name
+ * Handles both predefined slugs and encoded Japanese names
+ */
+export function decodeStationSlug(slug: string): string {
+  // Check if it's a predefined slug
+  const info = stationMap[slug.toLowerCase()]
+  if (info) {
+    return info.ja.replace(/駅$/, '')
+  }
+
+  // Otherwise, decode the URL-encoded Japanese name
+  try {
+    return decodeURIComponent(slug)
+  } catch (e) {
+    return slug
+  }
 }

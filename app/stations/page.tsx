@@ -22,7 +22,7 @@ interface Station {
   name: string
   prefecture: string
   count: number
-  slug: string | null
+  slug: string
 }
 
 const regions = [
@@ -172,28 +172,16 @@ export default function StationsPage() {
               </p>
               <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                 {filteredStations.map((station) => (
-                  station.slug ? (
-                    <Link
-                      key={`${station.prefecture}-${station.name}`}
-                      href={`/stations/${station.slug}`}
-                      className="flex items-center justify-between rounded-lg border border-border bg-card p-3 transition-all hover:border-[#FF6B6B] hover:shadow-md"
-                    >
-                      <div>
-                        <div className="font-medium text-sm">{station.name}</div>
-                        <div className="text-xs text-muted-foreground">{station.prefecture} • {station.count}件</div>
-                      </div>
-                    </Link>
-                  ) : (
-                    <div
-                      key={`${station.prefecture}-${station.name}`}
-                      className="flex items-center justify-between rounded-lg border border-border bg-muted/50 p-3 opacity-60"
-                    >
-                      <div>
-                        <div className="font-medium text-sm text-muted-foreground">{station.name}</div>
-                        <div className="text-xs text-muted-foreground">{station.prefecture} • {station.count}件</div>
-                      </div>
+                  <Link
+                    key={`${station.prefecture}-${station.name}`}
+                    href={`/stations/${station.slug}`}
+                    className="flex items-center justify-between rounded-lg border border-border bg-card p-3 transition-all hover:border-[#FF6B6B] hover:shadow-md"
+                  >
+                    <div>
+                      <div className="font-medium text-sm">{station.name}</div>
+                      <div className="text-xs text-muted-foreground">{station.prefecture} • {station.count}件</div>
                     </div>
-                  )
+                  </Link>
                 ))}
               </div>
             </div>
@@ -219,24 +207,14 @@ export default function StationsPage() {
                           <CollapsibleContent>
                             <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 pt-2">
                               {prefStations.map((station) => (
-                                station.slug ? (
-                                  <Link
-                                    key={station.name}
-                                    href={`/stations/${station.slug}`}
-                                    className="flex items-center justify-between rounded px-3 py-2 text-sm transition-colors hover:bg-[#FFE5E5]"
-                                  >
-                                    <span>{station.name}</span>
-                                    <span className="text-xs text-muted-foreground">{station.count}件</span>
-                                  </Link>
-                                ) : (
-                                  <div
-                                    key={station.name}
-                                    className="flex items-center justify-between rounded px-3 py-2 text-sm opacity-60"
-                                  >
-                                    <span className="text-muted-foreground">{station.name}</span>
-                                    <span className="text-xs text-muted-foreground">{station.count}件</span>
-                                  </div>
-                                )
+                                <Link
+                                  key={station.name}
+                                  href={`/stations/${station.slug}`}
+                                  className="flex items-center justify-between rounded px-3 py-2 text-sm transition-colors hover:bg-[#FFE5E5]"
+                                >
+                                  <span>{station.name}</span>
+                                  <span className="text-xs text-muted-foreground">{station.count}件</span>
+                                </Link>
                               ))}
                             </div>
                           </CollapsibleContent>

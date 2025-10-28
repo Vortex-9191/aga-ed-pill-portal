@@ -276,19 +276,6 @@ export default async function CityDetailPage({
                       // Get proper English slug from Japanese station name
                       const stationSlug = getStationSlug(station)
 
-                      // If no slug mapping found, don't render as link
-                      if (!stationSlug) {
-                        return (
-                          <div
-                            key={station}
-                            className="flex items-center gap-2 p-3 rounded-lg border border-border bg-muted/30"
-                          >
-                            <Train className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                            <span className="text-sm font-medium truncate">{station}</span>
-                          </div>
-                        )
-                      }
-
                       return (
                         <Link
                           key={station}

@@ -370,23 +370,6 @@ export default async function CityPage({
                   {relatedStations.map((station) => {
                     const stationSlug = getStationSlug(station.name)
 
-                    if (!stationSlug) {
-                      // If no slug mapping, display without link
-                      return (
-                        <div
-                          key={station.name}
-                          className="flex items-center justify-between p-4 rounded-lg border border-border bg-muted/30"
-                        >
-                          <div className="flex items-center gap-3">
-                            <Train className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                            <span className="text-sm font-medium">{station.name}</span>
-                          </div>
-                          <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
-                            {station.count}件
-                          </span>
-                        </div>
-                      )
-                    }
                     return (
                       <Link
                         key={station.name}

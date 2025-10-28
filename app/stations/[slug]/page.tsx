@@ -12,7 +12,7 @@ import { ClinicCard } from "@/components/clinic-card"
 import { SearchFilters } from "@/components/search-filters"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
-import { getStationInfo } from "@/lib/data/stations"
+import { getStationInfo, decodeStationSlug } from "@/lib/data/stations"
 import { getMunicipalitySlug } from "@/lib/data/municipalities"
 import type { Metadata } from "next"
 import Link from "next/link"
@@ -23,11 +23,11 @@ const ITEMS_PER_PAGE = 15
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const stationInfo = getStationInfo(params.slug)
-  const stationName = stationInfo?.ja || params.slug
+  const stationName = stationInfo?.ja || decodeStationSlug(params.slug)
 
   return {
-    title: `${stationName}の精神科・心療内科 ${stationInfo?.prefecture ? `| ${stationInfo.prefecture}` : ""} | 全国精神科ドットコム`,
-    description: `${stationName}周辺の精神科・心療内科を検索。${stationInfo?.prefecture || ""}${stationName}から通える心療内科・精神科クリニックの診療時間、アクセス、口コミ情報を掲載。`,
+    title: `${stationName}駅の精神科・心療内科 ${stationInfo?.prefecture ? `| ${stationInfo.prefecture}` : ""} | 全国精神科ドットコム`,
+    description: `${stationName}駅周辺の精神科・心療内科を検索。${stationInfo?.prefecture || ""}${stationName}駅から通える心療内科・精神科クリニックの診療時間、アクセス、口コミ情報を掲載。`,
   }
 }
 
@@ -48,7 +48,7 @@ export default async function StationDetailPage({
   const supabase = await createClient()
 
   const stationInfo = getStationInfo(params.slug)
-  const japaneseStationName = stationInfo?.ja || params.slug
+  const japaneseStationName = stationInfo?.ja || decodeStationSlug(params.slug)
 
   const currentPage = Number(searchParams.page) || 1
 
