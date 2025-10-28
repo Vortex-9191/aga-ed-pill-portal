@@ -55,6 +55,7 @@ export default async function CityPage({
     weekend?: string
     evening?: string
     director?: string
+    station?: string
   }
 }) {
   const prefectureName = prefectureMap[params.prefecture]
@@ -67,12 +68,37 @@ export default async function CityPage({
   const supabase = await createClient()
   const currentPage = Number(searchParams.page) || 1
 
-  // Get all clinics for this city (for facet generation)
-  const { data: allClinics } = await supabase
+  // Get clinics for facet generation with current filters applied (except station filter)
+  let facetQuery = supabase
     .from("clinics")
     .select("featured_subjects, hours_saturday, hours_sunday, hours_monday, hours_tuesday, hours_wednesday, hours_thursday, hours_friday, director_name, features, stations")
     .eq("prefecture", prefectureName)
     .eq("municipalities", cityName)
+
+  // Apply same filters as main query, except station (so we can show all stations)
+  if (searchParams.specialty) {
+    facetQuery = facetQuery.ilike("featured_subjects", `%${searchParams.specialty}%`)
+  }
+
+  if (searchParams.feature) {
+    facetQuery = facetQuery.ilike("features", `%${searchParams.feature}%`)
+  }
+
+  if (searchParams.weekend) {
+    facetQuery = facetQuery.or("hours_saturday.not.is.null,hours_sunday.not.is.null")
+  }
+
+  if (searchParams.evening) {
+    facetQuery = facetQuery.or(
+      "hours_monday.ilike.%18:%,hours_monday.ilike.%19:%,hours_monday.ilike.%20:%,hours_tuesday.ilike.%18:%,hours_tuesday.ilike.%19:%,hours_tuesday.ilike.%20:%,hours_wednesday.ilike.%18:%,hours_wednesday.ilike.%19:%,hours_wednesday.ilike.%20:%,hours_thursday.ilike.%18:%,hours_thursday.ilike.%19:%,hours_thursday.ilike.%20:%,hours_friday.ilike.%18:%,hours_friday.ilike.%19:%,hours_friday.ilike.%20:%"
+    )
+  }
+
+  if (searchParams.director) {
+    facetQuery = facetQuery.not("director_name", "is", null)
+  }
+
+  const { data: allClinics } = await facetQuery
 
   // Build query
   let clinicsQuery = supabase
@@ -102,6 +128,10 @@ export default async function CityPage({
 
   if (searchParams.director) {
     clinicsQuery = clinicsQuery.not("director_name", "is", null)
+  }
+
+  if (searchParams.station) {
+    clinicsQuery = clinicsQuery.ilike("stations", `%${searchParams.station}%`)
   }
 
   // Get total count
@@ -172,8 +202,25 @@ export default async function CityPage({
     }
   })
 
+  // Extract stations with counts from filtered clinics
+  const stationFacetMap = new Map<string, number>()
+  allClinics?.forEach((clinic) => {
+    if (clinic.stations) {
+      const stations = clinic.stations.split(",").map((s: string) => s.trim())
+      stations.forEach((station: string) => {
+        if (station && station !== "-") {
+          stationFacetMap.set(station, (stationFacetMap.get(station) || 0) + 1)
+        }
+      })
+    }
+  })
+
   const facetData = {
     prefectures: [], // Not needed for city page
+    stations: Array.from(stationFacetMap.entries())
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 15),
     specialties: Array.from(specialtyMap.entries())
       .map(([name, count]) => ({ name, count }))
       .sort((a, b) => b.count - a.count)
@@ -187,20 +234,8 @@ export default async function CityPage({
     director: directorCount,
   }
 
-  // Extract stations with counts from all clinics in this city
-  const stationMap = new Map<string, number>()
-  allClinics?.forEach((clinic) => {
-    if (clinic.stations) {
-      // Stations are comma-separated in the database
-      const stations = clinic.stations.split(",").map((s: string) => s.trim())
-      stations.forEach((station: string) => {
-        if (station && station !== "-") {
-          stationMap.set(station, (stationMap.get(station) || 0) + 1)
-        }
-      })
-    }
-  })
-  const relatedStations = Array.from(stationMap.entries())
+  // Use the same station data for the stations section at bottom (top 10)
+  const relatedStations = Array.from(stationFacetMap.entries())
     .map(([name, count]) => ({ name, count }))
     .sort((a, b) => b.count - a.count) // Sort by clinic count
     .slice(0, 10) // Limit to top 10

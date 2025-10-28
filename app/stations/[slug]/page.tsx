@@ -52,11 +52,36 @@ export default async function StationDetailPage({
 
   const currentPage = Number(searchParams.page) || 1
 
-  // Get all clinics for this station (for facet generation)
-  const { data: allClinics } = await supabase
+  // Get clinics for facet generation with current filters applied
+  let facetQuery = supabase
     .from("clinics")
     .select("featured_subjects, hours_saturday, hours_sunday, hours_monday, hours_tuesday, hours_wednesday, hours_thursday, hours_friday, director_name, features, municipalities, prefecture")
     .ilike("stations", `%${japaneseStationName}%`)
+
+  // Apply same filters as main query for accurate facet counts
+  if (searchParams.specialty) {
+    facetQuery = facetQuery.ilike("featured_subjects", `%${searchParams.specialty}%`)
+  }
+
+  if (searchParams.feature) {
+    facetQuery = facetQuery.ilike("features", `%${searchParams.feature}%`)
+  }
+
+  if (searchParams.weekend) {
+    facetQuery = facetQuery.or("hours_saturday.not.is.null,hours_sunday.not.is.null")
+  }
+
+  if (searchParams.evening) {
+    facetQuery = facetQuery.or(
+      "hours_monday.ilike.%18:%,hours_monday.ilike.%19:%,hours_monday.ilike.%20:%,hours_tuesday.ilike.%18:%,hours_tuesday.ilike.%19:%,hours_tuesday.ilike.%20:%,hours_wednesday.ilike.%18:%,hours_wednesday.ilike.%19:%,hours_wednesday.ilike.%20:%,hours_thursday.ilike.%18:%,hours_thursday.ilike.%19:%,hours_thursday.ilike.%20:%,hours_friday.ilike.%18:%,hours_friday.ilike.%19:%,hours_friday.ilike.%20:%"
+    )
+  }
+
+  if (searchParams.director) {
+    facetQuery = facetQuery.not("director_name", "is", null)
+  }
+
+  const { data: allClinics } = await facetQuery
 
   // Build query with filters
   let queryBuilder = supabase

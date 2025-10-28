@@ -16,6 +16,7 @@ interface FacetOption {
 interface SearchFiltersProps {
   facets: {
     prefectures: FacetOption[]
+    stations?: FacetOption[]
     specialties: FacetOption[]
     features: FacetOption[]
     weekend: number
@@ -30,6 +31,7 @@ export function SearchFilters({ facets }: SearchFiltersProps) {
   const pathname = usePathname()
 
   const selectedPrefecture = searchParams.get("prefecture") || ""
+  const selectedStation = searchParams.get("station") || ""
   const selectedSpecialty = searchParams.get("specialty") || ""
   const selectedFeature = searchParams.get("feature") || ""
   const selectedWeekend = searchParams.get("weekend") || ""
@@ -63,7 +65,7 @@ export function SearchFilters({ facets }: SearchFiltersProps) {
   }
 
   const hasFilters =
-    selectedPrefecture || selectedSpecialty || selectedFeature || selectedWeekend || selectedEvening || selectedDirector
+    selectedPrefecture || selectedStation || selectedSpecialty || selectedFeature || selectedWeekend || selectedEvening || selectedDirector
 
   return (
     <Card>
@@ -98,6 +100,33 @@ export function SearchFilters({ facets }: SearchFiltersProps) {
                     >
                       <span>{pref.name}</span>
                       <span className="text-xs text-muted-foreground">{pref.count}</span>
+                    </button>
+                  ))}
+                </CollapsibleContent>
+              </Collapsible>
+              <div className="border-t border-border" />
+            </>
+          )}
+
+          {/* Station Filter */}
+          {facets.stations && facets.stations.length > 0 && (
+            <>
+              <Collapsible defaultOpen>
+                <CollapsibleTrigger className="flex w-full items-center justify-between py-2 text-sm font-medium text-foreground hover:text-accent transition-colors">
+                  最寄り駅
+                  <ChevronDown className="h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
+                </CollapsibleTrigger>
+                <CollapsibleContent className="space-y-1 pt-2 max-h-64 overflow-y-auto">
+                  {facets.stations.map((station) => (
+                    <button
+                      key={station.name}
+                      onClick={() => updateFilter("station", selectedStation === station.name ? "" : station.name!)}
+                      className={`flex items-center justify-between w-full text-sm py-2 px-3 rounded hover:bg-accent/10 transition-colors ${
+                        selectedStation === station.name ? "bg-accent/20 font-medium" : ""
+                      }`}
+                    >
+                      <span>{station.name}</span>
+                      <span className="text-xs text-muted-foreground">{station.count}</span>
                     </button>
                   ))}
                 </CollapsibleContent>
