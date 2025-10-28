@@ -1,29 +1,82 @@
 import Link from "next/link"
-import { getStationSlug } from "@/lib/data/stations"
 
-const municipalities = [
-  { name: "新宿区", slug: "shinjuku-ku" },
-  { name: "渋谷区", slug: "shibuya-ku" },
-  { name: "港区", slug: "minato-ku" },
-  { name: "世田谷区", slug: "setagaya-ku" },
-  { name: "品川区", slug: "shinagawa-ku" },
-  { name: "千代田区", slug: "chiyoda-ku" },
-  { name: "横浜市中区", slug: "yokohama-naka" },
-  { name: "大阪市北区", slug: "osaka-kita" },
-  { name: "名古屋市中区", slug: "nagoya-naka" },
-  { name: "福岡市博多区", slug: "fukuoka-hakata" },
-  { name: "札幌市中央区", slug: "sapporo-chuo" },
-  { name: "京都市中京区", slug: "kyoto-nakagyo" },
-]
-
-const stations = [
-  "三鷹駅", "仙台駅", "五反田駅", "京橋駅", "佐賀駅", "センター南駅", "三国ケ丘駅", "上大岡駅",
-  "住吉駅", "中津駅", "代々木駅", "伊丹駅", "いわき駅", "ときわ台駅", "なんば駅", "三軒茶屋駅",
-  "下北沢駅", "京都駅", "伊勢原駅", "つくば駅", "三ノ宮駅", "上飯田駅", "中央林間駅", "中目黒駅",
-  "中野駅", "亀戸駅", "二俣川駅", "今池駅", "佐世保中央駅", "たまプラーザ駅", "バスセンター前駅",
-  "三島駅", "三田駅", "丹波口駅", "久喜駅", "久米川駅", "九段下駅", "亀有駅", "五稜郭駅",
-  "京急蒲田駅", "人形町駅", "伏見駅", "倉吉駅", "あざみ野駅", "センター北駅", "つつじケ丘駅",
-  "ひばりケ丘駅", "一ノ関駅"
+const regions = [
+  {
+    name: "関東",
+    prefectures: [
+      { name: "東京都", slug: "tokyo" },
+      { name: "神奈川県", slug: "kanagawa" },
+      { name: "埼玉県", slug: "saitama" },
+      { name: "千葉県", slug: "chiba" },
+      { name: "茨城県", slug: "ibaraki" },
+      { name: "栃木県", slug: "tochigi" },
+      { name: "群馬県", slug: "gunma" },
+    ],
+  },
+  {
+    name: "関西",
+    prefectures: [
+      { name: "大阪府", slug: "osaka" },
+      { name: "兵庫県", slug: "hyogo" },
+      { name: "京都府", slug: "kyoto" },
+      { name: "奈良県", slug: "nara" },
+      { name: "滋賀県", slug: "shiga" },
+      { name: "和歌山県", slug: "wakayama" },
+    ],
+  },
+  {
+    name: "中部",
+    prefectures: [
+      { name: "愛知県", slug: "aichi" },
+      { name: "静岡県", slug: "shizuoka" },
+      { name: "岐阜県", slug: "gifu" },
+      { name: "長野県", slug: "nagano" },
+      { name: "新潟県", slug: "niigata" },
+      { name: "富山県", slug: "toyama" },
+      { name: "石川県", slug: "ishikawa" },
+      { name: "福井県", slug: "fukui" },
+      { name: "山梨県", slug: "yamanashi" },
+    ],
+  },
+  {
+    name: "九州・沖縄",
+    prefectures: [
+      { name: "福岡県", slug: "fukuoka" },
+      { name: "熊本県", slug: "kumamoto" },
+      { name: "鹿児島県", slug: "kagoshima" },
+      { name: "長崎県", slug: "nagasaki" },
+      { name: "大分県", slug: "oita" },
+      { name: "宮崎県", slug: "miyazaki" },
+      { name: "佐賀県", slug: "saga" },
+      { name: "沖縄県", slug: "okinawa" },
+    ],
+  },
+  {
+    name: "北海道・東北",
+    prefectures: [
+      { name: "北海道", slug: "hokkaido" },
+      { name: "宮城県", slug: "miyagi" },
+      { name: "福島県", slug: "fukushima" },
+      { name: "青森県", slug: "aomori" },
+      { name: "岩手県", slug: "iwate" },
+      { name: "秋田県", slug: "akita" },
+      { name: "山形県", slug: "yamagata" },
+    ],
+  },
+  {
+    name: "中国・四国",
+    prefectures: [
+      { name: "広島県", slug: "hiroshima" },
+      { name: "岡山県", slug: "okayama" },
+      { name: "山口県", slug: "yamaguchi" },
+      { name: "愛媛県", slug: "ehime" },
+      { name: "香川県", slug: "kagawa" },
+      { name: "徳島県", slug: "tokushima" },
+      { name: "高知県", slug: "kochi" },
+      { name: "鳥取県", slug: "tottori" },
+      { name: "島根県", slug: "shimane" },
+    ],
+  },
 ]
 
 export function Footer() {
@@ -46,17 +99,12 @@ export function Footer() {
               </li>
               <li>
                 <Link href="/areas" className="text-muted-foreground hover:text-foreground transition-colors">
-                  エリア一覧
+                  都道府県一覧
                 </Link>
               </li>
               <li>
                 <Link href="/cities" className="text-muted-foreground hover:text-foreground transition-colors">
                   市区町村一覧
-                </Link>
-              </li>
-              <li>
-                <Link href="/stations" className="text-muted-foreground hover:text-foreground transition-colors">
-                  駅名一覧
                 </Link>
               </li>
             </ul>
@@ -118,50 +166,51 @@ export function Footer() {
           </div>
         </div>
 
-        {/* All Municipalities Section */}
+        {/* All Prefectures Section */}
         <div className="mt-8 pt-8 border-t border-border">
-          <h4 className="mb-3 text-xs font-semibold text-foreground">市区町村から探す</h4>
-          <div className="flex flex-wrap gap-2">
-            {municipalities.map((municipality) => (
-              <Link
-                key={municipality.slug}
-                href={`/cities/${municipality.slug}`}
-                className="text-xs text-muted-foreground hover:text-foreground hover:underline"
-              >
-                {municipality.name}
-              </Link>
+          <div className="mb-6 flex items-center justify-between">
+            <h4 className="text-sm font-semibold text-foreground">都道府県・市区町村から探す</h4>
+            <Link
+              href="/areas"
+              className="text-xs text-[#FF6B6B] hover:underline"
+            >
+              すべて見る →
+            </Link>
+          </div>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {regions.map((region) => (
+              <div key={region.name}>
+                <h5 className="mb-2 text-xs font-semibold text-foreground">{region.name}</h5>
+                <div className="flex flex-wrap gap-x-3 gap-y-1">
+                  {region.prefectures.map((prefecture) => (
+                    <Link
+                      key={prefecture.slug}
+                      href={`/areas/${prefecture.slug}`}
+                      className="text-xs text-muted-foreground hover:text-[#FF6B6B] hover:underline"
+                    >
+                      {prefecture.name}
+                    </Link>
+                  ))}
+                </div>
+              </div>
             ))}
           </div>
         </div>
 
-        {/* All Stations Section */}
-        <div className="mt-6">
-          <h4 className="mb-3 text-xs font-semibold text-foreground">駅名から探す</h4>
-          <div className="flex flex-wrap gap-2">
-            {stations.map((station) => {
-              const stationSlug = getStationSlug(station)
-
-              // If no slug mapping, render as plain text
-              if (!stationSlug) {
-                return (
-                  <span key={station} className="text-xs text-muted-foreground">
-                    {station}
-                  </span>
-                )
-              }
-
-              // Render as clickable link with English slug
-              return (
-                <Link
-                  key={station}
-                  href={`/stations/${stationSlug}`}
-                  className="text-xs text-muted-foreground hover:text-foreground hover:underline"
-                >
-                  {station}
-                </Link>
-              )
-            })}
-          </div>
+        {/* Quick Links to Cities and Stations */}
+        <div className="mt-6 flex flex-wrap gap-4 text-xs">
+          <Link
+            href="/cities"
+            className="text-muted-foreground hover:text-foreground hover:underline"
+          >
+            市区町村一覧 →
+          </Link>
+          <Link
+            href="/stations"
+            className="text-muted-foreground hover:text-foreground hover:underline"
+          >
+            駅名一覧 →
+          </Link>
         </div>
 
         <div className="mt-8 border-t border-border pt-8 text-center text-xs text-muted-foreground">
