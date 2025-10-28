@@ -1,6 +1,6 @@
 "use client"
 
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter, useSearchParams, usePathname } from "next/navigation"
 import { Check, ChevronDown, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -27,9 +27,11 @@ interface SearchFiltersProps {
 export function SearchFilters({ facets }: SearchFiltersProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const pathname = usePathname()
 
   const selectedPrefecture = searchParams.get("prefecture") || ""
   const selectedSpecialty = searchParams.get("specialty") || ""
+  const selectedFeature = searchParams.get("feature") || ""
   const selectedWeekend = searchParams.get("weekend") || ""
   const selectedEvening = searchParams.get("evening") || ""
   const selectedDirector = searchParams.get("director") || ""
@@ -46,7 +48,8 @@ export function SearchFilters({ facets }: SearchFiltersProps) {
     // Reset to page 1 when filters change
     params.delete("page")
 
-    router.push(`/search?${params.toString()}`)
+    // Use current pathname instead of hardcoded /search
+    router.push(`${pathname}?${params.toString()}`)
   }
 
   const clearAll = () => {
@@ -55,11 +58,12 @@ export function SearchFilters({ facets }: SearchFiltersProps) {
     if (query) {
       params.set("q", query)
     }
-    router.push(`/search?${params.toString()}`)
+    // Use current pathname instead of hardcoded /search
+    router.push(`${pathname}?${params.toString()}`)
   }
 
   const hasFilters =
-    selectedPrefecture || selectedSpecialty || selectedWeekend || selectedEvening || selectedDirector
+    selectedPrefecture || selectedSpecialty || selectedFeature || selectedWeekend || selectedEvening || selectedDirector
 
   return (
     <Card>
@@ -189,10 +193,16 @@ export function SearchFilters({ facets }: SearchFiltersProps) {
                 </CollapsibleTrigger>
                 <CollapsibleContent className="space-y-1 pt-2 max-h-48 overflow-y-auto">
                   {facets.features.map((feature) => (
-                    <div key={feature.name} className="flex items-center justify-between text-sm py-1 px-3">
-                      <span className="text-muted-foreground">{feature.name}</span>
+                    <button
+                      key={feature.name}
+                      onClick={() => updateFilter("feature", selectedFeature === feature.name ? "" : feature.name!)}
+                      className={`flex items-center justify-between w-full text-sm py-2 px-3 rounded hover:bg-accent/10 transition-colors ${
+                        selectedFeature === feature.name ? "bg-accent/20 font-medium" : ""
+                      }`}
+                    >
+                      <span>{feature.name}</span>
                       <span className="text-xs text-muted-foreground">{feature.count}</span>
-                    </div>
+                    </button>
                   ))}
                 </CollapsibleContent>
               </Collapsible>
