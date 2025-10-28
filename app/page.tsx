@@ -3,7 +3,7 @@ import { HeroSection } from "@/components/hero-section"
 import { PopularAreas } from "@/components/popular-areas"
 import { Footer } from "@/components/footer"
 import { PopularStations } from "@/components/popular-stations"
-import { PopularMunicipalities } from "@/components/popular-municipalities"
+import { AllPrefectures } from "@/components/all-prefectures"
 
 export default function HomePage() {
   return (
@@ -12,7 +12,7 @@ export default function HomePage() {
       <main className="flex-1">
         <HeroSection />
         <PopularAreas />
-        <PopularMunicipalities />
+        <AllPrefectures />
         <PopularStations />
       </main>
       <Footer />
