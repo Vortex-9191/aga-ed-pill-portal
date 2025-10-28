@@ -278,6 +278,84 @@ export const stationMap: Record<string, { ja: string; prefecture: string; lines:
   aomori: { ja: "青森駅", prefecture: "青森県", lines: ["JR奥羽本線", "JR津軽線"] },
   hachinohe: { ja: "八戸駅", prefecture: "青森県", lines: ["JR東北新幹線", "JR八戸線"] },
   misawa: { ja: "三沢駅", prefecture: "青森県", lines: ["JR東北本線"] },
+
+  // 静岡県 - 伊豆方面
+  nirayama: { ja: "韮山駅", prefecture: "静岡県", lines: ["伊豆箱根鉄道駿豆線"] },
+  takyo: { ja: "田京駅", prefecture: "静岡県", lines: ["伊豆箱根鉄道駿豆線"] },
+  ohito: { ja: "大仁駅", prefecture: "静岡県", lines: ["伊豆箱根鉄道駿豆線"] },
+  mishima: { ja: "三島駅", prefecture: "静岡県", lines: ["JR東海道本線", "JR東海道新幹線", "伊豆箱根鉄道駿豆線"] },
+  numazu: { ja: "沼津駅", prefecture: "静岡県", lines: ["JR東海道本線", "JR御殿場線"] },
+  atami: { ja: "熱海駅", prefecture: "静岡県", lines: ["JR東海道本線", "JR東海道新幹線", "伊東線"] },
+  ito: { ja: "伊東駅", prefecture: "静岡県", lines: ["JR伊東線"] },
+  gotemba: { ja: "御殿場駅", prefecture: "静岡県", lines: ["JR御殿場線"] },
+
+  // 静岡県 - その他
+  fuji: { ja: "富士駅", prefecture: "静岡県", lines: ["JR東海道本線", "JR身延線"] },
+  mishimataguchi: { ja: "三島田町駅", prefecture: "静岡県", lines: ["伊豆箱根鉄道駿豆線"] },
+  izukokawa: { ja: "伊豆国市駅", prefecture: "静岡県", lines: [] },
+  izunagaoka: { ja: "伊豆長岡駅", prefecture: "静岡県", lines: ["伊豆箱根鉄道駿豆線"] },
+
+  // 愛知県 - 追加
+  okazaki: { ja: "岡崎駅", prefecture: "愛知県", lines: ["JR東海道本線", "愛知環状鉄道線"] },
+  toyohashi: { ja: "豊橋駅", prefecture: "愛知県", lines: ["JR東海道本線", "JR飯田線", "名鉄名古屋本線"] },
+  kasugai: { ja: "春日井駅", prefecture: "愛知県", lines: ["JR中央本線"] },
+  ichinomiya: { ja: "一宮駅", prefecture: "愛知県", lines: ["JR東海道本線", "名鉄名古屋本線"] },
+  toyota: { ja: "豊田市駅", prefecture: "愛知県", lines: ["名鉄三河線"] },
+
+  // 茨城県 - 追加
+  hitachi: { ja: "日立駅", prefecture: "茨城県", lines: ["JR常磐線"] },
+  hitachinaka: { ja: "勝田駅", prefecture: "茨城県", lines: ["JR常磐線"] },
+  toride: { ja: "取手駅", prefecture: "茨城県", lines: ["JR常磐線", "関東鉄道常総線"] },
+  tsukuba: { ja: "つくば駅", prefecture: "茨城県", lines: ["つくばエクスプレス"] },
+
+  // 群馬県 - 追加
+  takasaki: { ja: "高崎駅", prefecture: "群馬県", lines: ["JR高崎線", "JR上越新幹線", "JR八高線"] },
+  maebashi: { ja: "前橋駅", prefecture: "群馬県", lines: ["JR両毛線"] },
+  kiryu: { ja: "桐生駅", prefecture: "群馬県", lines: ["JR両毛線"] },
+
+  // 栃木県 - 追加
+  oyama: { ja: "小山駅", prefecture: "栃木県", lines: ["JR東北本線", "JR水戸線", "JR両毛線"] },
+  ashikaga: { ja: "足利駅", prefecture: "栃木県", lines: ["JR両毛線"] },
+  sano: { ja: "佐野駅", prefecture: "栃木県", lines: ["JR両毛線"] },
+
+  // 長野県 - 追加
+  matsumoto: { ja: "松本駅", prefecture: "長野県", lines: ["JR篠ノ井線", "JR大糸線", "松本電鉄上高地線"] },
+  suzaka: { ja: "須坂駅", prefecture: "長野県", lines: ["長野電鉄長野線"] },
+  ueda: { ja: "上田駅", prefecture: "長野県", lines: ["JR北陸新幹線", "JR信越本線", "上田電鉄別所線"] },
+  iida: { ja: "飯田駅", prefecture: "長野県", lines: ["JR飯田線"] },
+
+  // 山梨県 - 追加
+  kofu: { ja: "甲府駅", prefecture: "山梨県", lines: ["JR中央本線", "JR身延線"] },
+
+  // 岐阜県 - 追加
+  gifu: { ja: "岐阜駅", prefecture: "岐阜県", lines: ["JR東海道本線", "JR高山本線", "名鉄名古屋本線"] },
+  ogaki: { ja: "大垣駅", prefecture: "岐阜県", lines: ["JR東海道本線", "JR大垣駅", "養老鉄道"] },
+
+  // 山口県 - 追加
+  yamaguchi: { ja: "山口駅", prefecture: "山口県", lines: ["JR山口線"] },
+  shimonoseki: { ja: "下関駅", prefecture: "山口県", lines: ["JR山陽本線", "JR山陰本線"] },
+
+  // 愛媛県 - 追加
+  matsuyama: { ja: "松山駅", prefecture: "愛媛県", lines: ["JR予讃線"] },
+  iyo: { ja: "伊予市駅", prefecture: "愛媛県", lines: ["JR予讃線"] },
+
+  // 香川県 - 追加
+  takamatsu: { ja: "高松駅", prefecture: "香川県", lines: ["JR予讃線", "JR高徳線"] },
+
+  // 徳島県 - 追加
+  tokushima: { ja: "徳島駅", prefecture: "徳島県", lines: ["JR高徳線", "JR徳島線"] },
+
+  // 高知県 - 追加
+  kochi: { ja: "高知駅", prefecture: "高知県", lines: ["JR土讃線"] },
+
+  // 福井県 - 追加
+  fukui: { ja: "福井駅", prefecture: "福井県", lines: ["JR北陸本線", "えちぜん鉄道"] },
+
+  // 石川県 - 追加
+  kanazawa: { ja: "金沢駅", prefecture: "石川県", lines: ["JR北陸本線", "JR北陸新幹線"] },
+
+  // 富山県 - 追加
+  toyama: { ja: "富山駅", prefecture: "富山県", lines: ["JR北陸本線", "JR高山本線", "富山地方鉄道"] },
 }
 
 export function getStationInfo(slug: string) {
