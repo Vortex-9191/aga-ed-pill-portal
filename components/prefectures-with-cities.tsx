@@ -51,13 +51,17 @@ export async function PrefecturesWithCities() {
   // Initialize prefecture data map
   let prefectureData = new Map<string, Map<string, number>>()
 
-  // Use RPC function to get pre-aggregated counts (server-side aggregation)
+  // Use clinic_counts table for pre-aggregated counts
   const { data: municipalityCounts, error } = await supabase
-    .rpc('get_municipality_counts')
+    .from("clinic_counts")
+    .select("prefecture, municipality, clinic_count")
+    .eq("count_type", "municipality")
+    .not("prefecture", "is", null)
+    .not("municipality", "is", null)
 
   if (error) {
-    console.error('Error fetching municipality counts:', error)
-    // Fallback: try direct query if RPC fails
+    console.error('[PrefecturesWithCities] Error fetching from clinic_counts:', error)
+    // Fallback: try direct query if clinic_counts table doesn't exist yet
     const { data: clinicsData, error: fallbackError } = await supabase
       .from("clinics")
       .select("municipalities, prefecture")
@@ -68,31 +72,23 @@ export async function PrefecturesWithCities() {
       .limit(50000)
 
     if (fallbackError) {
-      console.error('Fallback query also failed:', fallbackError)
+      console.error('[PrefecturesWithCities] Fallback query also failed:', fallbackError)
       return null // Return null if both methods fail
     }
 
-    console.log(`[DEBUG] Fallback: fetched ${clinicsData?.length || 0} clinics`)
-
     // Build from fallback data and continue with normal flow
-    const fallbackPrefectureData = new Map<string, Map<string, number>>()
     clinicsData?.forEach((clinic) => {
-      if (!fallbackPrefectureData.has(clinic.prefecture)) {
-        fallbackPrefectureData.set(clinic.prefecture, new Map())
+      if (!prefectureData.has(clinic.prefecture)) {
+        prefectureData.set(clinic.prefecture, new Map())
       }
-      const municipalities = fallbackPrefectureData.get(clinic.prefecture)!
+      const municipalities = prefectureData.get(clinic.prefecture)!
       municipalities.set(
         clinic.municipalities,
         (municipalities.get(clinic.municipalities) || 0) + 1
       )
     })
-
-    // Use fallback data for rendering
-    const prefectureData = fallbackPrefectureData
   } else {
-    console.log(`[DEBUG] RPC returned ${municipalityCounts?.length || 0} municipality aggregations`)
-
-    // Group by prefecture from RPC results
+    // Group by prefecture from clinic_counts table
     municipalityCounts?.forEach((row: { prefecture: string; municipality: string; clinic_count: number }) => {
       if (!prefectureData.has(row.prefecture)) {
         prefectureData.set(row.prefecture, new Map())
