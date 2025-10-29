@@ -17,6 +17,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import type { Metadata } from "next"
+import { ClinicFinderWrapper } from "@/components/clinic-finder-wrapper"
 
 const ITEMS_PER_PAGE = 15
 
@@ -265,6 +266,9 @@ export default async function SearchPage({
 
             {/* Results */}
             <div className="space-y-6">
+              {/* Clinic Finder Wizard */}
+              <ClinicFinderWrapper />
+
               {/* Results Header */}
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>

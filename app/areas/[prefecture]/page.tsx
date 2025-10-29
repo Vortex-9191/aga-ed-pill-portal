@@ -10,6 +10,7 @@ import { SearchFilters } from "@/components/search-filters"
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
 import { getStationSlug } from "@/lib/data/stations"
+import { ClinicFinderWrapper } from "@/components/clinic-finder-wrapper"
 
 // Prefecture slug to name mapping
 const prefectureMap: Record<string, string> = {
@@ -352,6 +353,9 @@ export default async function PrefecturePage({
 
             {/* Clinic List */}
             <div>
+              {/* Clinic Finder Wizard */}
+              <ClinicFinderWrapper />
+
               <div className="mb-6 flex items-center justify-between">
                 <p className="text-sm text-muted-foreground">
                   {totalCount || 0}件中 {from + 1}〜{Math.min(to + 1, totalCount || 0)}件を表示
