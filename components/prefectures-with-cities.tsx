@@ -62,8 +62,6 @@ export async function PrefecturesWithCities() {
     console.error('Error fetching clinics for prefecture data:', error)
   }
 
-  console.log(`[PrefecturesWithCities] Fetched ${clinicsData?.length || 0} clinics total`)
-
   // Group municipalities by prefecture and count clinics
   const prefectureData = new Map<string, Map<string, number>>()
 
@@ -78,7 +76,7 @@ export async function PrefecturesWithCities() {
     )
   })
 
-  // Get top 3 municipalities per prefecture
+  // Get top 3 municipalities per prefecture (minimum 2 clinics)
   const prefecturesWithTopCities = new Map<string, Array<{ name: string; count: number }>>()
 
   prefectureData.forEach((municipalities, prefecture) => {
@@ -87,19 +85,9 @@ export async function PrefecturesWithCities() {
         name,
         count
       }))
+      .filter(city => city.count >= 2) // Only show municipalities with 2+ clinics
       .sort((a, b) => b.count - a.count)
       .slice(0, 3)
-
-    // Debug log for 茨城県
-    if (prefecture === '茨城県') {
-      console.log('[PrefecturesWithCities] 茨城県 all municipalities:')
-      Array.from(municipalities.entries())
-        .sort((a, b) => b[1] - a[1])
-        .forEach(([name, count]) => {
-          console.log(`  ${name}: ${count}件`)
-        })
-      console.log('[PrefecturesWithCities] 茨城県 top 3:', topCities)
-    }
 
     if (topCities.length > 0) {
       prefecturesWithTopCities.set(prefecture, topCities)

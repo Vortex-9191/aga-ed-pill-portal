@@ -4,8 +4,8 @@ import { PopularAreas } from "@/components/popular-areas"
 import { Footer } from "@/components/footer"
 import { PrefecturesWithCities } from "@/components/prefectures-with-cities"
 
-// Revalidate every hour to ensure fresh data
-export const revalidate = 3600
+// Force dynamic rendering to ensure fresh data
+export const dynamic = 'force-dynamic'
 
 export default function HomePage() {
   return (
