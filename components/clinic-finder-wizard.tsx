@@ -223,19 +223,29 @@ export function ClinicFinderWizard({ onComplete }: ClinicFinderWizardProps) {
               onClick={() => handleAnswer(option.value)}
               variant="outline"
               className={cn(
-                "w-full justify-start text-left h-auto py-4 px-4 hover:border-[#FF6B6B] hover:bg-[#FFF5F5] transition-all",
-                answers[currentQuestion.id] === option.value && "border-[#FF6B6B] bg-[#FFE5E5]"
+                "w-full justify-start text-left h-auto py-4 px-4 transition-all",
+                "hover:border-[#FF6B6B] hover:bg-[#FFF5F5]",
+                "active:bg-[#FFF5F5]",
+                answers[currentQuestion.id] === option.value && "border-[#FF6B6B] bg-[#FFF5F5]"
               )}
             >
               <div className="flex-1">
-                <div className="font-medium">{option.label}</div>
+                <div className={cn(
+                  "font-medium text-foreground",
+                  answers[currentQuestion.id] === option.value && "text-[#FF6B6B]"
+                )}>
+                  {option.label}
+                </div>
                 {option.description && (
                   <div className="text-sm text-muted-foreground mt-1">
                     {option.description}
                   </div>
                 )}
               </div>
-              <ChevronRight className="h-5 w-5 text-muted-foreground ml-2" />
+              <ChevronRight className={cn(
+                "h-5 w-5 ml-2 transition-colors",
+                answers[currentQuestion.id] === option.value ? "text-[#FF6B6B]" : "text-muted-foreground"
+              )} />
             </Button>
           ))}
         </div>
