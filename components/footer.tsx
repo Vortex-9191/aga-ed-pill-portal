@@ -124,7 +124,7 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/sitemap" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Link href="/sitemap-page" className="text-muted-foreground hover:text-foreground transition-colors">
                   サイトマップ
                 </Link>
               </li>
@@ -136,20 +136,20 @@ export function Footer() {
             <ul className="space-y-3 text-sm">
               <li>
                 <Link
-                  href="/policies/privacy"
+                  href="/privacy"
                   className="text-muted-foreground hover:text-foreground transition-colors"
                 >
                   プライバシーポリシー
                 </Link>
               </li>
               <li>
-                <Link href="/policies/terms" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Link href="/terms" className="text-muted-foreground hover:text-foreground transition-colors">
                   利用規約
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/policies/reviews"
+                  href="/review-guidelines"
                   className="text-muted-foreground hover:text-foreground transition-colors"
                 >
                   口コミガイドライン
