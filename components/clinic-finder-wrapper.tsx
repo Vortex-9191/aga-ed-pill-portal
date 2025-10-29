@@ -7,30 +7,10 @@ import { Button } from "./ui/button"
 
 export function ClinicFinderWrapper() {
   const [isOpen, setIsOpen] = useState(true)
-  const [answers, setAnswers] = useState<Record<string, string>>({})
 
   const handleComplete = (newAnswers: Record<string, string>) => {
-    setAnswers(newAnswers)
-
-    // Construct filter URL based on answers
-    const params = new URLSearchParams(window.location.search)
-
-    if (newAnswers.schedule === "weekend") {
-      params.set("weekend", "true")
-    }
-    if (newAnswers.schedule === "weekday_evening") {
-      params.set("evening", "true")
-    }
-    if (newAnswers.director === "yes") {
-      params.set("director", "true")
-    }
-
-    // Update URL with filters
-    const newUrl = `${window.location.pathname}?${params.toString()}`
-    window.history.pushState({}, "", newUrl)
-
-    // Reload to apply filters
-    window.location.reload()
+    // Simply show results - the wizard component handles displaying anycure
+    // No need to apply filters or navigate
   }
 
   if (!isOpen) {
@@ -66,7 +46,7 @@ export function ClinicFinderWrapper() {
           <h2 className="text-2xl font-bold">あなたに最適なクリニックを見つける</h2>
         </div>
         <p className="text-muted-foreground">
-          7つの質問に答えるだけで、条件に合うクリニックが表示されます
+          7つの質問に答えるだけで、あなたに合った受診方法をご提案します
         </p>
       </div>
       <ClinicFinderWizard onComplete={handleComplete} />

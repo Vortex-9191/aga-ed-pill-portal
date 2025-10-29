@@ -130,18 +130,66 @@ export function ClinicFinderWizard({ onComplete }: ClinicFinderWizardProps) {
     return (
       <Card className="border-[#FF6B6B] bg-gradient-to-br from-white to-[#FFF5F5]">
         <CardHeader>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 mb-2">
             <Sparkles className="h-6 w-6 text-[#FF6B6B]" />
-            <CardTitle>診断が完了しました</CardTitle>
+            <CardTitle className="text-2xl">あなたにおすすめ：エニキュア</CardTitle>
           </div>
-          <CardDescription>
-            あなたの回答に基づいて、最適なクリニックを表示しています
+          <CardDescription className="text-base">
+            オンラインで完結する精神科・心療内科診療サービス
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <Button onClick={handleReset} variant="outline">
-            もう一度診断する
-          </Button>
+        <CardContent className="space-y-6">
+          <div className="space-y-4">
+            <h3 className="font-semibold text-lg">エニキュアの特徴</h3>
+            <ul className="space-y-3">
+              <li className="flex items-start gap-3">
+                <div className="bg-[#FF6B6B] text-white rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5">✓</div>
+                <div>
+                  <p className="font-medium">24時間365日予約可能</p>
+                  <p className="text-sm text-muted-foreground">スマホやPCから簡単予約</p>
+                </div>
+              </li>
+              <li className="flex items-start gap-3">
+                <div className="bg-[#FF6B6B] text-white rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5">✓</div>
+                <div>
+                  <p className="font-medium">自宅で診察・薬の配送</p>
+                  <p className="text-sm text-muted-foreground">通院不要、薬は最短当日配送</p>
+                </div>
+              </li>
+              <li className="flex items-start gap-3">
+                <div className="bg-[#FF6B6B] text-white rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5">✓</div>
+                <div>
+                  <p className="font-medium">専門医による診察</p>
+                  <p className="text-sm text-muted-foreground">精神科専門医が丁寧に対応</p>
+                </div>
+              </li>
+              <li className="flex items-start gap-3">
+                <div className="bg-[#FF6B6B] text-white rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5">✓</div>
+                <div>
+                  <p className="font-medium">保険適用で安心</p>
+                  <p className="text-sm text-muted-foreground">通常の保険診療と同じ</p>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Button
+              className="flex-1 bg-[#FF6B6B] hover:bg-[#FF6B6B]/90 text-white"
+              asChild
+            >
+              <a href="https://anycure.jp/" target="_blank" rel="noopener noreferrer">
+                エニキュアで予約する
+              </a>
+            </Button>
+            <Button
+              onClick={handleReset}
+              variant="outline"
+              className="sm:w-auto"
+            >
+              もう一度診断する
+            </Button>
+          </div>
         </CardContent>
       </Card>
     )
