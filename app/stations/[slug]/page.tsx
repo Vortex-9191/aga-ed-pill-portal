@@ -14,6 +14,7 @@ import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { getStationInfo, decodeStationSlug } from "@/lib/data/stations"
 import { getMunicipalitySlug } from "@/lib/data/municipalities"
+import { ClinicFinderWrapper } from "@/components/clinic-finder-wrapper"
 import type { Metadata } from "next"
 import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -330,6 +331,9 @@ export default async function StationDetailPage({
 
             {/* Results */}
             <div>
+              {/* Clinic Finder Wizard */}
+              <ClinicFinderWrapper />
+
               <p className="text-sm text-muted-foreground mb-6">
                 {totalCount || 0}件中 {from + 1}〜{Math.min(to + 1, totalCount || 0)}件を表示
               </p>
