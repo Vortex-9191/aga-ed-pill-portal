@@ -2,13 +2,14 @@ import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { ClinicCard } from "@/components/clinic-card"
 import Link from "next/link"
-import { ChevronRight, MapPin } from "lucide-react"
-import { Card, CardContent } from "@/components/ui/card"
+import { ChevronRight, MapPin, Train } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { createClient } from "@/lib/supabase/server"
 import { SearchFilters } from "@/components/search-filters"
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
+import { getStationSlug } from "@/lib/data/stations"
 
 // Prefecture slug to name mapping
 const prefectureMap: Record<string, string> = {
@@ -99,7 +100,7 @@ export default async function PrefecturePage({
   // Get clinics for facet generation with current filters applied (except city filter)
   let facetQuery = supabase
     .from("clinics")
-    .select("municipalities, featured_subjects, hours_saturday, hours_sunday, hours_monday, hours_tuesday, hours_wednesday, hours_thursday, hours_friday, director_name, features")
+    .select("municipalities, stations, featured_subjects, hours_saturday, hours_sunday, hours_monday, hours_tuesday, hours_wednesday, hours_thursday, hours_friday, director_name, features")
     .eq("prefecture", prefectureName)
 
   // Apply same filters as main query, except city (so we can show all cities)
@@ -248,6 +249,36 @@ export default async function PrefecturePage({
     director: directorCount,
   }
 
+  // Extract municipalities with counts
+  const municipalityMap = new Map<string, number>()
+  allClinics?.forEach((clinic: any) => {
+    if (clinic.municipalities) {
+      const municipality = clinic.municipalities.trim()
+      municipalityMap.set(municipality, (municipalityMap.get(municipality) || 0) + 1)
+    }
+  })
+  const relatedMunicipalities = Array.from(municipalityMap.entries())
+    .map(([name, count]) => ({ name, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 10)
+
+  // Extract stations with counts
+  const stationMap = new Map<string, number>()
+  allClinics?.forEach((clinic: any) => {
+    if (clinic.stations) {
+      const stations = clinic.stations.split(",").map((s: string) => s.trim())
+      stations.forEach((station: string) => {
+        if (station && station !== "-") {
+          stationMap.set(station, (stationMap.get(station) || 0) + 1)
+        }
+      })
+    }
+  })
+  const relatedStations = Array.from(stationMap.entries())
+    .map(([name, count]) => ({ name, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 10)
+
   // Transform data for ClinicCard
   const clinicCards =
     clinics?.map((clinic) => {
@@ -356,6 +387,74 @@ export default async function PrefecturePage({
                 </div>
               )}
             </div>
+          </div>
+
+          {/* Related Municipalities and Stations Section */}
+          <div className="mt-8 grid gap-6 lg:grid-cols-2">
+            {/* Related Municipalities */}
+            {relatedMunicipalities.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <MapPin className="h-5 w-5" />
+                    {prefectureName}の市区町村
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-3 grid-cols-1 sm:grid-cols-2">
+                    {relatedMunicipalities.map((municipality) => (
+                      <Link
+                        key={municipality.name}
+                        href={`/areas/${params.prefecture}/${encodeURIComponent(municipality.name)}`}
+                        className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-accent hover:border-coral transition-colors group"
+                      >
+                        <div className="flex items-center gap-3">
+                          <MapPin className="h-4 w-4 text-muted-foreground group-hover:text-coral flex-shrink-0 transition-colors" />
+                          <span className="text-sm font-medium group-hover:text-coral transition-colors">{municipality.name}</span>
+                        </div>
+                        <span className="text-xs text-muted-foreground bg-muted group-hover:bg-coral/10 px-2 py-1 rounded transition-colors">
+                          {municipality.count}件
+                        </span>
+                      </Link>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Related Stations */}
+            {relatedStations.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Train className="h-5 w-5" />
+                    {prefectureName}の主要駅
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-3 grid-cols-1 sm:grid-cols-2">
+                    {relatedStations.map((station) => {
+                      const stationSlug = getStationSlug(station.name)
+                      return (
+                        <Link
+                          key={station.name}
+                          href={`/stations/${stationSlug}`}
+                          className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-accent hover:border-coral transition-colors group"
+                        >
+                          <div className="flex items-center gap-3">
+                            <Train className="h-4 w-4 text-muted-foreground group-hover:text-coral flex-shrink-0 transition-colors" />
+                            <span className="text-sm font-medium group-hover:text-coral transition-colors">{station.name}</span>
+                          </div>
+                          <span className="text-xs text-muted-foreground bg-muted group-hover:bg-coral/10 px-2 py-1 rounded transition-colors">
+                            {station.count}件
+                          </span>
+                        </Link>
+                      )
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </div>
       </main>
