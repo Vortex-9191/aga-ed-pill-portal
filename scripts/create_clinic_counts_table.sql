@@ -55,21 +55,48 @@ BEGIN
     clinic_count = EXCLUDED.clinic_count,
     updated_at = NOW();
 
-  -- Insert station counts
-  INSERT INTO clinic_counts (count_type, station, clinic_count)
+  -- Insert station counts with main prefecture
+  INSERT INTO clinic_counts (count_type, prefecture, station, clinic_count)
   WITH station_split AS (
     SELECT
-      TRIM(unnest(string_to_array(stations, ','))) as station_name
-    FROM clinics
-    WHERE stations IS NOT NULL AND stations != '' AND stations != '-'
+      c.prefecture,
+      TRIM(unnest(string_to_array(c.stations, ','))) as station_name
+    FROM clinics c
+    WHERE c.stations IS NOT NULL AND c.stations != '' AND c.stations != '-'
+      AND c.prefecture IS NOT NULL
+  ),
+  station_counts AS (
+    SELECT
+      station_name,
+      prefecture,
+      COUNT(*) as count_per_prefecture
+    FROM station_split
+    WHERE station_name != '' AND station_name != '-'
+    GROUP BY station_name, prefecture
+  ),
+  main_prefecture AS (
+    SELECT DISTINCT ON (station_name)
+      station_name,
+      prefecture,
+      count_per_prefecture
+    FROM station_counts
+    ORDER BY station_name, count_per_prefecture DESC
+  ),
+  total_counts AS (
+    SELECT
+      station_name,
+      COUNT(*) as total_count
+    FROM station_split
+    WHERE station_name != '' AND station_name != '-'
+    GROUP BY station_name
   )
   SELECT
     'station'::TEXT,
-    station_name,
-    COUNT(*)::INTEGER
-  FROM station_split
-  WHERE station_name != '' AND station_name != '-'
-  GROUP BY station_name
+    mp.prefecture,
+    mp.station_name,
+    tc.total_count::INTEGER
+  FROM main_prefecture mp
+  JOIN total_counts tc ON mp.station_name = tc.station_name
   ON CONFLICT (count_type, prefecture, municipality, station)
   DO UPDATE SET
     clinic_count = EXCLUDED.clinic_count,

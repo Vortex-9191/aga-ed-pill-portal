@@ -250,35 +250,77 @@ export default async function PrefecturePage({
     director: directorCount,
   }
 
-  // Extract municipalities with counts
-  const municipalityMap = new Map<string, number>()
-  allClinics?.forEach((clinic: any) => {
-    if (clinic.municipalities) {
-      const municipality = clinic.municipalities.trim()
-      municipalityMap.set(municipality, (municipalityMap.get(municipality) || 0) + 1)
-    }
-  })
-  const relatedMunicipalities = Array.from(municipalityMap.entries())
-    .map(([name, count]) => ({ name, count }))
-    .sort((a, b) => b.count - a.count)
-    .slice(0, 10)
+  // Extract municipalities with counts from clinic_counts table
+  const { data: municipalityCounts } = await supabase
+    .from("clinic_counts")
+    .select("municipality, clinic_count")
+    .eq("count_type", "municipality")
+    .eq("prefecture", prefectureName)
+    .not("municipality", "is", null)
+    .order("clinic_count", { ascending: false })
+    .limit(10)
 
-  // Extract stations with counts
-  const stationMap = new Map<string, number>()
-  allClinics?.forEach((clinic: any) => {
-    if (clinic.stations) {
-      const stations = clinic.stations.split(",").map((s: string) => s.trim())
-      stations.forEach((station: string) => {
-        if (station && station !== "-") {
-          stationMap.set(station, (stationMap.get(station) || 0) + 1)
-        }
-      })
-    }
-  })
-  const relatedStations = Array.from(stationMap.entries())
-    .map(([name, count]) => ({ name, count }))
-    .sort((a, b) => b.count - a.count)
-    .slice(0, 10)
+  const relatedMunicipalities = municipalityCounts
+    ? municipalityCounts.map((row: { municipality: string; clinic_count: number }) => ({
+        name: row.municipality,
+        count: row.clinic_count
+      }))
+    : []
+
+  // Fallback: use allClinics if clinic_counts query failed or returned empty
+  if (relatedMunicipalities.length === 0 && allClinics) {
+    const municipalityMap = new Map<string, number>()
+    allClinics.forEach((clinic: any) => {
+      if (clinic.municipalities) {
+        const municipality = clinic.municipalities.trim()
+        municipalityMap.set(municipality, (municipalityMap.get(municipality) || 0) + 1)
+      }
+    })
+    relatedMunicipalities.push(
+      ...Array.from(municipalityMap.entries())
+        .map(([name, count]) => ({ name, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 10)
+    )
+  }
+
+  // Extract stations with counts from clinic_counts table
+  const { data: stationCounts } = await supabase
+    .from("clinic_counts")
+    .select("station, clinic_count")
+    .eq("count_type", "station")
+    .eq("prefecture", prefectureName)
+    .not("station", "is", null)
+    .order("clinic_count", { ascending: false })
+    .limit(10)
+
+  const relatedStations = stationCounts
+    ? stationCounts.map((row: { station: string; clinic_count: number }) => ({
+        name: row.station,
+        count: row.clinic_count
+      }))
+    : []
+
+  // Fallback: use allClinics if clinic_counts query failed or returned empty
+  if (relatedStations.length === 0 && allClinics) {
+    const stationMap = new Map<string, number>()
+    allClinics.forEach((clinic: any) => {
+      if (clinic.stations) {
+        const stations = clinic.stations.split(",").map((s: string) => s.trim())
+        stations.forEach((station: string) => {
+          if (station && station !== "-") {
+            stationMap.set(station, (stationMap.get(station) || 0) + 1)
+          }
+        })
+      }
+    })
+    relatedStations.push(
+      ...Array.from(stationMap.entries())
+        .map(([name, count]) => ({ name, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 10)
+    )
+  }
 
   // Transform data for ClinicCard
   const clinicCards =

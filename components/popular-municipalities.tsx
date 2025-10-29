@@ -22,40 +22,72 @@ const prefectureSlugMap: Record<string, string> = {
 export async function PopularMunicipalities() {
   const supabase = await createClient()
 
-  // Get top 10 municipalities by clinic count
-  const { data: municipalitiesData } = await supabase
-    .from("clinics")
-    .select("municipalities, prefecture")
-    .not("municipalities", "is", null)
+  // Get top 10 municipalities by clinic count from clinic_counts table
+  const { data: municipalityCounts, error } = await supabase
+    .from("clinic_counts")
+    .select("prefecture, municipality, clinic_count")
+    .eq("count_type", "municipality")
     .not("prefecture", "is", null)
+    .not("municipality", "is", null)
+    .order("clinic_count", { ascending: false })
+    .limit(10)
 
-  // Count clinics per municipality
-  const municipalityMap = new Map<string, { prefecture: string; count: number }>()
-  municipalitiesData?.forEach((clinic) => {
-    const key = `${clinic.prefecture}|${clinic.municipalities}`
-    const existing = municipalityMap.get(key)
-    if (existing) {
-      existing.count++
-    } else {
-      municipalityMap.set(key, { prefecture: clinic.prefecture, count: 1 })
+  let topMunicipalities: Array<{
+    name: string
+    prefecture: string
+    clinics: number
+    slug: string | null
+    prefectureSlug: string
+  }> = []
+
+  if (error) {
+    console.error('[PopularMunicipalities] Error fetching from clinic_counts:', error)
+    // Fallback: fetch from clinics table if clinic_counts doesn't exist
+    const { data: municipalitiesData } = await supabase
+      .from("clinics")
+      .select("municipalities, prefecture")
+      .not("municipalities", "is", null)
+      .not("prefecture", "is", null)
+
+    if (municipalitiesData) {
+      const municipalityMap = new Map<string, { prefecture: string; count: number }>()
+      municipalitiesData.forEach((clinic) => {
+        const key = `${clinic.prefecture}|${clinic.municipalities}`
+        const existing = municipalityMap.get(key)
+        if (existing) {
+          existing.count++
+        } else {
+          municipalityMap.set(key, { prefecture: clinic.prefecture, count: 1 })
+        }
+      })
+
+      topMunicipalities = Array.from(municipalityMap.entries())
+        .map(([key, value]) => {
+          const [prefecture, municipality] = key.split("|")
+          return {
+            name: municipality,
+            prefecture,
+            clinics: value.count,
+            slug: getMunicipalitySlug(municipality),
+            prefectureSlug: prefectureSlugMap[prefecture]
+          }
+        })
+        .filter((m) => m.slug && m.prefectureSlug)
+        .sort((a, b) => b.clinics - a.clinics)
+        .slice(0, 10)
     }
-  })
-
-  // Sort and get top 10
-  const topMunicipalities = Array.from(municipalityMap.entries())
-    .map(([key, value]) => {
-      const [prefecture, municipality] = key.split("|")
-      return {
-        name: municipality,
-        prefecture,
-        clinics: value.count,
-        slug: getMunicipalitySlug(municipality),
-        prefectureSlug: prefectureSlugMap[prefecture]
-      }
-    })
-    .filter((m) => m.slug && m.prefectureSlug) // Only include municipalities with valid slugs
-    .sort((a, b) => b.clinics - a.clinics)
-    .slice(0, 10)
+  } else {
+    // Use clinic_counts data
+    topMunicipalities = (municipalityCounts || [])
+      .map((row: { prefecture: string; municipality: string; clinic_count: number }) => ({
+        name: row.municipality,
+        prefecture: row.prefecture,
+        clinics: row.clinic_count,
+        slug: getMunicipalitySlug(row.municipality),
+        prefectureSlug: prefectureSlugMap[row.prefecture]
+      }))
+      .filter((m) => m.slug && m.prefectureSlug)
+  }
 
   return (
     <section className="py-16 md:py-20">
