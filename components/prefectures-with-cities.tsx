@@ -48,44 +48,59 @@ const regions = [
 export async function PrefecturesWithCities() {
   const supabase = await createClient()
 
-  // Get all clinics with municipalities and prefecture
-  const { data: clinicsData, error } = await supabase
-    .from("clinics")
-    .select("municipalities, prefecture")
-    .not("municipalities", "is", null)
-    .not("municipalities", "eq", "")
-    .not("prefecture", "is", null)
-    .not("prefecture", "eq", "")
-    .limit(50000) // Explicitly set high limit to fetch all clinics
+  // Initialize prefecture data map
+  let prefectureData = new Map<string, Map<string, number>>()
+
+  // Use RPC function to get pre-aggregated counts (server-side aggregation)
+  const { data: municipalityCounts, error } = await supabase
+    .rpc('get_municipality_counts')
 
   if (error) {
-    console.error('Error fetching clinics for prefecture data:', error)
-  }
+    console.error('Error fetching municipality counts:', error)
+    // Fallback: try direct query if RPC fails
+    const { data: clinicsData, error: fallbackError } = await supabase
+      .from("clinics")
+      .select("municipalities, prefecture")
+      .not("municipalities", "is", null)
+      .not("municipalities", "eq", "")
+      .not("prefecture", "is", null)
+      .not("prefecture", "eq", "")
+      .limit(50000)
 
-  console.log(`[DEBUG] Total clinics fetched: ${clinicsData?.length || 0}`)
-
-  // Sample data for verification
-  if (clinicsData && clinicsData.length > 0) {
-    console.log('[DEBUG] First 5 clinics:', clinicsData.slice(0, 5))
-    const tokyoData = clinicsData.filter(c => c.prefecture === '東京都')
-    console.log(`[DEBUG] Tokyo clinics: ${tokyoData.length}`)
-    const shinjukuData = tokyoData.filter(c => c.municipalities === '新宿区')
-    console.log(`[DEBUG] Shinjuku clinics: ${shinjukuData.length}`)
-  }
-
-  // Group municipalities by prefecture and count clinics
-  const prefectureData = new Map<string, Map<string, number>>()
-
-  clinicsData?.forEach((clinic) => {
-    if (!prefectureData.has(clinic.prefecture)) {
-      prefectureData.set(clinic.prefecture, new Map())
+    if (fallbackError) {
+      console.error('Fallback query also failed:', fallbackError)
+      return null // Return null if both methods fail
     }
-    const municipalities = prefectureData.get(clinic.prefecture)!
-    municipalities.set(
-      clinic.municipalities,
-      (municipalities.get(clinic.municipalities) || 0) + 1
-    )
-  })
+
+    console.log(`[DEBUG] Fallback: fetched ${clinicsData?.length || 0} clinics`)
+
+    // Build from fallback data and continue with normal flow
+    const fallbackPrefectureData = new Map<string, Map<string, number>>()
+    clinicsData?.forEach((clinic) => {
+      if (!fallbackPrefectureData.has(clinic.prefecture)) {
+        fallbackPrefectureData.set(clinic.prefecture, new Map())
+      }
+      const municipalities = fallbackPrefectureData.get(clinic.prefecture)!
+      municipalities.set(
+        clinic.municipalities,
+        (municipalities.get(clinic.municipalities) || 0) + 1
+      )
+    })
+
+    // Use fallback data for rendering
+    const prefectureData = fallbackPrefectureData
+  } else {
+    console.log(`[DEBUG] RPC returned ${municipalityCounts?.length || 0} municipality aggregations`)
+
+    // Group by prefecture from RPC results
+    municipalityCounts?.forEach((row: { prefecture: string; municipality: string; clinic_count: number }) => {
+      if (!prefectureData.has(row.prefecture)) {
+        prefectureData.set(row.prefecture, new Map())
+      }
+      const municipalities = prefectureData.get(row.prefecture)!
+      municipalities.set(row.municipality, row.clinic_count)
+    })
+  }
 
   // Get top 3 municipalities per prefecture (minimum 2 clinics)
   const prefecturesWithTopCities = new Map<string, Array<{ name: string; count: number }>>()
