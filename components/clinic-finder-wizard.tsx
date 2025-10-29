@@ -105,12 +105,12 @@ export function ClinicFinderWizard({ onComplete }: ClinicFinderWizardProps) {
     setAnswers(newAnswers)
 
     if (currentStep < questions.length - 1) {
-      setTimeout(() => setCurrentStep(currentStep + 1), 300)
+      setTimeout(() => setCurrentStep(currentStep + 1), 100)
     } else {
       setTimeout(() => {
         setShowResults(true)
         onComplete?.(newAnswers)
-      }, 300)
+      }, 100)
     }
   }
 
@@ -205,7 +205,7 @@ export function ClinicFinderWizard({ onComplete }: ClinicFinderWizardProps) {
           </div>
           <div className="h-2 bg-muted rounded-full overflow-hidden">
             <div
-              className="h-full bg-[#FF6B6B] transition-all duration-300"
+              className="h-full bg-[#FF6B6B] transition-all duration-150"
               style={{ width: `${progress}%` }}
             />
           </div>
