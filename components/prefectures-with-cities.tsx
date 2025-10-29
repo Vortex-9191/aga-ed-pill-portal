@@ -62,6 +62,17 @@ export async function PrefecturesWithCities() {
     console.error('Error fetching clinics for prefecture data:', error)
   }
 
+  console.log(`[DEBUG] Total clinics fetched: ${clinicsData?.length || 0}`)
+
+  // Sample data for verification
+  if (clinicsData && clinicsData.length > 0) {
+    console.log('[DEBUG] First 5 clinics:', clinicsData.slice(0, 5))
+    const tokyoData = clinicsData.filter(c => c.prefecture === '東京都')
+    console.log(`[DEBUG] Tokyo clinics: ${tokyoData.length}`)
+    const shinjukuData = tokyoData.filter(c => c.municipalities === '新宿区')
+    console.log(`[DEBUG] Shinjuku clinics: ${shinjukuData.length}`)
+  }
+
   // Group municipalities by prefecture and count clinics
   const prefectureData = new Map<string, Map<string, number>>()
 
