@@ -59,6 +59,12 @@ export async function PrefecturesWithCities() {
     .not("prefecture", "is", null)
     .not("municipality", "is", null)
 
+  console.log('[PrefecturesWithCities] Query result:', {
+    dataCount: municipalityCounts?.length,
+    hasError: !!error,
+    errorMessage: error?.message
+  })
+
   if (error) {
     console.error('[PrefecturesWithCities] Error fetching from clinic_counts:', error)
     // Fallback: try direct query if clinic_counts table doesn't exist yet
@@ -114,6 +120,13 @@ export async function PrefecturesWithCities() {
     if (topCities.length > 0) {
       prefecturesWithTopCities.set(prefecture, topCities)
     }
+  })
+
+  console.log('[PrefecturesWithCities] Final result:', {
+    totalPrefectures: prefectureData.size,
+    prefecturesWithCities: prefecturesWithTopCities.size,
+    samplePrefecture: '茨城県',
+    ibarakiData: prefecturesWithTopCities.get('茨城県')
   })
 
   return (
