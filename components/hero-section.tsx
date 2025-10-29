@@ -63,13 +63,6 @@ export function HeroSection() {
             >
               <a href="/stations">駅から探す</a>
             </Button>
-            <Button
-              variant="outline"
-              className="rounded-full border-[#FF6B6B]/30 hover:bg-[#FFE5E5] hover:border-[#FF6B6B] bg-transparent"
-              asChild
-            >
-              <a href="/cities">市区町村から探す</a>
-            </Button>
           </div>
         </div>
       </div>

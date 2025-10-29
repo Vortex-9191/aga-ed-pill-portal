@@ -103,8 +103,8 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/cities" className="text-muted-foreground hover:text-foreground transition-colors">
-                  市区町村一覧
+                <Link href="/stations" className="text-muted-foreground hover:text-foreground transition-colors">
+                  駅一覧
                 </Link>
               </li>
             </ul>
@@ -197,14 +197,8 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Quick Links to Cities and Stations */}
+        {/* Quick Links to Stations */}
         <div className="mt-6 flex flex-wrap gap-4 text-xs">
-          <Link
-            href="/cities"
-            className="text-muted-foreground hover:text-foreground hover:underline"
-          >
-            市区町村一覧 →
-          </Link>
           <Link
             href="/stations"
             className="text-muted-foreground hover:text-foreground hover:underline"
