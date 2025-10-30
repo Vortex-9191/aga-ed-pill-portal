@@ -11,8 +11,8 @@ const notoSansJP = Noto_Sans_JP({
 })
 
 export const metadata: Metadata = {
-  title: "全国精神科ドットコム｜全国の精神科・心療内科を地域から探す",
-  description: "全国の精神科・心療内科を地域・駅・条件で検索。診療時間や詳細情報、予約リンクを掲載。",
+  title: "メディカルポータル｜AGA・ED・アフターピル治療クリニックを探す",
+  description: "全国のAGA・ED治療、アフターピル処方クリニックを地域・駅・条件で検索。オンライン診療対応クリニックも掲載。",
   generator: "v0.app",
 }
 

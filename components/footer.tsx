@@ -85,25 +85,25 @@ export function Footer() {
       <div className="container py-12 md:py-16">
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           <div>
-            <h3 className="mb-4 text-sm font-semibold text-foreground">精神科・心療内科を探す</h3>
+            <h3 className="mb-4 text-sm font-semibold text-foreground">クリニックを探す</h3>
             <ul className="space-y-3 text-sm">
               <li>
-                <Link href="/search" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Link href="/search" className="text-muted-foreground hover:text-primary transition-colors">
                   検索
                 </Link>
               </li>
               <li>
-                <Link href="/map" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Link href="/map" className="text-muted-foreground hover:text-primary transition-colors">
                   地図から探す
                 </Link>
               </li>
               <li>
-                <Link href="/areas" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Link href="/areas" className="text-muted-foreground hover:text-primary transition-colors">
                   都道府県一覧
                 </Link>
               </li>
               <li>
-                <Link href="/stations" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Link href="/stations" className="text-muted-foreground hover:text-primary transition-colors">
                   駅一覧
                 </Link>
               </li>
@@ -114,17 +114,17 @@ export function Footer() {
             <h3 className="mb-4 text-sm font-semibold text-foreground">サポート</h3>
             <ul className="space-y-3 text-sm">
               <li>
-                <Link href="/help" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Link href="/help" className="text-muted-foreground hover:text-primary transition-colors">
                   ヘルプ
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Link href="/contact" className="text-muted-foreground hover:text-primary transition-colors">
                   お問い合わせ
                 </Link>
               </li>
               <li>
-                <Link href="/sitemap-page" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Link href="/sitemap-page" className="text-muted-foreground hover:text-primary transition-colors">
                   サイトマップ
                 </Link>
               </li>
@@ -137,20 +137,20 @@ export function Footer() {
               <li>
                 <Link
                   href="/privacy"
-                  className="text-muted-foreground hover:text-foreground transition-colors"
+                  className="text-muted-foreground hover:text-primary transition-colors"
                 >
                   プライバシーポリシー
                 </Link>
               </li>
               <li>
-                <Link href="/terms" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Link href="/terms" className="text-muted-foreground hover:text-primary transition-colors">
                   利用規約
                 </Link>
               </li>
               <li>
                 <Link
                   href="/review-guidelines"
-                  className="text-muted-foreground hover:text-foreground transition-colors"
+                  className="text-muted-foreground hover:text-primary transition-colors"
                 >
                   口コミガイドライン
                 </Link>
@@ -159,9 +159,9 @@ export function Footer() {
           </div>
 
           <div>
-            <h3 className="mb-4 text-sm font-semibold text-foreground">全国精神科ドットコム</h3>
+            <h3 className="mb-4 text-sm font-semibold text-foreground">メディカルポータル</h3>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              全国の精神科・心療内科を地域・駅・条件で検索できる総合サイトです。診療時間や詳細情報、予約リンクを掲載しています。
+              全国のAGA・ED治療、アフターピル処方クリニックを地域・駅・条件で検索できる総合サイトです。オンライン診療対応クリニックも掲載しています。
             </p>
           </div>
         </div>
@@ -172,7 +172,7 @@ export function Footer() {
             <h4 className="text-sm font-semibold text-foreground">都道府県・市区町村から探す</h4>
             <Link
               href="/areas"
-              className="text-xs text-[#FF6B6B] hover:underline"
+              className="text-xs text-primary hover:underline"
             >
               すべて見る →
             </Link>
@@ -186,7 +186,7 @@ export function Footer() {
                     <Link
                       key={prefecture.slug}
                       href={`/areas/${prefecture.slug}`}
-                      className="text-xs text-muted-foreground hover:text-[#FF6B6B] hover:underline"
+                      className="text-xs text-muted-foreground hover:text-primary hover:underline"
                     >
                       {prefecture.name}
                     </Link>
@@ -201,14 +201,14 @@ export function Footer() {
         <div className="mt-6 flex flex-wrap gap-4 text-xs">
           <Link
             href="/stations"
-            className="text-muted-foreground hover:text-foreground hover:underline"
+            className="text-muted-foreground hover:text-primary hover:underline"
           >
             駅名一覧 →
           </Link>
         </div>
 
         <div className="mt-8 border-t border-border pt-8 text-center text-xs text-muted-foreground">
-          <p>&copy; 2025 全国精神科ドットコム. All rights reserved.</p>
+          <p>&copy; 2025 メディカルポータル. All rights reserved.</p>
         </div>
       </div>
     </footer>

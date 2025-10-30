@@ -18,15 +18,15 @@ export function HeroSection() {
   }
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-[#FFF5F5] to-background py-16 md:py-24">
+    <section className="relative overflow-hidden bg-gradient-to-b from-blue-50/50 to-background py-16 md:py-24">
       <div className="container">
         <div className="mx-auto max-w-3xl text-center">
           <h1 className="mb-4 text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl text-balance">
-            <span className="text-[#FF6B6B]">全国の精神科・心療内科を探す</span>
+            <span className="text-primary">AGA・ED・アフターピル治療を探す</span>
           </h1>
 
           <p className="mb-8 text-lg text-muted-foreground md:text-xl">
-            エリア・駅から、あなたに合った精神科・心療内科を見つけよう
+            エリア・駅から、あなたに合った治療クリニックを見つけよう
           </p>
 
           <div className="mx-auto mb-12 max-w-2xl">
@@ -37,11 +37,11 @@ export function HeroSection() {
                 placeholder="エリア、駅名で検索..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="h-14 pl-12 pr-4 text-base rounded-full border-2 border-[#FF6B6B]/20 focus:border-[#FF6B6B] shadow-sm"
+                className="h-14 pl-12 pr-4 text-base rounded-full border-2 border-primary/20 focus:border-primary shadow-sm"
               />
               <Button
                 type="submit"
-                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-[#FF6B6B] hover:bg-[#FF6B6B]/90"
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-primary hover:bg-primary/90"
               >
                 検索
               </Button>
@@ -51,14 +51,14 @@ export function HeroSection() {
           <div className="flex flex-wrap items-center justify-center gap-3">
             <Button
               variant="outline"
-              className="rounded-full border-[#FF6B6B]/30 hover:bg-[#FFE5E5] hover:border-[#FF6B6B] bg-transparent"
+              className="rounded-full border-primary/30 hover:bg-blue-50 hover:border-primary bg-transparent"
               asChild
             >
               <a href="/areas">エリアから探す</a>
             </Button>
             <Button
               variant="outline"
-              className="rounded-full border-[#FF6B6B]/30 hover:bg-[#FFE5E5] hover:border-[#FF6B6B] bg-transparent"
+              className="rounded-full border-primary/30 hover:bg-blue-50 hover:border-primary bg-transparent"
               asChild
             >
               <a href="/stations">駅から探す</a>
