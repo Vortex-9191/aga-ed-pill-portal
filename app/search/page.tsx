@@ -21,6 +21,9 @@ import { ClinicFinderWrapper } from "@/components/clinic-finder-wrapper"
 
 const ITEMS_PER_PAGE = 15
 
+// Force dynamic rendering to avoid build-time static generation
+export const dynamic = 'force-dynamic'
+
 export async function generateMetadata({
   searchParams,
 }: {

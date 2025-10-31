@@ -13,6 +13,9 @@ import { createClient } from "@/lib/supabase/server"
 import { getStationSlug } from "@/lib/data/stations"
 import { StationList } from "@/components/station-list"
 
+// Force dynamic rendering to avoid build-time static generation
+export const dynamic = 'force-dynamic'
+
 interface Station {
   name: string
   prefecture: string
