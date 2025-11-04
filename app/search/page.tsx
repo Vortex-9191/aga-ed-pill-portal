@@ -7,7 +7,7 @@ import { Pagination } from "@/components/pagination"
 import { SlidersHorizontal } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { createClient } from "@/lib/supabase/server"
+import { getDummyClinics } from "@/lib/data/dummy-clinics"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -63,7 +63,6 @@ export default async function SearchPage({
     page?: string
   }
 }) {
-  const supabase = await createClient()
   const query = searchParams.q || ""
   const prefecture = searchParams.prefecture || ""
   const specialty = searchParams.specialty || ""
@@ -72,69 +71,82 @@ export default async function SearchPage({
   const hasDirector = searchParams.director
   const currentPage = Number(searchParams.page) || 1
 
-  // Get facet aggregation data (for counts)
-  const { data: allClinics } = await supabase.from("clinics").select("prefecture, featured_subjects, hours_saturday, hours_sunday, hours_monday, hours_tuesday, hours_wednesday, hours_thursday, hours_friday, director_name, features")
+  // Get all clinics from dummy data
+  const allClinics = getDummyClinics()
 
-  // Build base query
-  let queryBuilder = supabase.from("clinics").select("*", { count: "exact" })
+  // Filter clinics based on search params
+  let filteredClinics = [...allClinics]
 
   if (prefecture) {
-    queryBuilder = queryBuilder.eq("prefecture", prefecture)
+    filteredClinics = filteredClinics.filter((c) => c.prefecture === prefecture)
   }
 
   if (specialty) {
-    queryBuilder = queryBuilder.ilike("featured_subjects", `%${specialty}%`)
+    filteredClinics = filteredClinics.filter((c) =>
+      c.featured_subjects?.toLowerCase().includes(specialty.toLowerCase())
+    )
   }
 
   if (weekend) {
-    queryBuilder = queryBuilder.or("hours_saturday.not.is.null,hours_sunday.not.is.null")
+    filteredClinics = filteredClinics.filter(
+      (c) => c.hours_saturday || c.hours_sunday
+    )
   }
 
   if (evening) {
-    // Check if any weekday has hours containing "18:" or later
-    queryBuilder = queryBuilder.or(
-      "hours_monday.ilike.%18:%,hours_monday.ilike.%19:%,hours_monday.ilike.%20:%,hours_tuesday.ilike.%18:%,hours_tuesday.ilike.%19:%,hours_tuesday.ilike.%20:%,hours_wednesday.ilike.%18:%,hours_wednesday.ilike.%19:%,hours_wednesday.ilike.%20:%,hours_thursday.ilike.%18:%,hours_thursday.ilike.%19:%,hours_thursday.ilike.%20:%,hours_friday.ilike.%18:%,hours_friday.ilike.%19:%,hours_friday.ilike.%20:%"
-    )
+    filteredClinics = filteredClinics.filter((c) => {
+      const weekdayHours = [
+        c.hours_monday,
+        c.hours_tuesday,
+        c.hours_wednesday,
+        c.hours_thursday,
+        c.hours_friday,
+      ]
+      return weekdayHours.some(
+        (hours) =>
+          hours &&
+          (hours.includes("18:") ||
+            hours.includes("19:") ||
+            hours.includes("20:"))
+      )
+    })
   }
 
   if (hasDirector) {
-    queryBuilder = queryBuilder.not("director_name", "is", null)
+    filteredClinics = filteredClinics.filter((c) => c.director_name)
   }
 
   if (query) {
-    queryBuilder = queryBuilder.or(
-      `clinic_name.ilike.%${query}%,address.ilike.%${query}%,stations.ilike.%${query}%,featured_subjects.ilike.%${query}%`
+    const q = query.toLowerCase()
+    filteredClinics = filteredClinics.filter(
+      (c) =>
+        c.clinic_name.toLowerCase().includes(q) ||
+        c.address.toLowerCase().includes(q) ||
+        c.stations?.toLowerCase().includes(q) ||
+        c.featured_subjects?.toLowerCase().includes(q)
     )
   }
 
-  // Get total count
-  const { count: totalCount } = await queryBuilder
-
   // Calculate pagination
-  const totalPages = Math.ceil((totalCount || 0) / ITEMS_PER_PAGE)
+  const totalCount = filteredClinics.length
+  const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE)
   const from = (currentPage - 1) * ITEMS_PER_PAGE
-  const to = from + ITEMS_PER_PAGE - 1
+  const to = from + ITEMS_PER_PAGE
 
-  // Fetch paginated data
-  const { data: clinics, error } = await queryBuilder
-    .order("created_at", { ascending: false })
-    .range(from, to)
-
-  if (error) {
-    console.error("[v0] Error fetching clinics:", error)
-  }
+  // Get paginated clinics
+  const clinics = filteredClinics.slice(from, to)
 
   const clinicCards =
-    clinics?.map((clinic) => {
+    clinics.map((clinic) => {
       // Get first weekday with hours for display
       const weekdays = [
-        { en: 'hours_monday', jp: '月曜' },
-        { en: 'hours_tuesday', jp: '火曜' },
-        { en: 'hours_wednesday', jp: '水曜' },
-        { en: 'hours_thursday', jp: '木曜' },
-        { en: 'hours_friday', jp: '金曜' },
-        { en: 'hours_saturday', jp: '土曜' },
-        { en: 'hours_sunday', jp: '日曜' },
+        { en: 'hours_monday' as const, jp: '月曜' },
+        { en: 'hours_tuesday' as const, jp: '火曜' },
+        { en: 'hours_wednesday' as const, jp: '水曜' },
+        { en: 'hours_thursday' as const, jp: '木曜' },
+        { en: 'hours_friday' as const, jp: '金曜' },
+        { en: 'hours_saturday' as const, jp: '土曜' },
+        { en: 'hours_sunday' as const, jp: '日曜' },
       ]
       const firstHours = weekdays.find(day => clinic[day.en] && clinic[day.en] !== '-')
       const hoursPreview = firstHours ? `${firstHours.jp}: ${clinic[firstHours.en]}` : null
@@ -152,7 +164,7 @@ export default async function SearchPage({
         hours: hoursPreview,
         directorName: clinic.director_name,
       }
-    }) || []
+    })
 
   // Calculate facet data
   const prefectureMap = new Map<string, number>()
@@ -162,7 +174,7 @@ export default async function SearchPage({
   let eveningCount = 0
   let directorCount = 0
 
-  allClinics?.forEach((clinic) => {
+  allClinics.forEach((clinic) => {
     // Prefecture
     if (clinic.prefecture) {
       prefectureMap.set(clinic.prefecture, (prefectureMap.get(clinic.prefecture) || 0) + 1)
@@ -170,7 +182,7 @@ export default async function SearchPage({
 
     // Specialties
     if (clinic.featured_subjects) {
-      clinic.featured_subjects.split(",").forEach((s: string) => {
+      clinic.featured_subjects.split(",").forEach((s) => {
         const specialty = s.trim()
         if (specialty) {
           specialtyMap.set(specialty, (specialtyMap.get(specialty) || 0) + 1)
@@ -180,7 +192,7 @@ export default async function SearchPage({
 
     // Features
     if (clinic.features) {
-      clinic.features.split(",").forEach((f: string) => {
+      clinic.features.split(",").forEach((f) => {
         const feature = f.trim()
         if (feature && feature !== "-") {
           featureMap.set(feature, (featureMap.get(feature) || 0) + 1)

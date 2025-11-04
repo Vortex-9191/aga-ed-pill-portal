@@ -9,7 +9,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { createClient } from "@/lib/supabase/server"
+import { getDummyClinics } from "@/lib/data/dummy-clinics"
 import { getStationSlug } from "@/lib/data/stations"
 import { StationList } from "@/components/station-list"
 
@@ -33,77 +33,45 @@ const regions = [
 ]
 
 export default async function StationsPage() {
-  const supabase = await createClient()
+  // Get clinics from dummy data
+  const clinicsData = getDummyClinics()
 
-  // Fetch station counts from clinic_counts table
-  const { data: stationCounts, error } = await supabase
-    .from("clinic_counts")
-    .select("prefecture, station, clinic_count")
-    .eq("count_type", "station")
-    .not("prefecture", "is", null)
-    .not("station", "is", null)
+  // Build station map from dummy data
+  const stationMap = new Map<string, { prefectures: Set<string>; count: number }>()
 
-  let stations: Station[] = []
+  clinicsData.forEach((clinic) => {
+    if (!clinic.stations) return
 
-  if (error) {
-    console.error('[StationsPage] Error fetching from clinic_counts:', error)
-    // Fallback: fetch from clinics table if clinic_counts doesn't exist
-    const { data: clinicsData, error: fallbackError } = await supabase
-      .from("clinics")
-      .select("stations, prefecture")
-      .not("stations", "is", null)
-      .not("prefecture", "is", null)
-      .limit(50000)
+    const stationNames = clinic.stations.split(',').map((s) => s.trim())
 
-    if (!fallbackError && clinicsData) {
-      const stationMap = new Map<string, { prefectures: Set<string>; count: number }>()
+    stationNames.forEach((stationName) => {
+      if (!stationName) return
 
-      clinicsData.forEach((clinic) => {
-        if (!clinic.stations) return
-
-        const stationNames = clinic.stations.split(',').map((s: string) => s.trim())
-
-        stationNames.forEach((stationName: string) => {
-          if (!stationName) return
-
-          const existing = stationMap.get(stationName)
-          if (existing) {
-            existing.count++
-            existing.prefectures.add(clinic.prefecture)
-          } else {
-            stationMap.set(stationName, {
-              prefectures: new Set([clinic.prefecture]),
-              count: 1
-            })
-          }
+      const existing = stationMap.get(stationName)
+      if (existing) {
+        existing.count++
+        existing.prefectures.add(clinic.prefecture)
+      } else {
+        stationMap.set(stationName, {
+          prefectures: new Set([clinic.prefecture]),
+          count: 1
         })
-      })
+      }
+    })
+  })
 
-      stations = Array.from(stationMap.entries())
-        .map(([name, value]) => {
-          const prefecture = Array.from(value.prefectures)[0]
-          return {
-            name,
-            prefecture,
-            count: value.count,
-            slug: getStationSlug(name)
-          }
-        })
-        .filter(station => station.count >= 2)
-        .sort((a, b) => a.name.localeCompare(b.name, 'ja'))
-    }
-  } else {
-    // Use clinic_counts data
-    stations = (stationCounts || [])
-      .map((row: { prefecture: string; station: string; clinic_count: number }) => ({
-        name: row.station,
-        prefecture: row.prefecture,
-        count: row.clinic_count,
-        slug: getStationSlug(row.station)
-      }))
-      .filter(station => station.count >= 2)
-      .sort((a, b) => a.name.localeCompare(b.name, 'ja'))
-  }
+  const stations: Station[] = Array.from(stationMap.entries())
+    .map(([name, value]) => {
+      const prefecture = Array.from(value.prefectures)[0]
+      return {
+        name,
+        prefecture,
+        count: value.count,
+        slug: getStationSlug(name)
+      }
+    })
+    .filter(station => station.count >= 1)
+    .sort((a, b) => a.name.localeCompare(b.name, 'ja'))
 
   return (
     <div className="flex min-h-screen flex-col">
