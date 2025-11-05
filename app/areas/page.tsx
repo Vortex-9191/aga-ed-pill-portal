@@ -114,34 +114,45 @@ export default function AreasPage() {
         </div>
 
         {/* Page Header */}
-        <div className="border-b border-border bg-secondary/20">
-          <div className="container py-12">
-            <div className="flex items-center gap-3 mb-4">
-              <MapPin className="h-8 w-8 text-accent" />
+        <div className="border-b border-border bg-gradient-to-b from-primary/5 to-background">
+          <div className="container py-16 md:py-20">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10">
+                <MapPin className="h-7 w-7 text-primary" />
+              </div>
               <h1 className="text-3xl font-bold text-foreground md:text-4xl">エリアから探す</h1>
             </div>
-            <p className="text-lg text-muted-foreground">地方・都道府県からクリニックを検索できます</p>
+            <p className="text-lg text-muted-foreground max-w-2xl">
+              全国47都道府県のAGA治療クリニックを地域から検索できます
+            </p>
           </div>
         </div>
 
         {/* Regions */}
-        <div className="container py-12">
-          <div className="space-y-12">
+        <div className="container py-16 md:py-20">
+          <div className="space-y-16">
             {regions.map((region) => (
               <div key={region.name}>
-                <h2 className="mb-6 text-2xl font-bold text-foreground">{region.name}</h2>
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                <h2 className="mb-8 text-2xl font-bold text-foreground border-l-4 border-primary pl-4">
+                  {region.name}
+                </h2>
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                   {region.prefectures.map((prefecture) => (
                     <Link key={prefecture.slug} href={`/areas/${prefecture.slug}`}>
-                      <Card className="group h-full transition-all hover:shadow-md hover:-translate-y-0.5">
-                        <CardContent className="flex items-center justify-between p-5">
-                          <div>
-                            <h3 className="text-base font-semibold text-foreground group-hover:text-accent transition-colors">
-                              {prefecture.name}
-                            </h3>
-                            <p className="text-sm text-muted-foreground">{prefecture.count}件</p>
+                      <Card className="group h-full rounded-xl border border-border transition-all hover:border-primary/50 hover:shadow-lg hover:-translate-y-1">
+                        <CardContent className="flex items-center justify-between p-6">
+                          <div className="flex items-center gap-3">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-white">
+                              <MapPin className="h-5 w-5" />
+                            </div>
+                            <div>
+                              <h3 className="text-base font-semibold text-foreground group-hover:text-primary transition-colors">
+                                {prefecture.name}
+                              </h3>
+                              <p className="text-sm text-muted-foreground font-medium">{prefecture.count}件</p>
+                            </div>
                           </div>
-                          <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-accent transition-colors" />
+                          <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
                         </CardContent>
                       </Card>
                     </Link>

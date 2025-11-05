@@ -95,14 +95,16 @@ export default async function StationsPage() {
         </div>
 
         {/* Page Header */}
-        <div className="border-b border-border bg-secondary/20">
-          <div className="container py-12">
-            <div className="flex items-center gap-3 mb-4">
-              <Train className="h-8 w-8 text-accent" />
+        <div className="border-b border-border bg-gradient-to-b from-primary/5 to-background">
+          <div className="container py-16 md:py-20">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10">
+                <Train className="h-7 w-7 text-primary" />
+              </div>
               <h1 className="text-3xl font-bold text-foreground md:text-4xl">駅名から探す</h1>
             </div>
-            <p className="text-lg text-muted-foreground">
-              全国{stations.length}駅のクリニック情報を検索できます
+            <p className="text-lg text-muted-foreground max-w-2xl">
+              全国{stations.length}駅のAGA治療クリニック情報を検索できます
             </p>
           </div>
         </div>
