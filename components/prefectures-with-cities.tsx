@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { MapPin, ChevronRight } from "lucide-react"
-import { createClient } from "@/lib/supabase/server"
+import { getDummyClinics } from "@/lib/data/dummy-clinics"
 
 // Prefecture slug mapping
 const prefectureSlugMap: Record<string, string> = {
@@ -45,66 +45,29 @@ const regions = [
   },
 ]
 
-export async function PrefecturesWithCities() {
-  const supabase = await createClient()
+export function PrefecturesWithCities() {
+  // Get clinics from dummy data
+  const allClinics = getDummyClinics()
 
   // Initialize prefecture data map
-  let prefectureData = new Map<string, Map<string, number>>()
+  const prefectureData = new Map<string, Map<string, number>>()
 
-  // Use clinic_counts table for pre-aggregated counts
-  const { data: municipalityCounts, error } = await supabase
-    .from("clinic_counts")
-    .select("prefecture, municipality, clinic_count")
-    .eq("count_type", "municipality")
-    .not("prefecture", "is", null)
-    .not("municipality", "is", null)
+  // Build prefecture and municipality data from dummy clinics
+  allClinics.forEach((clinic) => {
+    if (!clinic.prefecture || !clinic.municipalities) return
 
-  console.log('[PrefecturesWithCities] Query result:', {
-    dataCount: municipalityCounts?.length,
-    hasError: !!error,
-    errorMessage: error?.message
-  })
-
-  if (error) {
-    console.error('[PrefecturesWithCities] Error fetching from clinic_counts:', error)
-    // Fallback: try direct query if clinic_counts table doesn't exist yet
-    const { data: clinicsData, error: fallbackError } = await supabase
-      .from("clinics")
-      .select("municipalities, prefecture")
-      .not("municipalities", "is", null)
-      .not("municipalities", "eq", "")
-      .not("prefecture", "is", null)
-      .not("prefecture", "eq", "")
-      .limit(50000)
-
-    if (fallbackError) {
-      console.error('[PrefecturesWithCities] Fallback query also failed:', fallbackError)
-      return null // Return null if both methods fail
+    if (!prefectureData.has(clinic.prefecture)) {
+      prefectureData.set(clinic.prefecture, new Map())
     }
 
-    // Build from fallback data and continue with normal flow
-    clinicsData?.forEach((clinic) => {
-      if (!prefectureData.has(clinic.prefecture)) {
-        prefectureData.set(clinic.prefecture, new Map())
-      }
-      const municipalities = prefectureData.get(clinic.prefecture)!
-      municipalities.set(
-        clinic.municipalities,
-        (municipalities.get(clinic.municipalities) || 0) + 1
-      )
-    })
-  } else {
-    // Group by prefecture from clinic_counts table
-    municipalityCounts?.forEach((row: { prefecture: string; municipality: string; clinic_count: number }) => {
-      if (!prefectureData.has(row.prefecture)) {
-        prefectureData.set(row.prefecture, new Map())
-      }
-      const municipalities = prefectureData.get(row.prefecture)!
-      municipalities.set(row.municipality, row.clinic_count)
-    })
-  }
+    const municipalities = prefectureData.get(clinic.prefecture)!
+    municipalities.set(
+      clinic.municipalities,
+      (municipalities.get(clinic.municipalities) || 0) + 1
+    )
+  })
 
-  // Get top 3 municipalities per prefecture (minimum 2 clinics)
+  // Get top 3 municipalities per prefecture (minimum 1 clinic)
   const prefecturesWithTopCities = new Map<string, Array<{ name: string; count: number }>>()
 
   prefectureData.forEach((municipalities, prefecture) => {
@@ -113,7 +76,7 @@ export async function PrefecturesWithCities() {
         name,
         count
       }))
-      .filter(city => city.count >= 2) // Only show municipalities with 2+ clinics
+      .filter(city => city.count >= 1)
       .sort((a, b) => b.count - a.count)
       .slice(0, 3)
 
@@ -122,28 +85,21 @@ export async function PrefecturesWithCities() {
     }
   })
 
-  console.log('[PrefecturesWithCities] Final result:', {
-    totalPrefectures: prefectureData.size,
-    prefecturesWithCities: prefecturesWithTopCities.size,
-    samplePrefecture: '茨城県',
-    ibarakiData: prefecturesWithTopCities.get('茨城県')
-  })
-
   return (
-    <section className="py-16 md:py-20">
+    <section className="py-20 md:py-28 bg-background">
       <div className="container">
-        <div className="mb-12 text-center">
-          <h2 className="mb-3 text-3xl font-bold tracking-tight md:text-4xl">都道府県・市区町村から探す</h2>
-          <p className="text-muted-foreground">お住まいの地域のクリニックを探せます</p>
+        <div className="mb-16 text-center">
+          <h2 className="mb-4 text-3xl font-bold tracking-tight md:text-4xl">都道府県・市区町村から探す</h2>
+          <p className="text-lg text-muted-foreground">お住まいの地域のクリニックを探せます</p>
         </div>
 
-        <div className="mx-auto max-w-7xl space-y-10">
+        <div className="mx-auto max-w-7xl space-y-12">
           {regions.map((region) => (
             <div key={region.name}>
-              <h3 className="mb-5 text-xl font-semibold text-foreground border-l-4 border-[#FF6B6B] pl-3">
+              <h3 className="mb-6 text-xl font-semibold text-foreground border-l-4 border-primary pl-4">
                 {region.name}
               </h3>
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {region.prefectures.map((prefecture) => {
                   const prefectureSlug = prefectureSlugMap[prefecture]
                   const topCities = prefecturesWithTopCities.get(prefecture) || []
@@ -151,35 +107,35 @@ export async function PrefecturesWithCities() {
                   return (
                     <div
                       key={prefecture}
-                      className="rounded-lg border border-border bg-card p-4 transition-all hover:border-[#FF6B6B] hover:shadow-md"
+                      className="rounded-xl border border-border bg-card p-5 transition-all hover:border-primary/50 hover:shadow-md"
                     >
                       <Link
                         href={`/areas/${prefectureSlug}`}
                         className="group mb-3 flex items-center justify-between"
                       >
-                        <div className="flex items-center gap-2">
-                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#FFE5E5] text-[#FF6B6B] transition-colors group-hover:bg-[#FF6B6B] group-hover:text-white">
-                            <MapPin className="h-4 w-4" />
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-white">
+                            <MapPin className="h-5 w-5" />
                           </div>
-                          <h4 className="text-base font-semibold text-foreground group-hover:text-[#FF6B6B]">
+                          <h4 className="text-base font-semibold text-foreground group-hover:text-primary">
                             {prefecture}
                           </h4>
                         </div>
-                        <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-[#FF6B6B]" />
+                        <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
                       </Link>
 
                       {topCities.length > 0 && (
-                        <div className="space-y-1.5 border-t border-border pt-3">
+                        <div className="space-y-2 border-t border-border pt-3">
                           {topCities.map((city) => (
                             <Link
                               key={city.name}
                               href={`/areas/${prefectureSlug}/${encodeURIComponent(city.name)}`}
-                              className="flex items-center justify-between rounded px-2 py-1.5 text-sm transition-colors hover:bg-[#FFE5E5]"
+                              className="flex items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors hover:bg-primary/5"
                             >
-                              <span className="text-muted-foreground hover:text-[#FF6B6B]">
+                              <span className="text-muted-foreground hover:text-primary">
                                 {city.name}
                               </span>
-                              <span className="text-xs text-muted-foreground">{city.count}件</span>
+                              <span className="text-xs text-muted-foreground font-medium">{city.count}件</span>
                             </Link>
                           ))}
                         </div>
@@ -192,10 +148,10 @@ export async function PrefecturesWithCities() {
           ))}
         </div>
 
-        <div className="mt-12 text-center">
+        <div className="mt-16 text-center">
           <Link
             href="/areas"
-            className="inline-flex items-center gap-2 text-[#FF6B6B] hover:underline font-medium"
+            className="inline-flex items-center gap-2 text-primary hover:underline font-medium text-lg"
           >
             すべてのエリアを見る
             <span>→</span>

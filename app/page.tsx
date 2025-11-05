@@ -1,6 +1,7 @@
 import { Header } from "@/components/header"
 import { HeroSection } from "@/components/hero-section"
-import { PopularAreas } from "@/components/popular-areas"
+import { WhyChooseUs } from "@/components/why-choose-us"
+import { TreatmentFlow } from "@/components/treatment-flow"
 import { Footer } from "@/components/footer"
 import { PrefecturesWithCities } from "@/components/prefectures-with-cities"
 
@@ -13,7 +14,8 @@ export default function HomePage() {
       <Header />
       <main className="flex-1">
         <HeroSection />
-        <PopularAreas />
+        <WhyChooseUs />
+        <TreatmentFlow />
         <PrefecturesWithCities />
       </main>
       <Footer />
