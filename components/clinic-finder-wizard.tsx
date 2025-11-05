@@ -18,32 +18,50 @@ interface Question {
 
 const questions: Question[] = [
   {
-    id: "visit_type",
-    question: "受診は初めてですか？",
+    id: "hair_loss_stage",
+    question: "薄毛が気になり始めたのはいつ頃ですか？",
     options: [
-      { label: "初めて受診します", value: "first", description: "精神科・心療内科は初めて" },
-      { label: "他院から転院を検討", value: "transfer", description: "別のクリニックに通っている" },
-      { label: "再診・継続治療", value: "continue", description: "以前通院していた" },
+      { label: "最近気になり始めた", value: "recent", description: "半年〜1年以内" },
+      { label: "1〜3年前から", value: "1-3years", description: "徐々に進行している" },
+      { label: "かなり以前から", value: "long", description: "3年以上" },
     ],
   },
   {
-    id: "symptoms",
-    question: "どのような症状でお悩みですか？",
+    id: "hair_loss_area",
+    question: "どの部分の薄毛が気になりますか？",
     options: [
-      { label: "気分の落ち込み・うつ状態", value: "depression" },
-      { label: "不安・パニック症状", value: "anxiety" },
-      { label: "不眠・睡眠の問題", value: "insomnia" },
-      { label: "仕事や学校のストレス", value: "stress" },
-      { label: "その他の症状", value: "other" },
+      { label: "生え際・M字部分", value: "hairline", description: "前頭部の後退" },
+      { label: "頭頂部・つむじ", value: "crown", description: "O字型の薄毛" },
+      { label: "生え際と頭頂部の両方", value: "both", description: "複数箇所が気になる" },
+      { label: "全体的に薄くなった", value: "overall", description: "髪のボリューム減少" },
     ],
   },
   {
-    id: "frequency",
-    question: "通院頻度はどれくらいを想定していますか？",
+    id: "family_history",
+    question: "ご家族に薄毛の方はいらっしゃいますか？",
     options: [
-      { label: "週1回以上", value: "weekly", description: "集中的な治療を希望" },
-      { label: "月2-3回", value: "biweekly", description: "定期的な通院" },
-      { label: "月1回程度", value: "monthly", description: "維持療法・経過観察" },
+      { label: "父親・父方の祖父", value: "paternal", description: "父方に薄毛の家系" },
+      { label: "母親・母方の祖父", value: "maternal", description: "母方に薄毛の家系" },
+      { label: "両方にいる", value: "both", description: "両親どちらにもいる" },
+      { label: "いない・わからない", value: "none" },
+    ],
+  },
+  {
+    id: "treatment_goal",
+    question: "治療の目的は何ですか？",
+    options: [
+      { label: "現状維持・進行を止めたい", value: "maintain", description: "これ以上薄くならないように" },
+      { label: "発毛・増毛したい", value: "regrow", description: "髪を増やしたい" },
+      { label: "予防したい", value: "prevent", description: "将来の薄毛予防" },
+    ],
+  },
+  {
+    id: "consultation_type",
+    question: "どのような診療形態を希望しますか？",
+    options: [
+      { label: "オンライン診療", value: "online", description: "自宅で完結・通院不要" },
+      { label: "対面診療", value: "in_person", description: "クリニックで直接診察" },
+      { label: "どちらでもよい", value: "either", description: "状況に応じて選びたい" },
     ],
   },
   {
@@ -57,30 +75,13 @@ const questions: Question[] = [
     ],
   },
   {
-    id: "distance",
-    question: "クリニックまでの距離は？",
-    options: [
-      { label: "自宅から徒歩圏内", value: "walking", description: "15分以内" },
-      { label: "電車で30分以内", value: "transit_30", description: "通いやすい範囲" },
-      { label: "距離は気にしない", value: "any", description: "良いクリニックなら遠くても" },
-    ],
-  },
-  {
-    id: "director",
-    question: "院長・ベテラン医師の診察を希望しますか？",
-    options: [
-      { label: "院長の診察を希望", value: "yes", description: "経験豊富な医師に診てほしい" },
-      { label: "どちらでもよい", value: "no_preference" },
-    ],
-  },
-  {
     id: "priority",
     question: "最も重視するポイントは？",
     options: [
       { label: "実績・口コミ評価", value: "reputation", description: "信頼できるクリニック" },
+      { label: "治療費の安さ", value: "cost", description: "コストパフォーマンス重視" },
       { label: "アクセスの良さ", value: "access", description: "通いやすさ重視" },
-      { label: "診療時間の柔軟性", value: "hours", description: "夜間・休日対応" },
-      { label: "専門性の高さ", value: "specialty", description: "特定症状に強い" },
+      { label: "プライバシー配慮", value: "privacy", description: "人目を気にせず通える" },
     ],
   },
 ]
@@ -128,46 +129,46 @@ export function ClinicFinderWizard({ onComplete }: ClinicFinderWizardProps) {
 
   if (showResults) {
     return (
-      <Card className="border-[#FF6B6B] bg-gradient-to-br from-white to-[#FFF5F5]">
+      <Card className="border-primary bg-gradient-to-br from-white to-primary/5">
         <CardHeader>
           <div className="flex items-center gap-2 mb-2">
-            <Sparkles className="h-6 w-6 text-[#FF6B6B]" />
-            <CardTitle className="text-2xl">あなたにおすすめ：エニキュア</CardTitle>
+            <Sparkles className="h-6 w-6 text-primary" />
+            <CardTitle className="text-2xl">診断が完了しました</CardTitle>
           </div>
           <CardDescription className="text-base">
-            オンラインで完結する精神科・心療内科診療サービス
+            あなたに合ったAGAクリニックを探しましょう
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-4">
-            <h3 className="font-semibold text-lg">エニキュアの特徴</h3>
+            <h3 className="font-semibold text-lg">AGA治療について</h3>
             <ul className="space-y-3">
               <li className="flex items-start gap-3">
-                <div className="bg-[#FF6B6B] text-white rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5">✓</div>
+                <div className="bg-primary text-white rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5">✓</div>
                 <div>
-                  <p className="font-medium">24時間365日予約可能</p>
-                  <p className="text-sm text-muted-foreground">スマホやPCから簡単予約</p>
+                  <p className="font-medium">早期治療が効果的</p>
+                  <p className="text-sm text-muted-foreground">薄毛が進行する前に始めることが重要です</p>
                 </div>
               </li>
               <li className="flex items-start gap-3">
-                <div className="bg-[#FF6B6B] text-white rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5">✓</div>
-                <div>
-                  <p className="font-medium">自宅で診察・薬の配送</p>
-                  <p className="text-sm text-muted-foreground">通院不要、薬は最短当日配送</p>
-                </div>
-              </li>
-              <li className="flex items-start gap-3">
-                <div className="bg-[#FF6B6B] text-white rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5">✓</div>
+                <div className="bg-primary text-white rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5">✓</div>
                 <div>
                   <p className="font-medium">専門医による診察</p>
-                  <p className="text-sm text-muted-foreground">精神科専門医が丁寧に対応</p>
+                  <p className="text-sm text-muted-foreground">AGA専門医が適切な治療法を提案します</p>
                 </div>
               </li>
               <li className="flex items-start gap-3">
-                <div className="bg-[#FF6B6B] text-white rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5">✓</div>
+                <div className="bg-primary text-white rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5">✓</div>
                 <div>
-                  <p className="font-medium">保険適用で安心</p>
-                  <p className="text-sm text-muted-foreground">通常の保険診療と同じ</p>
+                  <p className="font-medium">オンライン診療も可能</p>
+                  <p className="text-sm text-muted-foreground">自宅にいながら診察・処方が受けられます</p>
+                </div>
+              </li>
+              <li className="flex items-start gap-3">
+                <div className="bg-primary text-white rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5">✓</div>
+                <div>
+                  <p className="font-medium">継続治療で効果を実感</p>
+                  <p className="text-sm text-muted-foreground">多くの方が3〜6ヶ月で効果を実感しています</p>
                 </div>
               </li>
             </ul>
@@ -175,11 +176,11 @@ export function ClinicFinderWizard({ onComplete }: ClinicFinderWizardProps) {
 
           <div className="flex flex-col sm:flex-row gap-3">
             <Button
-              className="flex-1 bg-[#FF6B6B] hover:bg-[#FF6B6B]/90 text-white"
+              className="flex-1"
               asChild
             >
-              <a href="https://anycure.jp/" target="_blank" rel="noopener noreferrer">
-                エニキュアで予約する
+              <a href="/search">
+                おすすめのクリニックを探す
               </a>
             </Button>
             <Button
@@ -196,7 +197,7 @@ export function ClinicFinderWizard({ onComplete }: ClinicFinderWizardProps) {
   }
 
   return (
-    <Card className="border-[#FF6B6B]">
+    <Card className="border-primary">
       <CardHeader>
         <div className="mb-4">
           <div className="flex items-center justify-between text-sm text-muted-foreground mb-2">
@@ -205,14 +206,14 @@ export function ClinicFinderWizard({ onComplete }: ClinicFinderWizardProps) {
           </div>
           <div className="h-2 bg-muted rounded-full overflow-hidden">
             <div
-              className="h-full bg-[#FF6B6B] transition-all duration-150"
+              className="h-full bg-primary transition-all duration-150"
               style={{ width: `${progress}%` }}
             />
           </div>
         </div>
         <CardTitle className="text-xl">{currentQuestion.question}</CardTitle>
         <CardDescription>
-          最適なクリニックを見つけるため、以下から選択してください
+          あなたに最適なAGAクリニックを見つけるため、以下から選択してください
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -224,15 +225,15 @@ export function ClinicFinderWizard({ onComplete }: ClinicFinderWizardProps) {
               variant="outline"
               className={cn(
                 "w-full justify-start text-left h-auto py-4 px-4 transition-all",
-                "hover:border-[#FF6B6B] hover:bg-[#FFF5F5]",
-                "active:bg-[#FFF5F5]",
-                answers[currentQuestion.id] === option.value && "border-[#FF6B6B] bg-[#FFF5F5]"
+                "hover:border-primary hover:bg-primary/5",
+                "active:bg-primary/5",
+                answers[currentQuestion.id] === option.value && "border-primary bg-primary/5"
               )}
             >
               <div className="flex-1">
                 <div className={cn(
                   "font-medium text-foreground",
-                  answers[currentQuestion.id] === option.value && "text-[#FF6B6B]"
+                  answers[currentQuestion.id] === option.value && "text-primary"
                 )}>
                   {option.label}
                 </div>
@@ -244,7 +245,7 @@ export function ClinicFinderWizard({ onComplete }: ClinicFinderWizardProps) {
               </div>
               <ChevronRight className={cn(
                 "h-5 w-5 ml-2 transition-colors",
-                answers[currentQuestion.id] === option.value ? "text-[#FF6B6B]" : "text-muted-foreground"
+                answers[currentQuestion.id] === option.value ? "text-primary" : "text-muted-foreground"
               )} />
             </Button>
           ))}
