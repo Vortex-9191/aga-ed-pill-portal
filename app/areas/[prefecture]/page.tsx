@@ -67,8 +67,8 @@ export async function generateMetadata({ params }: { params: { prefecture: strin
   const prefectureName = prefectureMap[params.prefecture] || "都道府県"
 
   return {
-    title: `${prefectureName}の精神科・心療内科一覧 | 全国精神科ドットコム`,
-    description: `${prefectureName}の精神科・心療内科クリニック一覧。診療時間、住所、アクセス、口コミ情報を掲載。`,
+    title: `${prefectureName}のAGA治療クリニック一覧 | aga治療.com`,
+    description: `${prefectureName}のAGA治療専門クリニック一覧。診療時間、住所、アクセス、口コミ情報を掲載。`,
   }
 }
 

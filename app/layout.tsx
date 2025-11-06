@@ -11,8 +11,8 @@ const notoSansJP = Noto_Sans_JP({
 })
 
 export const metadata: Metadata = {
-  title: "メディカルポータル｜AGA・ED・アフターピル治療クリニックを探す",
-  description: "全国のAGA・ED治療、アフターピル処方クリニックを地域・駅・条件で検索。オンライン診療対応クリニックも掲載。",
+  title: "aga治療.com｜全国のAGA治療専門クリニック検索",
+  description: "全国のAGA治療専門クリニックを地域・駅・条件で検索。薄毛治療の専門医による診察、オンライン診療対応クリニックも掲載。",
   generator: "v0.app",
 }
 

@@ -34,19 +34,19 @@ export async function generateMetadata({
 
   if (query) {
     return {
-      title: `「${query}」の精神科・心療内科検索結果 | 全国精神科ドットコム`,
-      description: `「${query}」に関連する精神科・心療内科クリニックの検索結果。全国の心療内科・精神科から、診療時間、住所、アクセス、口コミ情報を掲載。`,
+      title: `「${query}」のAGA治療クリニック検索結果 | aga治療.com`,
+      description: `「${query}」に関連するAGA治療クリニックの検索結果。全国のAGA専門クリニックから、診療時間、住所、アクセス、口コミ情報を掲載。`,
     }
   } else if (prefecture) {
     return {
-      title: `${prefecture}の精神科・心療内科 | 全国精神科ドットコム`,
-      description: `${prefecture}の精神科・心療内科クリニックを検索。${prefecture}で評判の心療内科・精神科の診療時間、住所、アクセス、口コミ情報を掲載。`,
+      title: `${prefecture}のAGA治療クリニック | aga治療.com`,
+      description: `${prefecture}のAGA治療クリニックを検索。${prefecture}で評判のAGA専門クリニックの診療時間、住所、アクセス、口コミ情報を掲載。`,
     }
   }
 
   return {
-    title: `精神科・心療内科検索 | 全国精神科ドットコム`,
-    description: `全国の精神科・心療内科クリニックを検索。地域、駅名から心療内科・精神科を探せます。診療時間、住所、アクセス、口コミ情報を掲載。`,
+    title: `AGA治療クリニック検索 | aga治療.com`,
+    description: `全国のAGA治療専門クリニックを検索。地域、駅名からAGA治療クリニックを探せます。診療時間、住所、アクセス、口コミ情報を掲載。`,
   }
 }
 

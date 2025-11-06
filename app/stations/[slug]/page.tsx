@@ -27,8 +27,8 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   const stationName = stationInfo?.ja || decodeStationSlug(params.slug)
 
   return {
-    title: `${stationName}駅の精神科・心療内科 ${stationInfo?.prefecture ? `| ${stationInfo.prefecture}` : ""} | 全国精神科ドットコム`,
-    description: `${stationName}駅周辺の精神科・心療内科を検索。${stationInfo?.prefecture || ""}${stationName}駅から通える心療内科・精神科クリニックの診療時間、アクセス、口コミ情報を掲載。`,
+    title: `${stationName}駅のAGA治療クリニック ${stationInfo?.prefecture ? `| ${stationInfo.prefecture}` : ""} | aga治療.com`,
+    description: `${stationName}駅周辺のAGA治療クリニックを検索。${stationInfo?.prefecture || ""}${stationName}駅から通えるAGA治療専門クリニックの診療時間、アクセス、口コミ情報を掲載。`,
   }
 }
 

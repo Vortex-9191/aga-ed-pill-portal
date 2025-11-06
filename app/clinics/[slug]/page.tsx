@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 
   if (!clinic) {
     return {
-      title: "クリニックが見つかりません | 全国精神科ドットコム",
+      title: "クリニックが見つかりません | aga治療.com",
       description: "指定されたクリニックが見つかりませんでした。",
     }
   }
@@ -23,10 +23,10 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   const specialties = clinic.featured_subjects
     ? clinic.featured_subjects.split(",").map((s: string) => s.trim())
     : []
-  const specialtiesText = specialties.length > 0 ? specialties.join("・") : "精神科・心療内科"
+  const specialtiesText = specialties.length > 0 ? specialties.join("・") : "AGA治療"
 
   return {
-    title: `${clinic.clinic_name} | ${clinic.municipalities} ${specialtiesText} | 全国精神科ドットコム`,
+    title: `${clinic.clinic_name} | ${clinic.municipalities} ${specialtiesText} | aga治療.com`,
     description: `${clinic.prefecture}${clinic.municipalities}の${clinic.clinic_name}。${specialtiesText}の診療を行っています。${clinic.stations ? `${clinic.stations}。` : ""}診療時間、アクセス、口コミ情報を掲載。`,
   }
 }
