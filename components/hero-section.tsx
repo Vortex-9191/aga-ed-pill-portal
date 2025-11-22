@@ -67,6 +67,16 @@ export function HeroSection() {
           {/* Quick Links */}
           <div className="flex flex-wrap items-center justify-center gap-3 mb-16">
             <Button
+              variant="default"
+              className="rounded-xl bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white border-none shadow-lg hover:shadow-xl transition-all"
+              asChild
+            >
+              <a href="/womens-pill">
+                <span className="mr-2">💊</span>
+                女性向けピル処方はこちら
+              </a>
+            </Button>
+            <Button
               variant="outline"
               className="rounded-xl border-border hover:bg-primary/5 hover:border-primary bg-background"
               asChild

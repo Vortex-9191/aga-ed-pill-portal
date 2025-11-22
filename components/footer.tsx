@@ -81,12 +81,12 @@ const regions = [
 
 export function Footer() {
   return (
-    <footer className="border-t border-border bg-muted/30">
+    <footer className="border-t border-primary/10 bg-gradient-to-b from-white to-primary/5">
       <div className="container py-16 md:py-20">
         {/* Main Footer Content */}
         <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-4 mb-12">
           <div className="lg:col-span-1">
-            <h3 className="mb-5 text-lg font-bold text-foreground">aga治療.com</h3>
+            <h3 className="mb-5 text-lg font-bold text-primary">aga治療.com</h3>
             <p className="text-sm text-muted-foreground leading-relaxed mb-4">
               全国のAGA治療専門クリニックを地域・駅・条件で検索できる総合ポータルサイトです。
             </p>
@@ -96,7 +96,7 @@ export function Footer() {
           </div>
 
           <div>
-            <h3 className="mb-5 text-sm font-bold text-foreground uppercase tracking-wider">クリニックを探す</h3>
+            <h3 className="mb-5 text-sm font-bold text-foreground/80 uppercase tracking-wider">クリニックを探す</h3>
             <ul className="space-y-3 text-sm">
               <li>
                 <Link href="/search" className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-2">
@@ -122,7 +122,7 @@ export function Footer() {
           </div>
 
           <div>
-            <h3 className="mb-5 text-sm font-bold text-foreground uppercase tracking-wider">サポート</h3>
+            <h3 className="mb-5 text-sm font-bold text-foreground/80 uppercase tracking-wider">サポート</h3>
             <ul className="space-y-3 text-sm">
               <li>
                 <Link href="/help" className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-2">
@@ -143,7 +143,7 @@ export function Footer() {
           </div>
 
           <div>
-            <h3 className="mb-5 text-sm font-bold text-foreground uppercase tracking-wider">ポリシー</h3>
+            <h3 className="mb-5 text-sm font-bold text-foreground/80 uppercase tracking-wider">ポリシー</h3>
             <ul className="space-y-3 text-sm">
               <li>
                 <Link href="/privacy" className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-2">
@@ -165,7 +165,7 @@ export function Footer() {
         </div>
 
         {/* All Prefectures Section */}
-        <div className="mt-8 pt-8 border-t border-border">
+        <div className="mt-8 pt-8 border-t border-primary/10">
           <div className="mb-6 flex items-center justify-between">
             <h4 className="text-sm font-semibold text-foreground">都道府県・市区町村から探す</h4>
             <Link
@@ -205,7 +205,7 @@ export function Footer() {
           </Link>
         </div>
 
-        <div className="mt-8 border-t border-border pt-8 text-center text-xs text-muted-foreground">
+        <div className="mt-8 border-t border-primary/10 pt-8 text-center text-xs text-muted-foreground">
           <p>&copy; 2025 aga治療.com All rights reserved.</p>
         </div>
       </div>

@@ -11,87 +11,23 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+import { getClinicsCountByPrefecture, REGIONS, PREFECTURE_SLUGS } from "@/lib/api/locations"
 
-const regions = [
-  {
-    name: "関東",
-    prefectures: [
-      { name: "東京都", slug: "tokyo", count: 2345 },
-      { name: "神奈川県", slug: "kanagawa", count: 1234 },
-      { name: "埼玉県", slug: "saitama", count: 987 },
-      { name: "千葉県", slug: "chiba", count: 876 },
-      { name: "茨城県", slug: "ibaraki", count: 543 },
-      { name: "栃木県", slug: "tochigi", count: 432 },
-      { name: "群馬県", slug: "gunma", count: 398 },
-    ],
-  },
-  {
-    name: "関西",
-    prefectures: [
-      { name: "大阪府", slug: "osaka", count: 1567 },
-      { name: "兵庫県", slug: "hyogo", count: 876 },
-      { name: "京都府", slug: "kyoto", count: 654 },
-      { name: "奈良県", slug: "nara", count: 432 },
-      { name: "滋賀県", slug: "shiga", count: 321 },
-      { name: "和歌山県", slug: "wakayama", count: 234 },
-    ],
-  },
-  {
-    name: "中部",
-    prefectures: [
-      { name: "愛知県", slug: "aichi", count: 987 },
-      { name: "静岡県", slug: "shizuoka", count: 765 },
-      { name: "岐阜県", slug: "gifu", count: 543 },
-      { name: "長野県", slug: "nagano", count: 456 },
-      { name: "新潟県", slug: "niigata", count: 432 },
-      { name: "富山県", slug: "toyama", count: 321 },
-      { name: "石川県", slug: "ishikawa", count: 298 },
-      { name: "福井県", slug: "fukui", count: 234 },
-      { name: "山梨県", slug: "yamanashi", count: 198 },
-    ],
-  },
-  {
-    name: "九州・沖縄",
-    prefectures: [
-      { name: "福岡県", slug: "fukuoka", count: 876 },
-      { name: "熊本県", slug: "kumamoto", count: 543 },
-      { name: "鹿児島県", slug: "kagoshima", count: 432 },
-      { name: "長崎県", slug: "nagasaki", count: 398 },
-      { name: "大分県", slug: "oita", count: 345 },
-      { name: "宮崎県", slug: "miyazaki", count: 298 },
-      { name: "佐賀県", slug: "saga", count: 234 },
-      { name: "沖縄県", slug: "okinawa", count: 456 },
-    ],
-  },
-  {
-    name: "北海道・東北",
-    prefectures: [
-      { name: "北海道", slug: "hokkaido", count: 765 },
-      { name: "宮城県", slug: "miyagi", count: 543 },
-      { name: "福島県", slug: "fukushima", count: 432 },
-      { name: "青森県", slug: "aomori", count: 321 },
-      { name: "岩手県", slug: "iwate", count: 298 },
-      { name: "秋田県", slug: "akita", count: 234 },
-      { name: "山形県", slug: "yamagata", count: 234 },
-    ],
-  },
-  {
-    name: "中国・四国",
-    prefectures: [
-      { name: "広島県", slug: "hiroshima", count: 654 },
-      { name: "岡山県", slug: "okayama", count: 543 },
-      { name: "山口県", slug: "yamaguchi", count: 432 },
-      { name: "愛媛県", slug: "ehime", count: 398 },
-      { name: "香川県", slug: "kagawa", count: 321 },
-      { name: "徳島県", slug: "tokushima", count: 234 },
-      { name: "高知県", slug: "kochi", count: 234 },
-      { name: "鳥取県", slug: "tottori", count: 198 },
-      { name: "島根県", slug: "shimane", count: 198 },
-    ],
-  },
-]
+// Force dynamic rendering to ensure fresh data
+export const dynamic = 'force-dynamic'
 
-export default function AreasPage() {
+export default async function AreasPage() {
+  const counts = await getClinicsCountByPrefecture()
+
+  const regionsWithData = REGIONS.map(region => ({
+    name: region.name,
+    prefectures: region.prefectures.map(prefName => ({
+      name: prefName,
+      slug: PREFECTURE_SLUGS[prefName] || 'unknown',
+      count: counts[prefName] || 0
+    }))
+  }))
+
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
@@ -131,7 +67,7 @@ export default function AreasPage() {
         {/* Regions */}
         <div className="container py-16 md:py-20">
           <div className="space-y-16">
-            {regions.map((region) => (
+            {regionsWithData.map((region) => (
               <div key={region.name}>
                 <h2 className="mb-8 text-2xl font-bold text-foreground border-l-4 border-primary pl-4">
                   {region.name}
@@ -167,3 +103,4 @@ export default function AreasPage() {
     </div>
   )
 }
+

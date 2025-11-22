@@ -9,69 +9,14 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { getDummyClinics } from "@/lib/data/dummy-clinics"
-import { getStationSlug } from "@/lib/data/stations"
+import { getAllStations, REGIONS } from "@/lib/api/locations"
 import { StationList } from "@/components/station-list"
 
-// Force dynamic rendering to avoid build-time static generation
+// Force dynamic rendering to ensure fresh data
 export const dynamic = 'force-dynamic'
 
-interface Station {
-  name: string
-  prefecture: string
-  count: number
-  slug: string
-}
-
-const regions = [
-  { name: "北海道・東北", prefectures: ["北海道", "青森県", "岩手県", "宮城県", "秋田県", "山形県", "福島県"] },
-  { name: "関東", prefectures: ["東京都", "神奈川県", "埼玉県", "千葉県", "茨城県", "栃木県", "群馬県"] },
-  { name: "中部", prefectures: ["愛知県", "静岡県", "岐阜県", "長野県", "新潟県", "富山県", "石川県", "福井県", "山梨県"] },
-  { name: "関西", prefectures: ["大阪府", "兵庫県", "京都府", "奈良県", "滋賀県", "和歌山県"] },
-  { name: "中国・四国", prefectures: ["広島県", "岡山県", "山口県", "愛媛県", "香川県", "徳島県", "高知県", "鳥取県", "島根県"] },
-  { name: "九州・沖縄", prefectures: ["福岡県", "熊本県", "鹿児島県", "長崎県", "大分県", "宮崎県", "佐賀県", "沖縄県"] },
-]
-
 export default async function StationsPage() {
-  // Get clinics from dummy data
-  const clinicsData = getDummyClinics()
-
-  // Build station map from dummy data
-  const stationMap = new Map<string, { prefectures: Set<string>; count: number }>()
-
-  clinicsData.forEach((clinic) => {
-    if (!clinic.stations) return
-
-    const stationNames = clinic.stations.split(',').map((s) => s.trim())
-
-    stationNames.forEach((stationName) => {
-      if (!stationName) return
-
-      const existing = stationMap.get(stationName)
-      if (existing) {
-        existing.count++
-        existing.prefectures.add(clinic.prefecture)
-      } else {
-        stationMap.set(stationName, {
-          prefectures: new Set([clinic.prefecture]),
-          count: 1
-        })
-      }
-    })
-  })
-
-  const stations: Station[] = Array.from(stationMap.entries())
-    .map(([name, value]) => {
-      const prefecture = Array.from(value.prefectures)[0]
-      return {
-        name,
-        prefecture,
-        count: value.count,
-        slug: getStationSlug(name)
-      }
-    })
-    .filter(station => station.count >= 1)
-    .sort((a, b) => a.name.localeCompare(b.name, 'ja'))
+  const stations = await getAllStations()
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -109,7 +54,7 @@ export default async function StationsPage() {
           </div>
         </div>
 
-        <StationList stations={stations} regions={regions} />
+        <StationList stations={stations} regions={REGIONS} />
       </main>
       <Footer />
     </div>

@@ -18,6 +18,9 @@ export function Header() {
           </Link>
 
           <nav className="hidden md:flex items-center gap-6">
+            <Link href="/womens-pill" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+              女性向けピル
+            </Link>
             <Link href="/search" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
               クリニック検索
             </Link>

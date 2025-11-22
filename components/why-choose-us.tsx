@@ -25,7 +25,7 @@ export function WhyChooseUs() {
   ]
 
   return (
-    <section className="py-20 md:py-28 bg-muted/30">
+    <section className="py-20 md:py-28 bg-gradient-to-b from-primary/5 to-white">
       <div className="container">
         <div className="mx-auto max-w-6xl">
           <div className="text-center mb-16">
@@ -41,10 +41,10 @@ export function WhyChooseUs() {
             {reasons.map((reason, index) => (
               <div
                 key={index}
-                className="group relative bg-background rounded-2xl p-8 shadow-sm border border-border hover:border-primary/50 hover:shadow-md transition-all"
+                className="group relative bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-sm border border-primary/10 hover:border-primary/30 hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
               >
                 <div className="flex items-start gap-4">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-colors flex-shrink-0">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 text-primary group-hover:from-primary group-hover:to-primary/90 group-hover:text-white transition-all duration-300 flex-shrink-0 shadow-inner">
                     <reason.icon className="h-7 w-7" />
                   </div>
                   <div className="flex-1">

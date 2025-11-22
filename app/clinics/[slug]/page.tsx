@@ -98,15 +98,26 @@ export default async function ClinicDetailPage({ params }: { params: { slug: str
               <div className="flex-1">
                 <h1 className="text-3xl font-bold text-foreground mb-3 md:text-4xl">{clinic.clinic_name}</h1>
 
-                {specialties.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {specialties.map((specialty) => (
-                      <Badge key={specialty} variant="secondary">
-                        {specialty}
-                      </Badge>
-                    ))}
-                  </div>
-                )}
+                <div className="flex items-center gap-4 mb-4">
+                  {clinic.rating && (
+                    <div className="flex items-center gap-1">
+                      <span className="text-yellow-500 text-lg">★</span>
+                      <span className="font-bold text-lg">{clinic.rating}</span>
+                      {clinic.review_count && (
+                        <span className="text-muted-foreground text-sm">({clinic.review_count}件の口コミ)</span>
+                      )}
+                    </div>
+                  )}
+                  {specialties.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {specialties.map((specialty) => (
+                        <Badge key={specialty} variant="secondary">
+                          {specialty}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                </div>
 
                 {clinic.director_name && (
                   <div className="flex items-center gap-2 text-sm mb-3">

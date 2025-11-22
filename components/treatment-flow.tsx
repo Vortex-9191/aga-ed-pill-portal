@@ -52,15 +52,15 @@ export function TreatmentFlow() {
                   <div className="hidden lg:block absolute top-16 left-1/2 w-full h-0.5 bg-gradient-to-r from-primary/50 to-primary/20" />
                 )}
 
-                <div className="relative bg-background rounded-2xl p-6 border border-border hover:border-primary/50 hover:shadow-md transition-all text-center">
+                <div className="relative bg-white rounded-3xl p-8 border border-primary/10 hover:border-primary/30 hover:shadow-lg transition-all duration-300 text-center h-full">
                   {/* Step Number */}
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-white text-sm font-bold px-3 py-1 rounded-full">
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-primary to-primary/80 text-white text-sm font-bold px-4 py-1.5 rounded-full shadow-md">
                     STEP {step.number}
                   </div>
 
                   {/* Icon */}
                   <div className="flex justify-center mb-6 mt-4">
-                    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary">
+                    <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/5 text-primary border border-primary/10">
                       <step.icon className="h-8 w-8" />
                     </div>
                   </div>
