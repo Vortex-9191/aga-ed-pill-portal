@@ -274,13 +274,26 @@ export function NewHomePage() {
               </button>
             </div>
 
-            <div className="hidden md:flex items-center justify-center md:justify-start gap-6 text-sm font-medium text-slate-400">
-              <button className="flex items-center gap-1 hover:text-teal-300 transition group">
-                <MapPin size={14} /> 現在地から探す
-              </button>
-              <button className="flex items-center gap-1 hover:text-teal-300 transition group">
-                <Smartphone size={14} /> オンライン診療
-              </button>
+            {/* Search Options */}
+            <div className="flex flex-col sm:flex-row gap-3 pt-4">
+              <Link href="/areas" className="flex-1">
+                <button className="w-full bg-white hover:bg-slate-50 text-slate-800 px-6 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition shadow-md border border-slate-200 hover:border-teal-500">
+                  <Map size={18} className="text-teal-600" />
+                  エリアから探す
+                </button>
+              </Link>
+              <Link href="/map" className="flex-1">
+                <button className="w-full bg-white hover:bg-slate-50 text-slate-800 px-6 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition shadow-md border border-slate-200 hover:border-teal-500">
+                  <Navigation size={18} className="text-teal-600" />
+                  現在地から探す
+                </button>
+              </Link>
+              <Link href="/search?online=true" className="flex-1">
+                <button className="w-full bg-white hover:bg-slate-50 text-slate-800 px-6 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition shadow-md border border-slate-200 hover:border-teal-500">
+                  <Smartphone size={18} className="text-teal-600" />
+                  オンライン診療
+                </button>
+              </Link>
             </div>
           </div>
 

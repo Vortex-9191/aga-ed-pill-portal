@@ -26,13 +26,14 @@ interface NewSearchPageProps {
   to: number
   query: string
   prefecture: string
+  onlineOnly?: boolean
 }
 
 export function NewSearchPage(props: NewSearchPageProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [showFilters, setShowFilters] = useState(false)
 
-  const { clinics, facetData, totalCount, currentPage, totalPages, from, to, query, prefecture } = props
+  const { clinics, facetData, totalCount, currentPage, totalPages, from, to, query, prefecture, onlineOnly } = props
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-800">
@@ -91,7 +92,7 @@ export function NewSearchPage(props: NewSearchPageProps) {
       <div className="bg-slate-900 text-white py-8">
         <div className="max-w-6xl mx-auto px-4">
           <h1 className="text-3xl font-bold mb-4">
-            {query ? `「${query}」の検索結果` : prefecture ? `${prefecture}のクリニック` : "クリニック検索"}
+            {onlineOnly ? "オンライン診療対応クリニック" : query ? `「${query}」の検索結果` : prefecture ? `${prefecture}のクリニック` : "クリニック検索"}
           </h1>
         </div>
       </div>

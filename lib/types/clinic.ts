@@ -35,6 +35,18 @@ export interface Clinic {
   hours_holiday: string | null
 }
 
+export interface ClinicPrice {
+  name: string
+  price: number
+  note: string
+}
+
+export interface ClinicWithPrices extends Clinic {
+  min_price?: number
+  prices?: ClinicPrice[]
+  image_url?: string
+}
+
 export interface ClinicCardData {
   id: string
   name: string

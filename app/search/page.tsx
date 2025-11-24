@@ -47,6 +47,7 @@ export default async function SearchPage({
     director?: string
     page?: string
     sort?: string
+    online?: string
   }
 }) {
   const query = searchParams.q || ""
@@ -89,6 +90,10 @@ export default async function SearchPage({
 
   if (searchParams.director) {
     clinicsQuery = clinicsQuery.not("院長名", "is", null)
+  }
+
+  if (searchParams.online) {
+    clinicsQuery = clinicsQuery.ilike("特徴", "%オンライン%")
   }
 
   // Get total count
@@ -209,6 +214,7 @@ export default async function SearchPage({
       to={to}
       query={query}
       prefecture={prefecture}
+      onlineOnly={searchParams.online === "true"}
     />
   )
 }
