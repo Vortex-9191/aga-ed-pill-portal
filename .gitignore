@@ -25,3 +25,12 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# CSV data files
+*.csv
+
+# Import logs
+import_log.txt
+
+# Supabase temp files
+supabase/.temp/
