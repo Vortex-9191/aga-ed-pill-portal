@@ -75,25 +75,25 @@ export default async function SearchPage({
   }
 
   if (searchParams.feature) {
-    clinicsQuery = clinicsQuery.ilike("特徴", `%${searchParams.feature}%`)
+    clinicsQuery = clinicsQuery.ilike("features", `%${searchParams.feature}%`)
   }
 
   if (searchParams.weekend) {
-    clinicsQuery = clinicsQuery.or("土曜.not.is.null,日曜.not.is.null")
+    clinicsQuery = clinicsQuery.or("hours_saturday.not.is.null,hours_sunday.not.is.null")
   }
 
   if (searchParams.evening) {
     clinicsQuery = clinicsQuery.or(
-      "月曜.ilike.%18:%,月曜.ilike.%19:%,月曜.ilike.%20:%,火曜.ilike.%18:%,火曜.ilike.%19:%,火曜.ilike.%20:%,水曜.ilike.%18:%,水曜.ilike.%19:%,水曜.ilike.%20:%,木曜.ilike.%18:%,木曜.ilike.%19:%,木曜.ilike.%20:%,金曜.ilike.%18:%,金曜.ilike.%19:%,金曜.ilike.%20:%"
+      "hours_monday.ilike.%18:%,hours_monday.ilike.%19:%,hours_monday.ilike.%20:%,hours_tuesday.ilike.%18:%,hours_tuesday.ilike.%19:%,hours_tuesday.ilike.%20:%,hours_wednesday.ilike.%18:%,hours_wednesday.ilike.%19:%,hours_wednesday.ilike.%20:%,hours_thursday.ilike.%18:%,hours_thursday.ilike.%19:%,hours_thursday.ilike.%20:%,hours_friday.ilike.%18:%,hours_friday.ilike.%19:%,hours_friday.ilike.%20:%"
     )
   }
 
   if (searchParams.director) {
-    clinicsQuery = clinicsQuery.not("院長名", "is", null)
+    clinicsQuery = clinicsQuery.not("director_name", "is", null)
   }
 
   if (searchParams.online) {
-    clinicsQuery = clinicsQuery.ilike("特徴", "%オンライン%")
+    clinicsQuery = clinicsQuery.ilike("features", "%オンライン%")
   }
 
   // Get total count
@@ -116,7 +116,7 @@ export default async function SearchPage({
   // Get facet data for filters
   let facetQuery = supabase
     .from("clinics")
-    .select("prefecture, municipalities, featured_subjects, 土曜, 日曜, 月曜, 火曜, 水曜, 木曜, 金曜, 院長名, 特徴")
+    .select("prefecture, municipalities, featured_subjects, hours_saturday, hours_sunday, hours_monday, hours_tuesday, hours_wednesday, hours_thursday, hours_friday, director_name, features")
 
   if (query) {
     facetQuery = facetQuery.or(`clinic_name.ilike.%${query}%,address.ilike.%${query}%,stations.ilike.%${query}%`)
@@ -153,8 +153,8 @@ export default async function SearchPage({
     }
 
     // Features
-    if (clinic.特徴) {
-      clinic.特徴.split(",").forEach((f: string) => {
+    if (clinic.features) {
+      clinic.features.split(",").forEach((f: string) => {
         const feature = f.trim()
         if (feature && feature !== "-") {
           featureMap.set(feature, (featureMap.get(feature) || 0) + 1)
@@ -163,24 +163,24 @@ export default async function SearchPage({
     }
 
     // Weekend
-    if (clinic.土曜 || clinic.日曜) {
+    if (clinic.hours_saturday || clinic.hours_sunday) {
       weekendCount++
     }
 
     // Evening
     const hasEvening = [
-      clinic.月曜,
-      clinic.火曜,
-      clinic.水曜,
-      clinic.木曜,
-      clinic.金曜,
+      clinic.hours_monday,
+      clinic.hours_tuesday,
+      clinic.hours_wednesday,
+      clinic.hours_thursday,
+      clinic.hours_friday,
     ].some((hours) => hours && (hours.includes("18:") || hours.includes("19:") || hours.includes("20:")))
     if (hasEvening) {
       eveningCount++
     }
 
     // Director
-    if (clinic.院長名) {
+    if (clinic.director_name) {
       directorCount++
     }
   })

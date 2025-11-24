@@ -117,8 +117,8 @@ export default function CityPage() {
         }
 
         // Features
-        if (clinic.特徴) {
-          clinic.特徴.split(",").forEach((f: string) => {
+        if (clinic.features) {
+          clinic.features.split(",").forEach((f: string) => {
             const feature = f.trim()
             if (feature && feature !== "-") {
               featureMap.set(feature, (featureMap.get(feature) || 0) + 1)
@@ -137,24 +137,24 @@ export default function CityPage() {
         }
 
         // Weekend
-        if (clinic.土曜 || clinic.日曜) {
+        if (clinic.hours_saturday || clinic.hours_sunday) {
           weekendCount++
         }
 
         // Evening
         const hasEvening = [
-          clinic.月曜,
-          clinic.火曜,
-          clinic.水曜,
-          clinic.木曜,
-          clinic.金曜,
+          clinic.hours_monday,
+          clinic.hours_tuesday,
+          clinic.hours_wednesday,
+          clinic.hours_thursday,
+          clinic.hours_friday,
         ].some((hours: string) => hours && (hours.includes("18:") || hours.includes("19:") || hours.includes("20:")))
         if (hasEvening) {
           eveningCount++
         }
 
         // Director
-        if (clinic.院長名) {
+        if (clinic.director_name) {
           directorCount++
         }
       })
@@ -214,8 +214,8 @@ export default function CityPage() {
   // Get features as array
   const getFeatures = (clinic: any) => {
     const features: string[] = []
-    if (clinic.特徴 && clinic.特徴 !== '-') {
-      const featureList = clinic.特徴.split(',').map((f: string) => f.trim()).filter(Boolean)
+    if (clinic.features && clinic.features !== '-') {
+      const featureList = clinic.features.split(',').map((f: string) => f.trim()).filter(Boolean)
       features.push(...featureList.slice(0, 3))
     }
     if (clinic.online_consultation) {
@@ -445,12 +445,12 @@ export default function CityPage() {
                               <p className="text-xs text-slate-600 mt-0.5 line-clamp-2">{getOpeningHours(clinic)}</p>
                             </div>
                           </div>
-                          {clinic.院長名 && (
+                          {clinic.director_name && (
                             <div className="p-3 px-4 flex items-start gap-3">
                               <User size={16} className="text-slate-400 mt-0.5 flex-shrink-0" />
                               <div>
                                 <p className="text-[10px] text-slate-500 font-bold">院長・医師</p>
-                                <p className="text-xs text-slate-600 mt-0.5">{clinic.院長名}</p>
+                                <p className="text-xs text-slate-600 mt-0.5">{clinic.director_name}</p>
                               </div>
                             </div>
                           )}

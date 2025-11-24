@@ -77,19 +77,19 @@ export default async function ClinicDetailPage({ params }: { params: { slug: str
 
   // 診療時間をパース
   const weekdaysMap = [
-    { en: "hours_monday", jp: "月曜" },
-    { en: "hours_tuesday", jp: "火曜" },
-    { en: "hours_wednesday", jp: "水曜" },
-    { en: "hours_thursday", jp: "木曜" },
-    { en: "hours_friday", jp: "金曜" },
-    { en: "hours_saturday", jp: "土曜" },
-    { en: "hours_sunday", jp: "日曜" },
-    { en: "hours_holiday", jp: "祝" },
+    { field: "hours_monday", display: "月曜" },
+    { field: "hours_tuesday", display: "火曜" },
+    { field: "hours_wednesday", display: "水曜" },
+    { field: "hours_thursday", display: "木曜" },
+    { field: "hours_friday", display: "金曜" },
+    { field: "hours_saturday", display: "土曜" },
+    { field: "hours_sunday", display: "日曜" },
+    { field: "hours_holiday", display: "祝" },
   ]
   const businessHours: Array<{ day: string; hours: string }> = []
-  weekdaysMap.forEach(({ en, jp }) => {
-    if (clinic[en] && clinic[en] !== "-") {
-      businessHours.push({ day: jp, hours: clinic[en] })
+  weekdaysMap.forEach(({ field, display }) => {
+    if (clinic[field] && clinic[field] !== "-") {
+      businessHours.push({ day: display, hours: clinic[field] })
     }
   })
 

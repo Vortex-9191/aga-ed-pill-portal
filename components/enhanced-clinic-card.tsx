@@ -21,15 +21,15 @@ interface EnhancedClinicCardProps {
     non_medical_response: string | null
     rating: number | null
     review_count: number | null
-    特徴: string | null
-    備考: string | null
-    月曜?: string | null
-    火曜?: string | null
-    水曜?: string | null
-    木曜?: string | null
-    金曜?: string | null
-    土曜?: string | null
-    日曜?: string | null
+    features: string | null
+    notes: string | null
+    hours_monday?: string | null
+    hours_tuesday?: string | null
+    hours_wednesday?: string | null
+    hours_thursday?: string | null
+    hours_friday?: string | null
+    hours_saturday?: string | null
+    hours_sunday?: string | null
   }
   position?: number
 }
@@ -39,23 +39,23 @@ export function EnhancedClinicCard({ clinic, position }: EnhancedClinicCardProps
   const paymentMethods = clinic.non_medical_response?.split(',').map(s => s.trim()).filter(Boolean) || []
 
   // Parse features
-  const features = clinic.特徴?.split(',').map(s => s.trim()).filter(Boolean) || []
+  const features = clinic.features?.split(',').map(s => s.trim()).filter(Boolean) || []
 
   // Get operating hours
   const weekdayHours = [
-    { day: '月', hours: clinic.月曜 },
-    { day: '火', hours: clinic.火曜 },
-    { day: '水', hours: clinic.水曜 },
-    { day: '木', hours: clinic.木曜 },
-    { day: '金', hours: clinic.金曜 },
-    { day: '土', hours: clinic.土曜 },
-    { day: '日', hours: clinic.日曜 },
+    { day: '月', hours: clinic.hours_monday },
+    { day: '火', hours: clinic.hours_tuesday },
+    { day: '水', hours: clinic.hours_wednesday },
+    { day: '木', hours: clinic.hours_thursday },
+    { day: '金', hours: clinic.hours_friday },
+    { day: '土', hours: clinic.hours_saturday },
+    { day: '日', hours: clinic.hours_sunday },
   ].filter(d => d.hours && d.hours !== '-')
 
   const firstHours = weekdayHours[0]
 
   // Parse notes for pricing info
-  const notes = clinic.備考?.split('\n').filter(Boolean) || []
+  const notes = clinic.notes?.split('\n').filter(Boolean) || []
   const pricingInfo = notes.find(n => n.includes('カウンセリング') || n.includes('診察料'))
 
   return (
