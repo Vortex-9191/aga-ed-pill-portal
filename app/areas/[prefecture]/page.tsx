@@ -1,542 +1,722 @@
-import { Header } from "@/components/header"
-import { Footer } from "@/components/footer"
-import { EnhancedClinicCard } from "@/components/enhanced-clinic-card"
+"use client"
+
 import { DiagnosisTool } from "@/components/diagnosis-tool"
 import Link from "next/link"
-import { ChevronRight, MapPin, Train } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { createClient } from "@/lib/supabase/server"
-import { SearchFilters } from "@/components/search-filters"
-import { notFound } from "next/navigation"
-import type { Metadata } from "next"
+import { useEffect, useState } from "react"
+import {
+  ChevronRight,
+  MapPin,
+  Train,
+  CheckCircle2,
+  User,
+  Phone,
+  TrendingUp,
+  Filter,
+  HelpCircle,
+  AlertTriangle,
+  Menu,
+  X
+} from "lucide-react"
+import { createClient } from "@/lib/supabase/client"
+import { notFound, useParams, useSearchParams } from "next/navigation"
 import { getStationSlug } from "@/lib/data/stations"
 
 // Prefecture slug to name mapping
 const prefectureMap: Record<string, string> = {
-  hokkaido: "北海道",
-  aomori: "青森県",
-  iwate: "岩手県",
-  miyagi: "宮城県",
-  akita: "秋田県",
-  yamagata: "山形県",
-  fukushima: "福島県",
-  ibaraki: "茨城県",
-  tochigi: "栃木県",
-  gunma: "群馬県",
-  saitama: "埼玉県",
-  chiba: "千葉県",
-  tokyo: "東京都",
-  kanagawa: "神奈川県",
-  niigata: "新潟県",
-  toyama: "富山県",
-  ishikawa: "石川県",
-  fukui: "福井県",
-  yamanashi: "山梨県",
-  nagano: "長野県",
-  gifu: "岐阜県",
-  shizuoka: "静岡県",
-  aichi: "愛知県",
-  mie: "三重県",
-  shiga: "滋賀県",
-  kyoto: "京都府",
-  osaka: "大阪府",
-  hyogo: "兵庫県",
-  nara: "奈良県",
-  wakayama: "和歌山県",
-  tottori: "鳥取県",
-  shimane: "島根県",
-  okayama: "岡山県",
-  hiroshima: "広島県",
-  yamaguchi: "山口県",
-  tokushima: "徳島県",
-  kagawa: "香川県",
-  ehime: "愛媛県",
-  kochi: "高知県",
-  fukuoka: "福岡県",
-  saga: "佐賀県",
-  nagasaki: "長崎県",
-  kumamoto: "熊本県",
-  oita: "大分県",
-  miyazaki: "宮崎県",
-  kagoshima: "鹿児島県",
-  okinawa: "沖縄県",
-}
-
-export async function generateMetadata({ params }: { params: { prefecture: string } }): Promise<Metadata> {
-  const prefectureName = prefectureMap[params.prefecture] || "都道府県"
-
-  return {
-    title: `${prefectureName}のAGA治療クリニック一覧 | aga治療.com`,
-    description: `${prefectureName}のAGA治療専門クリニック一覧。診療時間、住所、アクセス、口コミ情報を掲載。`,
-  }
+  hokkaido: "北海道", aomori: "青森県", iwate: "岩手県", miyagi: "宮城県",
+  akita: "秋田県", yamagata: "山形県", fukushima: "福島県", ibaraki: "茨城県",
+  tochigi: "栃木県", gunma: "群馬県", saitama: "埼玉県", chiba: "千葉県",
+  tokyo: "東京都", kanagawa: "神奈川県", niigata: "新潟県", toyama: "富山県",
+  ishikawa: "石川県", fukui: "福井県", yamanashi: "山梨県", nagano: "長野県",
+  gifu: "岐阜県", shizuoka: "静岡県", aichi: "愛知県", mie: "三重県",
+  shiga: "滋賀県", kyoto: "京都府", osaka: "大阪府", hyogo: "兵庫県",
+  nara: "奈良県", wakayama: "和歌山県", tottori: "鳥取県", shimane: "島根県",
+  okayama: "岡山県", hiroshima: "広島県", yamaguchi: "山口県", tokushima: "徳島県",
+  kagawa: "香川県", ehime: "愛媛県", kochi: "高知県", fukuoka: "福岡県",
+  saga: "佐賀県", nagasaki: "長崎県", kumamoto: "熊本県", oita: "大分県",
+  miyazaki: "宮崎県", kagoshima: "鹿児島県", okinawa: "沖縄県",
 }
 
 const ITEMS_PER_PAGE = 15
 
-export default async function PrefecturePage({
-  params,
-  searchParams,
-}: {
-  params: { prefecture: string }
-  searchParams: {
-    page?: string
-    city?: string
-    specialty?: string
-    feature?: string
-    weekend?: string
-    evening?: string
-    director?: string
-  }
-}) {
-  const prefectureName = prefectureMap[params.prefecture]
+export default function PrefecturePage() {
+  const params = useParams()
+  const searchParams = useSearchParams()
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [activeSort, setActiveSort] = useState('recommended')
+  const [showMap, setShowMap] = useState(false)
+  const [clinics, setClinics] = useState<any[]>([])
+  const [totalCount, setTotalCount] = useState(0)
+  const [loading, setLoading] = useState(true)
+  const [facetData, setFacetData] = useState<any>({})
+  const [relatedMunicipalities, setRelatedMunicipalities] = useState<any[]>([])
+  const [relatedStations, setRelatedStations] = useState<any[]>([])
 
-  if (!prefectureName) {
-    notFound()
-  }
+  const prefecture = params.prefecture as string
+  const prefectureName = prefectureMap[prefecture]
+  const currentPage = Number(searchParams.get('page')) || 1
 
-  const supabase = await createClient()
-  const currentPage = Number(searchParams.page) || 1
+  useEffect(() => {
+    async function fetchData() {
+      if (!prefectureName) {
+        notFound()
+        return
+      }
 
-  // Get clinics for facet generation with current filters applied (except city filter)
-  let facetQuery = supabase
-    .from("clinics")
-    .select("municipalities, stations, featured_subjects, 土曜, 日曜, 月曜, 火曜, 水曜, 木曜, 金曜, 院長名, 特徴")
-    .eq("prefecture", prefectureName)
+      setLoading(true)
+      const supabase = createClient()
 
-  // Apply same filters as main query, except city (so we can show all cities)
-  if (searchParams.specialty) {
-    facetQuery = facetQuery.ilike("featured_subjects", `%${searchParams.specialty}%`)
-  }
+      // Get clinics for facet generation
+      let facetQuery = supabase
+        .from("clinics")
+        .select("municipalities, stations, featured_subjects, 土曜, 日曜, 月曜, 火曜, 水曜, 木曜, 金曜, 院長名, 特徴")
+        .eq("prefecture", prefectureName)
 
-  if (searchParams.feature) {
-    facetQuery = facetQuery.ilike("特徴", `%${searchParams.feature}%`)
-  }
+      const { data: allClinics } = await facetQuery
 
-  if (searchParams.weekend) {
-    facetQuery = facetQuery.or("土曜.not.is.null,日曜.not.is.null")
-  }
+      // Build main query
+      let clinicsQuery = supabase
+        .from("clinics")
+        .select("*", { count: "exact" })
+        .eq("prefecture", prefectureName)
 
-  if (searchParams.evening) {
-    facetQuery = facetQuery.or(
-      "月曜.ilike.%18:%,月曜.ilike.%19:%,月曜.ilike.%20:%,火曜.ilike.%18:%,火曜.ilike.%19:%,火曜.ilike.%20:%,水曜.ilike.%18:%,水曜.ilike.%19:%,水曜.ilike.%20:%,木曜.ilike.%18:%,木曜.ilike.%19:%,木曜.ilike.%20:%,金曜.ilike.%18:%,金曜.ilike.%19:%,金曜.ilike.%20:%"
-    )
-  }
+      // Get total count
+      const { count } = await clinicsQuery
 
-  if (searchParams.director) {
-    facetQuery = facetQuery.not("院長名", "is", null)
-  }
+      // Get paginated data
+      const from = (currentPage - 1) * ITEMS_PER_PAGE
+      const to = from + ITEMS_PER_PAGE - 1
 
-  const { data: allClinics } = await facetQuery
+      const { data, error } = await clinicsQuery
+        .order("rating", { ascending: false, nullsLast: true })
+        .range(from, to)
 
-  const uniqueCities = Array.from(
-    new Set(allClinics?.map((m) => m.municipalities).filter(Boolean))
-  ).sort()
+      if (error) {
+        console.error("Error fetching clinics:", error)
+      }
 
-  // Build query for clinics
-  let clinicsQuery = supabase
-    .from("clinics")
-    .select("*", { count: "exact" })
-    .eq("prefecture", prefectureName)
+      // Calculate facet data
+      const specialtyMap = new Map<string, number>()
+      const featureMap = new Map<string, number>()
+      const municipalityMap = new Map<string, number>()
+      const stationMap = new Map<string, number>()
+      let weekendCount = 0
+      let eveningCount = 0
+      let directorCount = 0
 
-  // Apply filters
-  if (searchParams.city) {
-    clinicsQuery = clinicsQuery.eq("municipalities", searchParams.city)
-  }
+      allClinics?.forEach((clinic) => {
+        // Municipalities
+        if (clinic.municipalities) {
+          const municipality = clinic.municipalities.trim()
+          municipalityMap.set(municipality, (municipalityMap.get(municipality) || 0) + 1)
+        }
 
-  if (searchParams.specialty) {
-    clinicsQuery = clinicsQuery.ilike("featured_subjects", `%${searchParams.specialty}%`)
-  }
+        // Specialties
+        if (clinic.featured_subjects) {
+          clinic.featured_subjects.split(",").forEach((s: string) => {
+            const specialty = s.trim()
+            if (specialty) {
+              specialtyMap.set(specialty, (specialtyMap.get(specialty) || 0) + 1)
+            }
+          })
+        }
 
-  if (searchParams.feature) {
-    clinicsQuery = clinicsQuery.ilike("特徴", `%${searchParams.feature}%`)
-  }
+        // Features
+        if (clinic.特徴) {
+          clinic.特徴.split(",").forEach((f: string) => {
+            const feature = f.trim()
+            if (feature && feature !== "-") {
+              featureMap.set(feature, (featureMap.get(feature) || 0) + 1)
+            }
+          })
+        }
 
-  if (searchParams.weekend) {
-    clinicsQuery = clinicsQuery.or("土曜.not.is.null,日曜.not.is.null")
-  }
+        // Stations
+        if (clinic.stations) {
+          const stations = clinic.stations.split(",").map((s: string) => s.trim())
+          stations.forEach((station: string) => {
+            if (station && station !== "-") {
+              stationMap.set(station, (stationMap.get(station) || 0) + 1)
+            }
+          })
+        }
 
-  if (searchParams.evening) {
-    clinicsQuery = clinicsQuery.or(
-      "月曜.ilike.%18:%,月曜.ilike.%19:%,月曜.ilike.%20:%,火曜.ilike.%18:%,火曜.ilike.%19:%,火曜.ilike.%20:%,水曜.ilike.%18:%,水曜.ilike.%19:%,水曜.ilike.%20:%,木曜.ilike.%18:%,木曜.ilike.%19:%,木曜.ilike.%20:%,金曜.ilike.%18:%,金曜.ilike.%19:%,金曜.ilike.%20:%"
-    )
-  }
+        // Weekend
+        if (clinic.土曜 || clinic.日曜) {
+          weekendCount++
+        }
 
-  if (searchParams.director) {
-    clinicsQuery = clinicsQuery.not("院長名", "is", null)
-  }
+        // Evening
+        const hasEvening = [
+          clinic.月曜,
+          clinic.火曜,
+          clinic.水曜,
+          clinic.木曜,
+          clinic.金曜,
+        ].some((hours: string) => hours && (hours.includes("18:") || hours.includes("19:") || hours.includes("20:")))
+        if (hasEvening) {
+          eveningCount++
+        }
 
-  // Get total count
-  const { count: totalCount } = await clinicsQuery
-
-  // Get paginated data
-  const from = (currentPage - 1) * ITEMS_PER_PAGE
-  const to = from + ITEMS_PER_PAGE - 1
-
-  const { data: clinics, error } = await clinicsQuery
-    .order("rating", { ascending: false, nullsLast: true })
-    .range(from, to)
-
-  if (error) {
-    console.error("[v0] Error fetching clinics:", error)
-  }
-
-  const totalPages = Math.ceil((totalCount || 0) / ITEMS_PER_PAGE)
-
-  // Calculate facet data
-  const specialtyMap = new Map<string, number>()
-  const featureMap = new Map<string, number>()
-  let weekendCount = 0
-  let eveningCount = 0
-  let directorCount = 0
-
-  allClinics?.forEach((clinic) => {
-    // Specialties
-    if (clinic.featured_subjects) {
-      clinic.featured_subjects.split(",").forEach((s: string) => {
-        const specialty = s.trim()
-        if (specialty) {
-          specialtyMap.set(specialty, (specialtyMap.get(specialty) || 0) + 1)
+        // Director
+        if (clinic.院長名) {
+          directorCount++
         }
       })
-    }
 
-    // Features
-    if (clinic.特徴) {
-      clinic.特徴.split(",").forEach((f: string) => {
-        const feature = f.trim()
-        if (feature && feature !== "-") {
-          featureMap.set(feature, (featureMap.get(feature) || 0) + 1)
-        }
+      setFacetData({
+        specialties: Array.from(specialtyMap.entries())
+          .map(([name, count]) => ({ name, count }))
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 15),
+        features: Array.from(featureMap.entries())
+          .map(([name, count]) => ({ name, count }))
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 10),
+        weekend: weekendCount,
+        evening: eveningCount,
+        director: directorCount,
       })
+
+      setRelatedMunicipalities(
+        Array.from(municipalityMap.entries())
+          .map(([name, count]) => ({ name, count }))
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 12)
+      )
+
+      setRelatedStations(
+        Array.from(stationMap.entries())
+          .map(([name, count]) => ({ name, count }))
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 10)
+      )
+
+      setClinics(data || [])
+      setTotalCount(count || 0)
+      setLoading(false)
     }
 
-    // Weekend
-    if (clinic.土曜 || clinic.日曜) {
-      weekendCount++
-    }
+    fetchData()
+  }, [prefecture, prefectureName, currentPage])
 
-    // Evening (18:00以降)
-    const hasEvening = [
-      clinic.月曜,
-      clinic.火曜,
-      clinic.水曜,
-      clinic.木曜,
-      clinic.金曜,
-    ].some((hours) => hours && (hours.includes("18:") || hours.includes("19:") || hours.includes("20:")))
-    if (hasEvening) {
-      eveningCount++
-    }
-
-    // Director
-    if (clinic.院長名) {
-      directorCount++
-    }
-  })
-
-  const facetData = {
-    prefectures: [], // Not needed for prefecture page
-    cities: uniqueCities,
-    specialties: Array.from(specialtyMap.entries())
-      .map(([name, count]) => ({ name, count }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 15),
-    features: Array.from(featureMap.entries())
-      .map(([name, count]) => ({ name, count }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 10),
-    weekend: weekendCount,
-    evening: eveningCount,
-    director: directorCount,
-  }
-
-  // Extract municipalities with counts from clinic_counts table
-  const { data: municipalityCounts } = await supabase
-    .from("clinic_counts")
-    .select("municipality, clinic_count")
-    .eq("count_type", "municipality")
-    .eq("prefecture", prefectureName)
-    .not("municipality", "is", null)
-    .order("clinic_count", { ascending: false })
-    .limit(10)
-
-  const relatedMunicipalities = municipalityCounts
-    ? municipalityCounts.map((row: { municipality: string; clinic_count: number }) => ({
-        name: row.municipality,
-        count: row.clinic_count
-      }))
-    : []
-
-  // Fallback: use allClinics if clinic_counts query failed or returned empty
-  if (relatedMunicipalities.length === 0 && allClinics) {
-    const municipalityMap = new Map<string, number>()
-    allClinics.forEach((clinic: any) => {
-      if (clinic.municipalities) {
-        const municipality = clinic.municipalities.trim()
-        municipalityMap.set(municipality, (municipalityMap.get(municipality) || 0) + 1)
+  // Extract opening hours for each clinic
+  const getOpeningHours = (clinic: any) => {
+    const days = ['月曜', '火曜', '水曜', '木曜', '金曜', '土曜', '日曜']
+    const hours: string[] = []
+    days.forEach(day => {
+      if (clinic[day] && clinic[day] !== '-') {
+        hours.push(`${day}: ${clinic[day]}`)
       }
     })
-    relatedMunicipalities.push(
-      ...Array.from(municipalityMap.entries())
-        .map(([name, count]) => ({ name, count }))
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 10)
-    )
+    return hours.length > 0 ? hours.join(', ') : '要確認'
   }
 
-  // Extract stations with counts from clinic_counts table
-  const { data: stationCounts } = await supabase
-    .from("clinic_counts")
-    .select("station, clinic_count")
-    .eq("count_type", "station")
-    .eq("prefecture", prefectureName)
-    .not("station", "is", null)
-    .order("clinic_count", { ascending: false })
-    .limit(10)
-
-  const relatedStations = stationCounts
-    ? stationCounts.map((row: { station: string; clinic_count: number }) => ({
-        name: row.station,
-        count: row.clinic_count
-      }))
-    : []
-
-  // Fallback: use allClinics if clinic_counts query failed or returned empty
-  if (relatedStations.length === 0 && allClinics) {
-    const stationMap = new Map<string, number>()
-    allClinics.forEach((clinic: any) => {
-      if (clinic.stations) {
-        const stations = clinic.stations.split(",").map((s: string) => s.trim())
-        stations.forEach((station: string) => {
-          if (station && station !== "-") {
-            stationMap.set(station, (stationMap.get(station) || 0) + 1)
-          }
-        })
-      }
-    })
-    relatedStations.push(
-      ...Array.from(stationMap.entries())
-        .map(([name, count]) => ({ name, count }))
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 10)
-    )
+  // Get first station from stations list
+  const getFirstStation = (stations: string | null) => {
+    if (!stations || stations === '-') return '駅情報なし'
+    const stationList = stations.split(',')
+    return stationList[0]?.trim() || '駅情報なし'
   }
 
-  // Generate JSON-LD structured data
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "ItemList",
-    "numberOfItems": totalCount || 0,
-    "itemListElement": clinics?.map((clinic, index) => ({
-      "@type": "ListItem",
-      "position": from + index + 1,
-      "item": {
-        "@type": "MedicalClinic",
-        "@id": `https://aga治療.com/clinics/${clinic.slug}`,
-        "name": clinic.clinic_name,
-        "url": clinic.url || `https://aga治療.com/clinics/${clinic.slug}`,
-        "address": {
-          "@type": "PostalAddress",
-          "streetAddress": clinic.address,
-          "addressRegion": clinic.prefecture,
-          "addressLocality": clinic.municipalities || "",
-          "addressCountry": "JP"
-        },
-        "telephone": clinic.corp_tel || "",
-        ...(clinic.rating && {
-          "aggregateRating": {
-            "@type": "AggregateRating",
-            "ratingValue": clinic.rating,
-            "reviewCount": clinic.review_count || 0,
-            "bestRating": 5,
-            "worstRating": 1
-          }
-        }),
-        "medicalSpecialty": clinic.clinic_spec || "AGA治療"
-      }
-    })) || []
+  // Get features as array
+  const getFeatures = (clinic: any) => {
+    const features: string[] = []
+    if (clinic.特徴 && clinic.特徴 !== '-') {
+      const featureList = clinic.特徴.split(',').map((f: string) => f.trim()).filter(Boolean)
+      features.push(...featureList.slice(0, 3))
+    }
+    if (clinic.online_consultation) {
+      features.unshift('オンライン診療')
+    }
+    return features
   }
+
+  const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE)
+
+  // Area description
+  const areaDescription = `${prefectureName}には、AGA（男性型脱毛症）治療を専門とするクリニックが${totalCount}件あります。当サイトでは、各クリニックの診療時間、住所、アクセス情報、取扱治療薬、口コミ評価などの詳細情報を掲載しています。`
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <Header />
-
-      {/* JSON-LD Structured Data */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-      />
-
-      <main className="flex-1">
-        {/* Breadcrumb */}
-        <div className="border-b border-border bg-muted/30">
-          <div className="container py-4">
-            <nav className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Link href="/" className="hover:text-foreground transition-colors">
-                ホーム
-              </Link>
-              <ChevronRight className="h-4 w-4" />
-              <Link href="/areas" className="hover:text-foreground transition-colors">
-                エリア一覧
-              </Link>
-              <ChevronRight className="h-4 w-4" />
-              <span className="text-foreground font-medium">{prefectureName}</span>
+    <div className="min-h-screen bg-slate-50 font-sans text-slate-800">
+      {/* Header */}
+      <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md shadow-sm border-b border-slate-100">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <Link href="/" className="flex items-center gap-2 group cursor-pointer">
+              <div className="bg-slate-900 text-teal-400 p-1.5 rounded-lg">
+                <TrendingUp size={20} />
+              </div>
+              <span className="text-xl font-bold tracking-tight text-slate-900">AGAミライ</span>
+            </Link>
+            <nav className="hidden md:flex space-x-8 text-sm font-bold text-slate-500">
+              <Link href="#" className="hover:text-teal-600 transition">AGAとは</Link>
+              <Link href="/search" className="hover:text-teal-600 transition">クリニック検索</Link>
+              <Link href="#" className="hover:text-teal-600 transition">治療薬・費用</Link>
             </nav>
-          </div>
-        </div>
-
-        {/* Page Header */}
-        <div className="border-b border-border bg-secondary/20">
-          <div className="container py-12">
-            <div className="flex items-center gap-3 mb-4">
-              <MapPin className="h-8 w-8 text-accent" />
-              <h1 className="text-3xl font-bold text-foreground md:text-4xl">{prefectureName}のAGA治療クリニック</h1>
+            <div className="flex items-center gap-4">
+              <button
+                className="md:hidden p-2 text-slate-600"
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+              >
+                {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+              </button>
+              <button className="hidden md:block bg-teal-600 hover:bg-teal-700 text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-lg shadow-teal-600/20 transition">
+                無料カウンセリング
+              </button>
             </div>
-            <p className="text-lg text-muted-foreground">{totalCount || 0}件のクリニック</p>
           </div>
         </div>
+      </header>
 
-        <div className="container py-12">
-          <div className="grid gap-8 lg:grid-cols-[280px_1fr]">
-            {/* Facet Sidebar */}
-            <aside className="hidden lg:block">
-              <div className="sticky top-24">
-                <SearchFilters facets={facetData} />
+      {/* Breadcrumbs */}
+      <div className="bg-white border-b border-slate-100">
+        <div className="max-w-6xl mx-auto px-4 py-3">
+          <nav className="flex items-center text-xs text-slate-500 overflow-x-auto whitespace-nowrap">
+            <Link href="/" className="hover:text-teal-600 transition">TOP</Link>
+            <ChevronRight size={12} className="mx-2 flex-shrink-0" />
+            <Link href="/areas" className="hover:text-teal-600 transition">エリア一覧</Link>
+            <ChevronRight size={12} className="mx-2 flex-shrink-0" />
+            <span className="font-bold text-slate-900">{prefectureName}のAGAクリニック</span>
+          </nav>
+        </div>
+      </div>
+
+      <div className="max-w-6xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+        {/* Main Content */}
+        <main className="lg:col-span-8">
+
+          {/* Area Title & Intro */}
+          <div className="mb-8">
+            <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 mb-4 leading-tight">
+              {prefectureName}のおすすめAGAクリニック一覧
+              <span className="ml-3 inline-flex items-center bg-teal-50 text-teal-700 text-base px-3 py-1 rounded-full align-middle font-bold">
+                {totalCount}件掲載
+              </span>
+            </h1>
+            <div className="text-sm text-slate-600 leading-relaxed bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+              <p>{areaDescription}</p>
+            </div>
+          </div>
+
+          {/* Desktop Filter Bar */}
+          <div className="hidden lg:flex items-center justify-between bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-6 sticky top-20 z-30">
+            <div className="flex items-center gap-4">
+              <span className="font-bold text-sm text-slate-900">並び替え:</span>
+              <div className="flex bg-slate-100 p-1 rounded-lg">
+                <button
+                  onClick={() => setActiveSort('recommended')}
+                  className={`px-4 py-1.5 rounded-md text-xs font-bold transition ${activeSort === 'recommended' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500 hover:text-slate-700'}`}
+                >
+                  おすすめ順
+                </button>
+                <button
+                  onClick={() => setActiveSort('price')}
+                  className={`px-4 py-1.5 rounded-md text-xs font-bold transition ${activeSort === 'price' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500 hover:text-slate-700'}`}
+                >
+                  料金が安い順
+                </button>
               </div>
-            </aside>
-
-            {/* Clinic List */}
-            <div>
-              {/* Diagnosis Tool */}
-              <DiagnosisTool />
-
-              <div className="mb-6 flex items-center justify-between">
-                <p className="text-sm text-muted-foreground">
-                  {totalCount || 0}件中 {from + 1}〜{Math.min(to + 1, totalCount || 0)}件を表示
-                </p>
-              </div>
-
-              <div className="space-y-4">
-                {clinics && clinics.length > 0 ? (
-                  clinics.map((clinic, index) => (
-                    <EnhancedClinicCard
-                      key={clinic.id}
-                      clinic={clinic}
-                      position={from + index + 1}
-                    />
-                  ))
-                ) : (
-                  <div className="text-center py-12">
-                    <p className="text-muted-foreground">条件に一致するクリニックが見つかりませんでした。</p>
-                  </div>
-                )}
-              </div>
-
-              {/* Pagination */}
-              {totalPages > 1 && (
-                <div className="mt-8 flex items-center justify-center gap-2">
-                  {currentPage > 1 && (
-                    <Link href={`/areas/${params.prefecture}?page=${currentPage - 1}`}>
-                      <Button variant="outline">前へ</Button>
-                    </Link>
-                  )}
-                  <span className="text-sm text-muted-foreground">
-                    {currentPage} / {totalPages}
-                  </span>
-                  {currentPage < totalPages && (
-                    <Link href={`/areas/${params.prefecture}?page=${currentPage + 1}`}>
-                      <Button variant="outline">次へ</Button>
-                    </Link>
-                  )}
+            </div>
+            <div className="flex items-center gap-2">
+              <label className="flex items-center gap-2 cursor-pointer group">
+                <div className="w-5 h-5 border-2 border-slate-300 rounded group-hover:border-teal-500 transition flex items-center justify-center">
+                  {showMap && <div className="w-3 h-3 bg-teal-500 rounded-sm"></div>}
                 </div>
+                <span className="text-sm font-bold text-slate-600 group-hover:text-teal-600 transition" onClick={() => setShowMap(!showMap)}>地図を表示</span>
+              </label>
+            </div>
+          </div>
+
+          {/* Diagnosis Tool */}
+          <div className="mb-10">
+            <DiagnosisTool />
+          </div>
+
+          {/* Clinic List */}
+          <div className="space-y-8">
+            {loading ? (
+              <div className="text-center py-12 bg-white rounded-2xl border border-slate-200">
+                <p className="text-slate-500">読み込み中...</p>
+              </div>
+            ) : clinics.length > 0 ? (
+              clinics.map((clinic, index) => (
+                <div key={clinic.id} className="bg-white rounded-2xl p-5 md:p-6 shadow-sm border border-slate-200 hover:border-slate-400 transition group">
+
+                  {clinic.rating && clinic.rating >= 4.5 && (
+                    <div className="text-[10px] font-bold text-slate-400 mb-2 flex items-center justify-between">
+                      <span>おすすめPICKUP</span>
+                    </div>
+                  )}
+
+                  <div className="flex flex-col sm:flex-row gap-6">
+                    <div className="sm:w-56 flex-shrink-0">
+                      <div className="w-full h-40 bg-slate-200 rounded-xl mb-3 relative overflow-hidden border border-slate-100">
+                        <div className="absolute top-2 left-2 bg-white/90 backdrop-blur px-2 py-1 rounded text-[10px] font-bold shadow-sm text-slate-800">
+                          外観写真
+                        </div>
+                        <div className="flex items-center justify-center h-full text-slate-400 text-xs font-bold">NO IMAGE</div>
+                      </div>
+                      <div className="hidden sm:block">
+                        <Link href={`/clinics/${clinic.slug}`}>
+                          <button className="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold text-sm py-3 rounded-lg shadow-md shadow-teal-600/20 transition transform active:scale-95">
+                            詳細ページを見る
+                          </button>
+                        </Link>
+                        {clinic.url && (
+                          <a href={clinic.url} target="_blank" rel="noopener noreferrer">
+                            <button className="w-full mt-2 text-teal-600 font-bold text-xs hover:bg-teal-50 py-2 rounded transition">
+                              公式サイトへ
+                            </button>
+                          </a>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex-1 flex flex-col h-full">
+                      <div>
+                        <h2 className="text-xl font-bold text-slate-900 leading-tight group-hover:text-teal-700 transition mb-2">
+                          {clinic.clinic_name}
+                        </h2>
+
+                        {clinic.catchphrase && (
+                          <p className="text-teal-600 font-bold text-sm mb-3 flex items-start gap-1.5">
+                            <CheckCircle2 size={16} className="mt-0.5 flex-shrink-0" />
+                            {clinic.catchphrase}
+                          </p>
+                        )}
+
+                        {clinic.description && (
+                          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed mb-4 bg-slate-50/50 p-3 rounded lg:bg-transparent lg:p-0">
+                            {clinic.description}
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="flex flex-wrap gap-2 mb-5">
+                        {getFeatures(clinic).map((feature, i) => (
+                          <span key={i} className="text-xs font-medium px-2 py-1 bg-slate-100 text-slate-600 rounded border border-slate-200">
+                            {feature}
+                          </span>
+                        ))}
+                      </div>
+
+                      <div className="mt-auto bg-slate-50 rounded-xl border border-slate-100 overflow-hidden text-sm">
+                        <div className="grid grid-cols-1 md:grid-cols-2 border-b border-slate-100">
+                          <div className="p-4 flex items-start gap-3 border-b md:border-b-0 border-slate-100 md:border-r">
+                            <TrendingUp size={18} className="text-teal-600 mt-0.5 flex-shrink-0" />
+                            <div>
+                              <p className="text-[10px] text-slate-500 font-bold mb-1">評価</p>
+                              {clinic.rating ? (
+                                <p className="text-lg font-bold text-slate-900 leading-none">
+                                  ★{clinic.rating.toFixed(1)}
+                                  {clinic.review_count && (
+                                    <span className="text-xs text-slate-500 font-normal ml-1">({clinic.review_count}件)</span>
+                                  )}
+                                </p>
+                              ) : (
+                                <p className="text-sm text-slate-500">評価なし</p>
+                              )}
+                            </div>
+                          </div>
+                          <div className="p-4 flex items-start gap-3">
+                            <Train size={18} className="text-teal-600 mt-0.5 flex-shrink-0" />
+                            <div>
+                              <p className="text-[10px] text-slate-500 font-bold mb-1">アクセス</p>
+                              <p className="text-sm text-slate-800 font-medium leading-tight">{getFirstStation(clinic.stations)}</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 border-b border-slate-100 bg-white md:bg-slate-50">
+                          <div className="p-3 px-4 flex items-start gap-3 border-b md:border-b-0 border-slate-100 md:border-r">
+                            <CheckCircle2 size={16} className="text-slate-400 mt-0.5 flex-shrink-0" />
+                            <div>
+                              <p className="text-[10px] text-slate-500 font-bold">診療時間</p>
+                              <p className="text-xs text-slate-600 mt-0.5 line-clamp-2">{getOpeningHours(clinic)}</p>
+                            </div>
+                          </div>
+                          {clinic.院長名 && (
+                            <div className="p-3 px-4 flex items-start gap-3">
+                              <User size={16} className="text-slate-400 mt-0.5 flex-shrink-0" />
+                              <div>
+                                <p className="text-[10px] text-slate-500 font-bold">院長・医師</p>
+                                <p className="text-xs text-slate-600 mt-0.5">{clinic.院長名}</p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="p-3 px-4 flex flex-col md:flex-row md:items-center gap-3 md:gap-6 bg-slate-100/50">
+                          <div className="flex items-center gap-2">
+                            <MapPin size={14} className="text-slate-400 flex-shrink-0" />
+                            <span className="text-xs text-slate-500">{clinic.address}</span>
+                          </div>
+                          {clinic.corp_tel && (
+                            <div className="flex items-center gap-2 md:ml-auto">
+                              <Phone size={14} className="text-slate-400 flex-shrink-0" />
+                              <span className="text-xs font-bold text-slate-600">{clinic.corp_tel}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="sm:hidden mt-4">
+                        <Link href={`/clinics/${clinic.slug}`}>
+                          <button className="w-full bg-teal-600 text-white font-bold py-3 rounded-lg shadow-md">
+                            詳細ページを見る
+                          </button>
+                        </Link>
+                      </div>
+
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-12 bg-white rounded-2xl border border-slate-200">
+                <p className="text-slate-500">クリニックが見つかりませんでした。</p>
+              </div>
+            )}
+          </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="mt-10 flex justify-center gap-2">
+              {currentPage > 1 && (
+                <Link href={`/areas/${prefecture}?page=${currentPage - 1}`}>
+                  <button className="px-5 py-2.5 rounded-lg bg-white text-slate-600 hover:bg-slate-100 font-medium border border-slate-200 transition">
+                    前へ
+                  </button>
+                </Link>
+              )}
+              <div className="flex items-center px-4 py-2.5 rounded-lg bg-slate-900 text-white font-bold shadow-md">
+                {currentPage} / {totalPages}
+              </div>
+              {currentPage < totalPages && (
+                <Link href={`/areas/${prefecture}?page=${currentPage + 1}`}>
+                  <button className="px-5 py-2.5 rounded-lg bg-white text-slate-600 hover:bg-slate-100 font-medium border border-slate-200 transition">
+                    次へ
+                  </button>
+                </Link>
               )}
             </div>
-          </div>
+          )}
 
-          {/* Related Municipalities and Stations Section */}
-          <div className="mt-8 grid gap-6 lg:grid-cols-2">
-            {/* Related Municipalities */}
-            {relatedMunicipalities.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <MapPin className="h-5 w-5" />
-                    {prefectureName}の市区町村
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid gap-3 grid-cols-1 sm:grid-cols-2">
-                    {relatedMunicipalities.map((municipality) => (
-                      <Link
-                        key={municipality.name}
-                        href={`/areas/${params.prefecture}/${encodeURIComponent(municipality.name)}`}
-                        className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-accent hover:border-coral transition-colors group"
-                      >
-                        <div className="flex items-center gap-3">
-                          <MapPin className="h-4 w-4 text-muted-foreground group-hover:text-coral flex-shrink-0 transition-colors" />
-                          <span className="text-sm font-medium group-hover:text-coral transition-colors">{municipality.name}</span>
-                        </div>
-                        <span className="text-xs text-muted-foreground bg-muted group-hover:bg-coral/10 px-2 py-1 rounded transition-colors">
-                          {municipality.count}件
-                        </span>
-                      </Link>
-                    ))}
+          {/* SEO Content */}
+          <section className="mt-20 bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+            <div className="bg-slate-900 text-white p-6 md:p-8">
+              <h2 className="text-xl md:text-2xl font-bold flex items-center gap-3">
+                <HelpCircle className="text-teal-400" />
+                {prefectureName}でのAGAクリニックの選び方
+              </h2>
+              <p className="text-slate-300 text-sm mt-2 opacity-90">
+                後悔しないためにチェックすべき3つのポイントを解説します。
+              </p>
+            </div>
+
+            <div className="p-6 md:p-8 space-y-10">
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-3">
+                  <span className="bg-teal-100 text-teal-700 w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm">01</span>
+                  「維持費（ランニングコスト）」の総額で比較する
+                </h3>
+                <div className="pl-11 space-y-3 text-sm text-slate-600 leading-relaxed">
+                  <p>
+                    AGA治療は継続が前提です。初回キャンペーン価格（例: 初月0円）だけで選んでしまうと、2ヶ月目以降の料金が高額で続けられなくなるケースがあります。
+                  </p>
+                  <div className="bg-slate-50 p-4 rounded-lg border border-slate-100">
+                    <p className="font-bold text-slate-800 mb-2 text-xs">チェックポイント</p>
+                    <ul className="space-y-2">
+                      <li className="flex items-start gap-2">
+                        <CheckCircle2 size={14} className="text-teal-500 mt-0.5 flex-shrink-0" />
+                        <span>診察料や血液検査代は毎回かかるか？（無料のクリニックも多い）</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle2 size={14} className="text-teal-500 mt-0.5 flex-shrink-0" />
+                        <span>2ヶ月目以降の薬代は予算内か？（月額5,000円〜15,000円が相場）</span>
+                      </li>
+                    </ul>
                   </div>
-                </CardContent>
-              </Card>
-            )}
+                </div>
+              </div>
 
-            {/* Related Stations */}
-            {relatedStations.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Train className="h-5 w-5" />
-                    {prefectureName}の主要駅
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid gap-3 grid-cols-1 sm:grid-cols-2">
-                    {relatedStations.map((station) => {
-                      const stationSlug = getStationSlug(station.name)
-                      return (
-                        <Link
-                          key={station.name}
-                          href={`/stations/${stationSlug}`}
-                          className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-accent hover:border-coral transition-colors group"
-                        >
-                          <div className="flex items-center gap-3">
-                            <Train className="h-4 w-4 text-muted-foreground group-hover:text-coral flex-shrink-0 transition-colors" />
-                            <span className="text-sm font-medium group-hover:text-coral transition-colors">{station.name}</span>
-                          </div>
-                          <span className="text-xs text-muted-foreground bg-muted group-hover:bg-coral/10 px-2 py-1 rounded transition-colors">
-                            {station.count}件
-                          </span>
-                        </Link>
-                      )
-                    })}
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-3">
+                  <span className="bg-teal-100 text-teal-700 w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm">02</span>
+                  「通いやすさ」か「オンライン」かを決める
+                </h3>
+                <div className="pl-11 space-y-3 text-sm text-slate-600 leading-relaxed">
+                  <p>
+                    {prefectureName}エリアは駅周辺にクリニックが集中していますが、忙しい方は「オンライン診療」も検討しましょう。
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                    <div className="border border-slate-200 rounded-lg p-4">
+                      <p className="font-bold text-slate-900 mb-1">🏥 通院するメリット</p>
+                      <p className="text-xs text-slate-500">マイクロスコープでの頭皮診断や、注入治療（メソセラピー）など高度な施術が受けられる。</p>
+                    </div>
+                    <div className="border border-slate-200 rounded-lg p-4">
+                      <p className="font-bold text-slate-900 mb-1">📱 オンラインのメリット</p>
+                      <p className="text-xs text-slate-500">通院時間ゼロ。薬は自宅配送。誰にも会わずに治療でき、料金も安く抑えられる傾向がある。</p>
+                    </div>
                   </div>
-                </CardContent>
-              </Card>
-            )}
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-3">
+                  <span className="bg-teal-100 text-teal-700 w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm">03</span>
+                  治療実績とプランの豊富さ
+                </h3>
+                <div className="pl-11 space-y-3 text-sm text-slate-600 leading-relaxed">
+                  <p>
+                    進行度によって適切な治療は異なります。「予防したいだけ」なら薬のみでOKですが、「かなり進行している」場合は内服薬・外用薬・注入治療などを組み合わせる提案力が必要です。
+                  </p>
+                  <p className="flex items-center gap-2 text-xs font-bold text-orange-600 bg-orange-50 p-2 rounded inline-block">
+                    <AlertTriangle size={14} />
+                    安すぎるプランは「成分濃度」が低い場合もあるので注意が必要です。
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+        </main>
+
+        {/* Sidebar */}
+        <aside className="lg:col-span-4 space-y-8">
+
+          {/* Search Box */}
+          <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+            <div className="flex items-center gap-2 mb-4 text-slate-900 font-bold">
+              <Filter size={18} />
+              <span>条件で絞り込む</span>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="text-xs font-bold text-slate-500 mb-2 block">こだわり条件</label>
+                <div className="space-y-2">
+                  {facetData.features?.slice(0, 5).map((feature: any, i: number) => (
+                    <label key={i} className="flex items-center justify-between cursor-pointer group">
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 rounded border border-slate-300 group-hover:border-teal-500 transition"></div>
+                        <span className="text-sm text-slate-700 group-hover:text-slate-900">{feature.name}</span>
+                      </div>
+                      <span className="text-xs text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-full">{feature.count}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
 
-          {/* SEO Content Section */}
-          <div className="mt-12 prose prose-sm max-w-none">
-            <h2 className="text-2xl font-bold mb-4">{prefectureName}のAGA治療について</h2>
-            <p className="text-muted-foreground mb-6">
-              {prefectureName}には、AGA（男性型脱毛症）治療を専門とするクリニックが{totalCount || 0}件あります。
-              当サイトでは、各クリニックの診療時間、住所、アクセス情報、取扱治療薬、口コミ評価などの詳細情報を掲載しています。
+          {/* Nearby Municipalities */}
+          {relatedMunicipalities.length > 0 && (
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+              <div className="flex items-center gap-2 mb-4 text-slate-900 font-bold">
+                <MapPin size={18} />
+                <span>{prefectureName}の市区町村</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {relatedMunicipalities.map((municipality, i) => (
+                  <Link
+                    key={i}
+                    href={`/areas/${prefecture}/${encodeURIComponent(municipality.name)}`}
+                    className="px-3 py-1.5 bg-slate-50 hover:bg-teal-50 hover:text-teal-700 hover:border-teal-200 border border-slate-200 rounded text-xs font-medium text-slate-600 transition"
+                  >
+                    {municipality.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* FAQ Widget */}
+          <div className="bg-teal-900 text-white p-6 rounded-2xl shadow-lg relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-teal-500 rounded-full filter blur-3xl opacity-20 -translate-y-1/2 translate-x-1/2"></div>
+            <h3 className="font-bold text-lg mb-3 relative z-10">初めての方へ</h3>
+            <p className="text-teal-100 text-sm mb-4 relative z-10 leading-relaxed">
+              クリニック選びで失敗しないためのポイントを医師が解説。
             </p>
-            <p className="text-muted-foreground mb-6">
-              AGA治療は早期発見・早期治療が重要です。薄毛や抜け毛が気になり始めたら、
-              まずは専門クリニックでの無料カウンセリングを受けることをおすすめします。
-              多くのクリニックでは初診料無料、オンライン診療対応など、気軽に相談できる体制を整えています。
-            </p>
+            <Link href="/help" className="inline-flex items-center gap-1 text-sm font-bold text-white border-b border-teal-400 pb-0.5 hover:text-teal-200 transition relative z-10">
+              失敗しない選び方ガイド <ChevronRight size={14} />
+            </Link>
           </div>
+
+        </aside>
+
+      </div>
+
+      {/* Related Stations Section */}
+      {relatedStations.length > 0 && (
+        <section className="border-t border-slate-200 bg-white py-12 mt-8">
+          <div className="max-w-6xl mx-auto px-4">
+            <h3 className="font-bold text-slate-900 mb-4 text-lg flex items-center gap-2">
+              <Train size={18} className="text-teal-600" />
+              {prefectureName}の主要駅
+            </h3>
+            <div className="grid gap-3 grid-cols-2 md:grid-cols-4 lg:grid-cols-5">
+              {relatedStations.map((station) => {
+                const stationSlug = getStationSlug(station.name)
+                return (
+                  <Link
+                    key={station.name}
+                    href={`/stations/${stationSlug}`}
+                    className="flex items-center justify-between p-4 rounded-lg border border-slate-200 hover:bg-teal-50 hover:border-teal-300 transition-colors group"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Train className="h-4 w-4 text-slate-400 group-hover:text-teal-600 flex-shrink-0 transition-colors" />
+                      <span className="text-sm font-medium group-hover:text-teal-700 transition-colors">{station.name}</span>
+                    </div>
+                    <span className="text-xs text-slate-400 bg-slate-50 group-hover:bg-teal-100 px-2 py-1 rounded transition-colors">
+                      {station.count}件
+                    </span>
+                  </Link>
+                )
+              })}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Nearby Municipalities Links */}
+      {relatedMunicipalities.length > 0 && (
+        <section className="border-t border-slate-200 bg-white py-12">
+          <div className="max-w-6xl mx-auto px-4">
+            <h3 className="font-bold text-slate-900 mb-4 text-lg flex items-center gap-2">
+              <MapPin size={18} className="text-teal-600" />
+              {prefectureName}のエリアからAGAクリニックを探す
+            </h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-y-3 gap-x-4">
+              {relatedMunicipalities.map((municipality, i) => (
+                <Link
+                  key={i}
+                  href={`/areas/${prefecture}/${encodeURIComponent(municipality.name)}`}
+                  className="text-sm text-slate-500 hover:text-teal-600 hover:underline flex items-center gap-1 transition group"
+                >
+                  <ChevronRight size={12} className="text-slate-300 group-hover:text-teal-400" />
+                  {municipality.name}
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Footer */}
+      <footer className="bg-slate-900 text-slate-400 py-12 text-sm">
+        <div className="max-w-6xl mx-auto px-4 text-center">
+          <div className="flex items-center justify-center gap-2 text-white font-bold text-lg mb-4">
+            <TrendingUp size={20} />
+            AGAミライ
+          </div>
+          <p className="opacity-50 text-xs">
+            &copy; 2025 AGA Mirai. All Rights Reserved.
+          </p>
         </div>
-      </main>
-      <Footer />
+      </footer>
     </div>
   )
 }
