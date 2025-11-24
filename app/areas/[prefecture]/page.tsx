@@ -101,7 +101,7 @@ export default async function PrefecturePage({
   // Get clinics for facet generation with current filters applied (except city filter)
   let facetQuery = supabase
     .from("clinics")
-    .select("municipalities, stations, featured_subjects, hours_saturday, hours_sunday, hours_monday, hours_tuesday, hours_wednesday, hours_thursday, hours_friday, director_name, features")
+    .select("municipalities, stations, featured_subjects, 土曜, 日曜, 月曜, 火曜, 水曜, 木曜, 金曜, 院長名, 特徴")
     .eq("prefecture", prefectureName)
 
   // Apply same filters as main query, except city (so we can show all cities)
@@ -110,21 +110,21 @@ export default async function PrefecturePage({
   }
 
   if (searchParams.feature) {
-    facetQuery = facetQuery.ilike("features", `%${searchParams.feature}%`)
+    facetQuery = facetQuery.ilike("特徴", `%${searchParams.feature}%`)
   }
 
   if (searchParams.weekend) {
-    facetQuery = facetQuery.or("hours_saturday.not.is.null,hours_sunday.not.is.null")
+    facetQuery = facetQuery.or("土曜.not.is.null,日曜.not.is.null")
   }
 
   if (searchParams.evening) {
     facetQuery = facetQuery.or(
-      "hours_monday.ilike.%18:%,hours_monday.ilike.%19:%,hours_monday.ilike.%20:%,hours_tuesday.ilike.%18:%,hours_tuesday.ilike.%19:%,hours_tuesday.ilike.%20:%,hours_wednesday.ilike.%18:%,hours_wednesday.ilike.%19:%,hours_wednesday.ilike.%20:%,hours_thursday.ilike.%18:%,hours_thursday.ilike.%19:%,hours_thursday.ilike.%20:%,hours_friday.ilike.%18:%,hours_friday.ilike.%19:%,hours_friday.ilike.%20:%"
+      "月曜.ilike.%18:%,月曜.ilike.%19:%,月曜.ilike.%20:%,火曜.ilike.%18:%,火曜.ilike.%19:%,火曜.ilike.%20:%,水曜.ilike.%18:%,水曜.ilike.%19:%,水曜.ilike.%20:%,木曜.ilike.%18:%,木曜.ilike.%19:%,木曜.ilike.%20:%,金曜.ilike.%18:%,金曜.ilike.%19:%,金曜.ilike.%20:%"
     )
   }
 
   if (searchParams.director) {
-    facetQuery = facetQuery.not("director_name", "is", null)
+    facetQuery = facetQuery.not("院長名", "is", null)
   }
 
   const { data: allClinics } = await facetQuery
@@ -149,21 +149,21 @@ export default async function PrefecturePage({
   }
 
   if (searchParams.feature) {
-    clinicsQuery = clinicsQuery.ilike("features", `%${searchParams.feature}%`)
+    clinicsQuery = clinicsQuery.ilike("特徴", `%${searchParams.feature}%`)
   }
 
   if (searchParams.weekend) {
-    clinicsQuery = clinicsQuery.or("hours_saturday.not.is.null,hours_sunday.not.is.null")
+    clinicsQuery = clinicsQuery.or("土曜.not.is.null,日曜.not.is.null")
   }
 
   if (searchParams.evening) {
     clinicsQuery = clinicsQuery.or(
-      "hours_monday.ilike.%18:%,hours_monday.ilike.%19:%,hours_monday.ilike.%20:%,hours_tuesday.ilike.%18:%,hours_tuesday.ilike.%19:%,hours_tuesday.ilike.%20:%,hours_wednesday.ilike.%18:%,hours_wednesday.ilike.%19:%,hours_wednesday.ilike.%20:%,hours_thursday.ilike.%18:%,hours_thursday.ilike.%19:%,hours_thursday.ilike.%20:%,hours_friday.ilike.%18:%,hours_friday.ilike.%19:%,hours_friday.ilike.%20:%"
+      "月曜.ilike.%18:%,月曜.ilike.%19:%,月曜.ilike.%20:%,火曜.ilike.%18:%,火曜.ilike.%19:%,火曜.ilike.%20:%,水曜.ilike.%18:%,水曜.ilike.%19:%,水曜.ilike.%20:%,木曜.ilike.%18:%,木曜.ilike.%19:%,木曜.ilike.%20:%,金曜.ilike.%18:%,金曜.ilike.%19:%,金曜.ilike.%20:%"
     )
   }
 
   if (searchParams.director) {
-    clinicsQuery = clinicsQuery.not("director_name", "is", null)
+    clinicsQuery = clinicsQuery.not("院長名", "is", null)
   }
 
   // Get total count
@@ -202,8 +202,8 @@ export default async function PrefecturePage({
     }
 
     // Features
-    if (clinic.features) {
-      clinic.features.split(",").forEach((f: string) => {
+    if (clinic.特徴) {
+      clinic.特徴.split(",").forEach((f: string) => {
         const feature = f.trim()
         if (feature && feature !== "-") {
           featureMap.set(feature, (featureMap.get(feature) || 0) + 1)
@@ -212,24 +212,24 @@ export default async function PrefecturePage({
     }
 
     // Weekend
-    if (clinic.hours_saturday || clinic.hours_sunday) {
+    if (clinic.土曜 || clinic.日曜) {
       weekendCount++
     }
 
     // Evening (18:00以降)
     const hasEvening = [
-      clinic.hours_monday,
-      clinic.hours_tuesday,
-      clinic.hours_wednesday,
-      clinic.hours_thursday,
-      clinic.hours_friday,
+      clinic.月曜,
+      clinic.火曜,
+      clinic.水曜,
+      clinic.木曜,
+      clinic.金曜,
     ].some((hours) => hours && (hours.includes("18:") || hours.includes("19:") || hours.includes("20:")))
     if (hasEvening) {
       eveningCount++
     }
 
     // Director
-    if (clinic.director_name) {
+    if (clinic.院長名) {
       directorCount++
     }
   })
@@ -326,16 +326,16 @@ export default async function PrefecturePage({
   const clinicCards =
     clinics?.map((clinic) => {
       const weekdays = [
-        { en: "hours_monday", jp: "月曜" },
-        { en: "hours_tuesday", jp: "火曜" },
-        { en: "hours_wednesday", jp: "水曜" },
-        { en: "hours_thursday", jp: "木曜" },
-        { en: "hours_friday", jp: "金曜" },
-        { en: "hours_saturday", jp: "土曜" },
-        { en: "hours_sunday", jp: "日曜" },
+        { jp: "月曜", value: clinic.月曜 },
+        { jp: "火曜", value: clinic.火曜 },
+        { jp: "水曜", value: clinic.水曜 },
+        { jp: "木曜", value: clinic.木曜 },
+        { jp: "金曜", value: clinic.金曜 },
+        { jp: "土曜", value: clinic.土曜 },
+        { jp: "日曜", value: clinic.日曜 },
       ]
-      const firstHours = weekdays.find((day) => clinic[day.en] && clinic[day.en] !== "-")
-      const hoursPreview = firstHours ? `${firstHours.jp}: ${clinic[firstHours.en]}` : null
+      const firstHours = weekdays.find((day) => day.value && day.value !== "-")
+      const hoursPreview = firstHours ? `${firstHours.jp}: ${firstHours.value}` : null
 
       return {
         id: clinic.id,
@@ -348,7 +348,7 @@ export default async function PrefecturePage({
         prefecture: clinic.prefecture,
         city: clinic.municipalities,
         hours: hoursPreview,
-        directorName: clinic.director_name,
+        directorName: clinic.院長名,
       }
     }) || []
 
