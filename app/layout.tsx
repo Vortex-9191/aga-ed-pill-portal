@@ -1,14 +1,7 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Noto_Sans_JP } from "next/font/google"
 import { Suspense } from "react"
 import "./globals.css"
-
-const notoSansJP = Noto_Sans_JP({
-  subsets: ["latin"],
-  weight: ["400", "500", "700"],
-  variable: "--font-noto-sans-jp",
-})
 
 export const metadata: Metadata = {
   title: "aga治療.com｜全国のAGA治療専門クリニック検索",
@@ -23,7 +16,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja">
-      <body className={`font-sans ${notoSansJP.variable} antialiased`}>
+      <body className="font-sans antialiased">
         <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
         {/* Analytics component removed */}
       </body>
