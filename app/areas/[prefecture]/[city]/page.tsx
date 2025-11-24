@@ -1,25 +1,24 @@
-import { Header } from "@/components/header"
-import { Footer } from "@/components/footer"
+"use client"
+
 import { DiagnosisTool } from "@/components/diagnosis-tool"
 import Link from "next/link"
+import { useEffect, useState } from "react"
 import {
   ChevronRight,
   MapPin,
   Train,
-  CreditCard,
   CheckCircle2,
-  Wallet,
   User,
   Phone,
   TrendingUp,
   Filter,
   HelpCircle,
-  AlertTriangle
+  AlertTriangle,
+  Menu,
+  X
 } from "lucide-react"
-import { createClient } from "@/lib/supabase/server"
-import { SearchFilters } from "@/components/search-filters"
-import { notFound } from "next/navigation"
-import type { Metadata } from "next"
+import { createClient } from "@/lib/supabase/client"
+import { notFound, useParams, useSearchParams } from "next/navigation"
 import { getStationSlug } from "@/lib/data/stations"
 
 // Prefecture slug to name mapping
@@ -38,253 +37,160 @@ const prefectureMap: Record<string, string> = {
   miyazaki: "宮崎県", kagoshima: "鹿児島県", okinawa: "沖縄県",
 }
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { prefecture: string; city: string }
-}): Promise<Metadata> {
-  const prefectureName = prefectureMap[params.prefecture] || "都道府県"
-  const cityName = decodeURIComponent(params.city)
-
-  return {
-    title: `${prefectureName}${cityName}のAGA治療クリニック | aga治療.com`,
-    description: `${prefectureName}${cityName}のAGA治療専門クリニック一覧。診療時間、住所、アクセス、口コミ情報を掲載。`,
-  }
-}
-
 const ITEMS_PER_PAGE = 15
 
-export default async function CityPage({
-  params,
-  searchParams,
-}: {
-  params: { prefecture: string; city: string }
-  searchParams: {
-    page?: string
-    specialty?: string
-    feature?: string
-    weekend?: string
-    evening?: string
-    director?: string
-    station?: string
-  }
-}) {
-  const prefectureName = prefectureMap[params.prefecture]
-  const cityName = decodeURIComponent(params.city)
+export default function CityPage() {
+  const params = useParams()
+  const searchParams = useSearchParams()
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [activeSort, setActiveSort] = useState('recommended')
+  const [showMap, setShowMap] = useState(false)
+  const [clinics, setClinics] = useState<any[]>([])
+  const [totalCount, setTotalCount] = useState(0)
+  const [loading, setLoading] = useState(true)
+  const [facetData, setFacetData] = useState<any>({})
+  const [relatedStations, setRelatedStations] = useState<any[]>([])
 
-  if (!prefectureName) {
-    notFound()
-  }
+  const prefecture = params.prefecture as string
+  const city = decodeURIComponent(params.city as string)
+  const prefectureName = prefectureMap[prefecture]
+  const currentPage = Number(searchParams.get('page')) || 1
 
-  const supabase = await createClient()
-  const currentPage = Number(searchParams.page) || 1
-
-  // Get clinics for facet generation with current filters applied (except station filter)
-  let facetQuery = supabase
-    .from("clinics")
-    .select("featured_subjects, 土曜, 日曜, 月曜, 火曜, 水曜, 木曜, 金曜, 特徴, stations")
-    .eq("prefecture", prefectureName)
-    .eq("municipalities", cityName)
-
-  // Apply same filters as main query, except station (so we can show all stations)
-  if (searchParams.specialty) {
-    facetQuery = facetQuery.ilike("featured_subjects", `%${searchParams.specialty}%`)
-  }
-
-  if (searchParams.feature) {
-    facetQuery = facetQuery.ilike("特徴", `%${searchParams.feature}%`)
-  }
-
-  if (searchParams.weekend) {
-    facetQuery = facetQuery.or("土曜.not.is.null,日曜.not.is.null")
-  }
-
-  if (searchParams.evening) {
-    facetQuery = facetQuery.or(
-      "月曜.ilike.%18:%,月曜.ilike.%19:%,月曜.ilike.%20:%,火曜.ilike.%18:%,火曜.ilike.%19:%,火曜.ilike.%20:%,水曜.ilike.%18:%,水曜.ilike.%19:%,水曜.ilike.%20:%,木曜.ilike.%18:%,木曜.ilike.%19:%,木曜.ilike.%20:%,金曜.ilike.%18:%,金曜.ilike.%19:%,金曜.ilike.%20:%"
-    )
-  }
-
-  if (searchParams.director) {
-    facetQuery = facetQuery.not("院長名", "is", null)
-  }
-
-  const { data: allClinics } = await facetQuery
-
-  // Build query
-  let clinicsQuery = supabase
-    .from("clinics")
-    .select("*", { count: "exact" })
-    .eq("prefecture", prefectureName)
-    .eq("municipalities", cityName)
-
-  // Apply filters
-  if (searchParams.specialty) {
-    clinicsQuery = clinicsQuery.ilike("featured_subjects", `%${searchParams.specialty}%`)
-  }
-
-  if (searchParams.feature) {
-    clinicsQuery = clinicsQuery.ilike("特徴", `%${searchParams.feature}%`)
-  }
-
-  if (searchParams.weekend) {
-    clinicsQuery = clinicsQuery.or("土曜.not.is.null,日曜.not.is.null")
-  }
-
-  if (searchParams.evening) {
-    clinicsQuery = clinicsQuery.or(
-      "月曜.ilike.%18:%,月曜.ilike.%19:%,月曜.ilike.%20:%,火曜.ilike.%18:%,火曜.ilike.%19:%,火曜.ilike.%20:%,水曜.ilike.%18:%,水曜.ilike.%19:%,水曜.ilike.%20:%,木曜.ilike.%18:%,木曜.ilike.%19:%,木曜.ilike.%20:%,金曜.ilike.%18:%,金曜.ilike.%19:%,金曜.ilike.%20:%"
-    )
-  }
-
-  if (searchParams.director) {
-    clinicsQuery = clinicsQuery.not("院長名", "is", null)
-  }
-
-  if (searchParams.station) {
-    clinicsQuery = clinicsQuery.ilike("stations", `%${searchParams.station}%`)
-  }
-
-  // Get total count
-  const { count: totalCount } = await clinicsQuery
-
-  // Get paginated data
-  const from = (currentPage - 1) * ITEMS_PER_PAGE
-  const to = from + ITEMS_PER_PAGE - 1
-
-  const { data: clinics, error } = await clinicsQuery
-    .order("rating", { ascending: false, nullsLast: true })
-    .range(from, to)
-
-  if (error) {
-    console.error("[v0] Error fetching clinics:", error)
-  }
-
-  const totalPages = Math.ceil((totalCount || 0) / ITEMS_PER_PAGE)
-
-  // Calculate facet data
-  const specialtyMap = new Map<string, number>()
-  const featureMap = new Map<string, number>()
-  let weekendCount = 0
-  let eveningCount = 0
-  let directorCount = 0
-
-  allClinics?.forEach((clinic) => {
-    // Specialties
-    if (clinic.featured_subjects) {
-      clinic.featured_subjects.split(",").forEach((s: string) => {
-        const specialty = s.trim()
-        if (specialty) {
-          specialtyMap.set(specialty, (specialtyMap.get(specialty) || 0) + 1)
-        }
-      })
-    }
-
-    // Features
-    if (clinic.特徴) {
-      clinic.特徴.split(",").forEach((f: string) => {
-        const feature = f.trim()
-        if (feature && feature !== "-") {
-          featureMap.set(feature, (featureMap.get(feature) || 0) + 1)
-        }
-      })
-    }
-
-    // Weekend
-    if (clinic.土曜 || clinic.日曜) {
-      weekendCount++
-    }
-
-    // Evening (18:00以降)
-    const hasEvening = [
-      clinic.月曜,
-      clinic.火曜,
-      clinic.水曜,
-      clinic.木曜,
-      clinic.金曜,
-    ].some((hours) => hours && (hours.includes("18:") || hours.includes("19:") || hours.includes("20:")))
-    if (hasEvening) {
-      eveningCount++
-    }
-
-    // Director
-    if (clinic.院長名) {
-      directorCount++
-    }
-  })
-
-  // Extract stations with counts from filtered clinics
-  const stationFacetMap = new Map<string, number>()
-  allClinics?.forEach((clinic) => {
-    if (clinic.stations) {
-      const stations = clinic.stations.split(",").map((s: string) => s.trim())
-      stations.forEach((station: string) => {
-        if (station && station !== "-") {
-          stationFacetMap.set(station, (stationFacetMap.get(station) || 0) + 1)
-        }
-      })
-    }
-  })
-
-  const facetData = {
-    prefectures: [],
-    stations: Array.from(stationFacetMap.entries())
-      .map(([name, count]) => ({ name, count }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 15),
-    specialties: Array.from(specialtyMap.entries())
-      .map(([name, count]) => ({ name, count }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 15),
-    features: Array.from(featureMap.entries())
-      .map(([name, count]) => ({ name, count }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 10),
-    weekend: weekendCount,
-    evening: eveningCount,
-    director: directorCount,
-  }
-
-  // Use the same station data for the stations section at bottom (top 10)
-  const relatedStations = Array.from(stationFacetMap.entries())
-    .map(([name, count]) => ({ name, count }))
-    .sort((a, b) => b.count - a.count)
-    .slice(0, 10)
-
-  // Generate JSON-LD structured data
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "ItemList",
-    "numberOfItems": totalCount || 0,
-    "itemListElement": clinics?.map((clinic, index) => ({
-      "@type": "ListItem",
-      "position": from + index + 1,
-      "item": {
-        "@type": "MedicalClinic",
-        "@id": `https://aga治療.com/clinics/${clinic.slug}`,
-        "name": clinic.clinic_name,
-        "url": clinic.url || `https://aga治療.com/clinics/${clinic.slug}`,
-        "address": {
-          "@type": "PostalAddress",
-          "streetAddress": clinic.address,
-          "addressRegion": clinic.prefecture,
-          "addressLocality": clinic.municipalities || "",
-          "addressCountry": "JP"
-        },
-        "telephone": clinic.corp_tel || "",
-        ...(clinic.rating && {
-          "aggregateRating": {
-            "@type": "AggregateRating",
-            "ratingValue": clinic.rating,
-            "reviewCount": clinic.review_count || 0,
-            "bestRating": 5,
-            "worstRating": 1
-          }
-        }),
-        "medicalSpecialty": clinic.clinic_spec || "AGA治療"
+  useEffect(() => {
+    async function fetchData() {
+      if (!prefectureName) {
+        notFound()
+        return
       }
-    })) || []
-  }
+
+      setLoading(true)
+      const supabase = createClient()
+
+      // Get clinics for facet generation
+      let facetQuery = supabase
+        .from("clinics")
+        .select("featured_subjects, 土曜, 日曜, 月曜, 火曜, 水曜, 木曜, 金曜, 特徴, stations")
+        .eq("prefecture", prefectureName)
+        .eq("municipalities", city)
+
+      const { data: allClinics } = await facetQuery
+
+      // Build main query
+      let clinicsQuery = supabase
+        .from("clinics")
+        .select("*", { count: "exact" })
+        .eq("prefecture", prefectureName)
+        .eq("municipalities", city)
+
+      // Get total count
+      const { count } = await clinicsQuery
+
+      // Get paginated data
+      const from = (currentPage - 1) * ITEMS_PER_PAGE
+      const to = from + ITEMS_PER_PAGE - 1
+
+      const { data, error } = await clinicsQuery
+        .order("rating", { ascending: false, nullsLast: true })
+        .range(from, to)
+
+      if (error) {
+        console.error("Error fetching clinics:", error)
+      }
+
+      // Calculate facet data
+      const specialtyMap = new Map<string, number>()
+      const featureMap = new Map<string, number>()
+      const stationFacetMap = new Map<string, number>()
+      let weekendCount = 0
+      let eveningCount = 0
+      let directorCount = 0
+
+      allClinics?.forEach((clinic) => {
+        // Specialties
+        if (clinic.featured_subjects) {
+          clinic.featured_subjects.split(",").forEach((s: string) => {
+            const specialty = s.trim()
+            if (specialty) {
+              specialtyMap.set(specialty, (specialtyMap.get(specialty) || 0) + 1)
+            }
+          })
+        }
+
+        // Features
+        if (clinic.特徴) {
+          clinic.特徴.split(",").forEach((f: string) => {
+            const feature = f.trim()
+            if (feature && feature !== "-") {
+              featureMap.set(feature, (featureMap.get(feature) || 0) + 1)
+            }
+          })
+        }
+
+        // Stations
+        if (clinic.stations) {
+          const stations = clinic.stations.split(",").map((s: string) => s.trim())
+          stations.forEach((station: string) => {
+            if (station && station !== "-") {
+              stationFacetMap.set(station, (stationFacetMap.get(station) || 0) + 1)
+            }
+          })
+        }
+
+        // Weekend
+        if (clinic.土曜 || clinic.日曜) {
+          weekendCount++
+        }
+
+        // Evening
+        const hasEvening = [
+          clinic.月曜,
+          clinic.火曜,
+          clinic.水曜,
+          clinic.木曜,
+          clinic.金曜,
+        ].some((hours: string) => hours && (hours.includes("18:") || hours.includes("19:") || hours.includes("20:")))
+        if (hasEvening) {
+          eveningCount++
+        }
+
+        // Director
+        if (clinic.院長名) {
+          directorCount++
+        }
+      })
+
+      setFacetData({
+        stations: Array.from(stationFacetMap.entries())
+          .map(([name, count]) => ({ name, count }))
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 15),
+        specialties: Array.from(specialtyMap.entries())
+          .map(([name, count]) => ({ name, count }))
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 15),
+        features: Array.from(featureMap.entries())
+          .map(([name, count]) => ({ name, count }))
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 10),
+        weekend: weekendCount,
+        evening: eveningCount,
+        director: directorCount,
+      })
+
+      setRelatedStations(
+        Array.from(stationFacetMap.entries())
+          .map(([name, count]) => ({ name, count }))
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 10)
+      )
+
+      setClinics(data || [])
+      setTotalCount(count || 0)
+      setLoading(false)
+    }
+
+    fetchData()
+  }, [prefecture, city, prefectureName, currentPage])
 
   // Extract opening hours for each clinic
   const getOpeningHours = (clinic: any) => {
@@ -312,28 +218,54 @@ export default async function CityPage({
       const featureList = clinic.特徴.split(',').map((f: string) => f.trim()).filter(Boolean)
       features.push(...featureList.slice(0, 3))
     }
-    // Add online if specified
     if (clinic.online_consultation) {
       features.unshift('オンライン診療')
     }
     return features
   }
 
-  // Get nearby cities - simplified version
+  // Get nearby cities
   const nearbyCities = [
     "渋谷区", "中野区", "豊島区", "港区", "千代田区",
     "中央区", "文京区", "世田谷区", "杉並区", "練馬区", "目黒区", "品川区"
-  ].filter(city => city !== cityName).slice(0, 12)
+  ].filter(c => c !== city).slice(0, 12)
+
+  const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE)
+
+  // Area description
+  const areaDescription = `${prefectureName}${city}には、AGA（男性型脱毛症）治療を専門とするクリニックが${totalCount}件あります。当サイトでは、各クリニックの診療時間、住所、アクセス情報、取扱治療薬、口コミ評価などの詳細情報を掲載しています。`
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-800">
-      {/* JSON-LD Injection */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-      />
-
-      <Header />
+      {/* Header */}
+      <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md shadow-sm border-b border-slate-100">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <Link href="/" className="flex items-center gap-2 group cursor-pointer">
+              <div className="bg-slate-900 text-teal-400 p-1.5 rounded-lg">
+                <TrendingUp size={20} />
+              </div>
+              <span className="text-xl font-bold tracking-tight text-slate-900">AGAミライ</span>
+            </Link>
+            <nav className="hidden md:flex space-x-8 text-sm font-bold text-slate-500">
+              <Link href="#" className="hover:text-teal-600 transition">AGAとは</Link>
+              <Link href="/search" className="hover:text-teal-600 transition">クリニック検索</Link>
+              <Link href="#" className="hover:text-teal-600 transition">治療薬・費用</Link>
+            </nav>
+            <div className="flex items-center gap-4">
+              <button
+                className="md:hidden p-2 text-slate-600"
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+              >
+                {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+              </button>
+              <button className="hidden md:block bg-teal-600 hover:bg-teal-700 text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-lg shadow-teal-600/20 transition">
+                無料カウンセリング
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
 
       {/* Breadcrumbs */}
       <div className="bg-white border-b border-slate-100">
@@ -343,9 +275,9 @@ export default async function CityPage({
             <ChevronRight size={12} className="mx-2 flex-shrink-0" />
             <Link href="/areas" className="hover:text-teal-600 transition">エリア一覧</Link>
             <ChevronRight size={12} className="mx-2 flex-shrink-0" />
-            <Link href={`/areas/${params.prefecture}`} className="hover:text-teal-600 transition">{prefectureName}</Link>
+            <Link href={`/areas/${prefecture}`} className="hover:text-teal-600 transition">{prefectureName}</Link>
             <ChevronRight size={12} className="mx-2 flex-shrink-0" />
-            <span className="font-bold text-slate-900">{cityName}のAGAクリニック</span>
+            <span className="font-bold text-slate-900">{city}のAGAクリニック</span>
           </nav>
         </div>
       </div>
@@ -358,16 +290,42 @@ export default async function CityPage({
           {/* Area Title & Intro */}
           <div className="mb-8">
             <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 mb-4 leading-tight">
-              {cityName}のおすすめAGAクリニック一覧
+              {city}のおすすめAGAクリニック一覧
               <span className="ml-3 inline-flex items-center bg-teal-50 text-teal-700 text-base px-3 py-1 rounded-full align-middle font-bold">
-                {totalCount || 0}件掲載
+                {totalCount}件掲載
               </span>
             </h1>
             <div className="text-sm text-slate-600 leading-relaxed bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-              <p>
-                {prefectureName}{cityName}には、AGA（男性型脱毛症）治療を専門とするクリニックが{totalCount || 0}件あります。
-                当サイトでは、各クリニックの診療時間、住所、アクセス情報、取扱治療薬、口コミ評価などの詳細情報を掲載しています。
-              </p>
+              <p>{areaDescription}</p>
+            </div>
+          </div>
+
+          {/* Desktop Filter Bar */}
+          <div className="hidden lg:flex items-center justify-between bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-6 sticky top-20 z-30">
+            <div className="flex items-center gap-4">
+              <span className="font-bold text-sm text-slate-900">並び替え:</span>
+              <div className="flex bg-slate-100 p-1 rounded-lg">
+                <button
+                  onClick={() => setActiveSort('recommended')}
+                  className={`px-4 py-1.5 rounded-md text-xs font-bold transition ${activeSort === 'recommended' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500 hover:text-slate-700'}`}
+                >
+                  おすすめ順
+                </button>
+                <button
+                  onClick={() => setActiveSort('price')}
+                  className={`px-4 py-1.5 rounded-md text-xs font-bold transition ${activeSort === 'price' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500 hover:text-slate-700'}`}
+                >
+                  料金が安い順
+                </button>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <label className="flex items-center gap-2 cursor-pointer group">
+                <div className="w-5 h-5 border-2 border-slate-300 rounded group-hover:border-teal-500 transition flex items-center justify-center">
+                  {showMap && <div className="w-3 h-3 bg-teal-500 rounded-sm"></div>}
+                </div>
+                <span className="text-sm font-bold text-slate-600 group-hover:text-teal-600 transition" onClick={() => setShowMap(!showMap)}>地図を表示</span>
+              </label>
             </div>
           </div>
 
@@ -378,7 +336,11 @@ export default async function CityPage({
 
           {/* Clinic List */}
           <div className="space-y-8">
-            {clinics && clinics.length > 0 ? (
+            {loading ? (
+              <div className="text-center py-12 bg-white rounded-2xl border border-slate-200">
+                <p className="text-slate-500">読み込み中...</p>
+              </div>
+            ) : clinics.length > 0 ? (
               clinics.map((clinic, index) => (
                 <div key={clinic.id} className="bg-white rounded-2xl p-5 md:p-6 shadow-sm border border-slate-200 hover:border-slate-400 transition group">
 
@@ -417,13 +379,11 @@ export default async function CityPage({
 
                     {/* Info */}
                     <div className="flex-1 flex flex-col h-full">
-                      {/* Header Info */}
                       <div>
                         <h2 className="text-xl font-bold text-slate-900 leading-tight group-hover:text-teal-700 transition mb-2">
                           {clinic.clinic_name}
                         </h2>
 
-                        {/* Catchphrase */}
                         {clinic.catchphrase && (
                           <p className="text-teal-600 font-bold text-sm mb-3 flex items-start gap-1.5">
                             <CheckCircle2 size={16} className="mt-0.5 flex-shrink-0" />
@@ -431,7 +391,6 @@ export default async function CityPage({
                           </p>
                         )}
 
-                        {/* Description */}
                         {clinic.description && (
                           <p className="text-xs sm:text-sm text-slate-600 leading-relaxed mb-4 bg-slate-50/50 p-3 rounded lg:bg-transparent lg:p-0">
                             {clinic.description}
@@ -536,7 +495,7 @@ export default async function CityPage({
           {totalPages > 1 && (
             <div className="mt-10 flex justify-center gap-2">
               {currentPage > 1 && (
-                <Link href={`/areas/${params.prefecture}/${params.city}?page=${currentPage - 1}`}>
+                <Link href={`/areas/${prefecture}/${city}?page=${currentPage - 1}`}>
                   <button className="px-5 py-2.5 rounded-lg bg-white text-slate-600 hover:bg-slate-100 font-medium border border-slate-200 transition">
                     前へ
                   </button>
@@ -546,7 +505,7 @@ export default async function CityPage({
                 {currentPage} / {totalPages}
               </div>
               {currentPage < totalPages && (
-                <Link href={`/areas/${params.prefecture}/${params.city}?page=${currentPage + 1}`}>
+                <Link href={`/areas/${prefecture}/${city}?page=${currentPage + 1}`}>
                   <button className="px-5 py-2.5 rounded-lg bg-white text-slate-600 hover:bg-slate-100 font-medium border border-slate-200 transition">
                     次へ
                   </button>
@@ -560,7 +519,7 @@ export default async function CityPage({
             <div className="bg-slate-900 text-white p-6 md:p-8">
               <h2 className="text-xl md:text-2xl font-bold flex items-center gap-3">
                 <HelpCircle className="text-teal-400" />
-                {cityName}でのAGAクリニックの選び方
+                {city}でのAGAクリニックの選び方
               </h2>
               <p className="text-slate-300 text-sm mt-2 opacity-90">
                 後悔しないためにチェックすべき3つのポイントを解説します。
@@ -602,7 +561,7 @@ export default async function CityPage({
                 </h3>
                 <div className="pl-11 space-y-3 text-sm text-slate-600 leading-relaxed">
                   <p>
-                    {cityName}エリアは駅周辺にクリニックが集中していますが、忙しい方は「オンライン診療」も検討しましょう。
+                    {city}エリアは駅周辺にクリニックが集中していますが、忙しい方は「オンライン診療」も検討しましょう。
                   </p>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
                     <div className="border border-slate-200 rounded-lg p-4">
@@ -648,7 +607,22 @@ export default async function CityPage({
               <span>条件で絞り込む</span>
             </div>
 
-            <SearchFilters facets={facetData} />
+            <div className="space-y-4">
+              <div>
+                <label className="text-xs font-bold text-slate-500 mb-2 block">こだわり条件</label>
+                <div className="space-y-2">
+                  {facetData.features?.slice(0, 5).map((feature: any, i: number) => (
+                    <label key={i} className="flex items-center justify-between cursor-pointer group">
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 rounded border border-slate-300 group-hover:border-teal-500 transition"></div>
+                        <span className="text-sm text-slate-700 group-hover:text-slate-900">{feature.name}</span>
+                      </div>
+                      <span className="text-xs text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-full">{feature.count}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Nearby Areas */}
@@ -662,7 +636,7 @@ export default async function CityPage({
                 {nearbyCities.map((area, i) => (
                   <Link
                     key={i}
-                    href={`/areas/${params.prefecture}/${encodeURIComponent(area)}`}
+                    href={`/areas/${prefecture}/${encodeURIComponent(area)}`}
                     className="px-3 py-1.5 bg-slate-50 hover:bg-teal-50 hover:text-teal-700 hover:border-teal-200 border border-slate-200 rounded text-xs font-medium text-slate-600 transition"
                   >
                     {area}
@@ -694,7 +668,7 @@ export default async function CityPage({
           <div className="max-w-6xl mx-auto px-4">
             <h3 className="font-bold text-slate-900 mb-4 text-lg flex items-center gap-2">
               <Train size={18} className="text-teal-600" />
-              {cityName}のクリニック最寄り駅
+              {city}のクリニック最寄り駅
             </h3>
             <div className="grid gap-3 grid-cols-2 md:grid-cols-4 lg:grid-cols-5">
               {relatedStations.map((station) => {
@@ -720,19 +694,19 @@ export default async function CityPage({
         </section>
       )}
 
-      {/* Nearby Areas Links (SEO Footer Navigation) */}
+      {/* Nearby Areas Links */}
       {nearbyCities.length > 0 && (
         <section className="border-t border-slate-200 bg-white py-12">
           <div className="max-w-6xl mx-auto px-4">
             <h3 className="font-bold text-slate-900 mb-4 text-lg flex items-center gap-2">
               <MapPin size={18} className="text-teal-600" />
-              {cityName}周辺のエリアからAGAクリニックを探す
+              {city}周辺のエリアからAGAクリニックを探す
             </h3>
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-y-3 gap-x-4">
               {nearbyCities.map((area, i) => (
                 <Link
                   key={i}
-                  href={`/areas/${params.prefecture}/${encodeURIComponent(area)}`}
+                  href={`/areas/${prefecture}/${encodeURIComponent(area)}`}
                   className="text-sm text-slate-500 hover:text-teal-600 hover:underline flex items-center gap-1 transition group"
                 >
                   <ChevronRight size={12} className="text-slate-300 group-hover:text-teal-400" />
@@ -744,7 +718,18 @@ export default async function CityPage({
         </section>
       )}
 
-      <Footer />
+      {/* Footer */}
+      <footer className="bg-slate-900 text-slate-400 py-12 text-sm">
+        <div className="max-w-6xl mx-auto px-4 text-center">
+          <div className="flex items-center justify-center gap-2 text-white font-bold text-lg mb-4">
+            <TrendingUp size={20} />
+            AGAミライ
+          </div>
+          <p className="opacity-50 text-xs">
+            &copy; 2025 AGA Mirai. All Rights Reserved.
+          </p>
+        </div>
+      </footer>
     </div>
   )
 }
