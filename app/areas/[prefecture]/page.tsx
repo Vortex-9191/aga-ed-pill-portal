@@ -1,6 +1,7 @@
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
-import { ClinicCard } from "@/components/clinic-card"
+import { EnhancedClinicCard } from "@/components/enhanced-clinic-card"
+import { DiagnosisTool } from "@/components/diagnosis-tool"
 import Link from "next/link"
 import { ChevronRight, MapPin, Train } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -10,7 +11,6 @@ import { SearchFilters } from "@/components/search-filters"
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
 import { getStationSlug } from "@/lib/data/stations"
-import { ClinicFinderWrapper } from "@/components/clinic-finder-wrapper"
 
 // Prefecture slug to name mapping
 const prefectureMap: Record<string, string> = {
@@ -322,39 +322,51 @@ export default async function PrefecturePage({
     )
   }
 
-  // Transform data for ClinicCard
-  const clinicCards =
-    clinics?.map((clinic) => {
-      const weekdays = [
-        { jp: "月曜", value: clinic.月曜 },
-        { jp: "火曜", value: clinic.火曜 },
-        { jp: "水曜", value: clinic.水曜 },
-        { jp: "木曜", value: clinic.木曜 },
-        { jp: "金曜", value: clinic.金曜 },
-        { jp: "土曜", value: clinic.土曜 },
-        { jp: "日曜", value: clinic.日曜 },
-      ]
-      const firstHours = weekdays.find((day) => day.value && day.value !== "-")
-      const hoursPreview = firstHours ? `${firstHours.jp}: ${firstHours.value}` : null
-
-      return {
-        id: clinic.id,
-        name: clinic.clinic_name,
-        slug: clinic.slug,
-        address: clinic.address,
-        station: clinic.stations || "",
-        specialties: clinic.featured_subjects ? clinic.featured_subjects.split(", ") : [],
-        phone: clinic.corp_tel,
-        prefecture: clinic.prefecture,
-        city: clinic.municipalities,
-        hours: hoursPreview,
-        directorName: clinic.院長名,
+  // Generate JSON-LD structured data
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "numberOfItems": totalCount || 0,
+    "itemListElement": clinics?.map((clinic, index) => ({
+      "@type": "ListItem",
+      "position": from + index + 1,
+      "item": {
+        "@type": "MedicalClinic",
+        "@id": `https://aga治療.com/clinics/${clinic.slug}`,
+        "name": clinic.clinic_name,
+        "url": clinic.url || `https://aga治療.com/clinics/${clinic.slug}`,
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": clinic.address,
+          "addressRegion": clinic.prefecture,
+          "addressLocality": clinic.municipalities || "",
+          "addressCountry": "JP"
+        },
+        "telephone": clinic.corp_tel || "",
+        ...(clinic.rating && {
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": clinic.rating,
+            "reviewCount": clinic.review_count || 0,
+            "bestRating": 5,
+            "worstRating": 1
+          }
+        }),
+        "medicalSpecialty": clinic.clinic_spec || "AGA治療"
       }
-    }) || []
+    })) || []
+  }
 
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
+
+      {/* JSON-LD Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+
       <main className="flex-1">
         {/* Breadcrumb */}
         <div className="border-b border-border bg-muted/30">
@@ -378,7 +390,7 @@ export default async function PrefecturePage({
           <div className="container py-12">
             <div className="flex items-center gap-3 mb-4">
               <MapPin className="h-8 w-8 text-accent" />
-              <h1 className="text-3xl font-bold text-foreground md:text-4xl">{prefectureName}のクリニック</h1>
+              <h1 className="text-3xl font-bold text-foreground md:text-4xl">{prefectureName}のAGA治療クリニック</h1>
             </div>
             <p className="text-lg text-muted-foreground">{totalCount || 0}件のクリニック</p>
           </div>
@@ -395,8 +407,8 @@ export default async function PrefecturePage({
 
             {/* Clinic List */}
             <div>
-              {/* Clinic Finder Wizard */}
-              <ClinicFinderWrapper />
+              {/* Diagnosis Tool */}
+              <DiagnosisTool />
 
               <div className="mb-6 flex items-center justify-between">
                 <p className="text-sm text-muted-foreground">
@@ -405,8 +417,14 @@ export default async function PrefecturePage({
               </div>
 
               <div className="space-y-4">
-                {clinicCards.length > 0 ? (
-                  clinicCards.map((clinic) => <ClinicCard key={clinic.id} clinic={clinic} />)
+                {clinics && clinics.length > 0 ? (
+                  clinics.map((clinic, index) => (
+                    <EnhancedClinicCard
+                      key={clinic.id}
+                      clinic={clinic}
+                      position={from + index + 1}
+                    />
+                  ))
                 ) : (
                   <div className="text-center py-12">
                     <p className="text-muted-foreground">条件に一致するクリニックが見つかりませんでした。</p>
@@ -501,6 +519,20 @@ export default async function PrefecturePage({
                 </CardContent>
               </Card>
             )}
+          </div>
+
+          {/* SEO Content Section */}
+          <div className="mt-12 prose prose-sm max-w-none">
+            <h2 className="text-2xl font-bold mb-4">{prefectureName}のAGA治療について</h2>
+            <p className="text-muted-foreground mb-6">
+              {prefectureName}には、AGA（男性型脱毛症）治療を専門とするクリニックが{totalCount || 0}件あります。
+              当サイトでは、各クリニックの診療時間、住所、アクセス情報、取扱治療薬、口コミ評価などの詳細情報を掲載しています。
+            </p>
+            <p className="text-muted-foreground mb-6">
+              AGA治療は早期発見・早期治療が重要です。薄毛や抜け毛が気になり始めたら、
+              まずは専門クリニックでの無料カウンセリングを受けることをおすすめします。
+              多くのクリニックでは初診料無料、オンライン診療対応など、気軽に相談できる体制を整えています。
+            </p>
           </div>
         </div>
       </main>
