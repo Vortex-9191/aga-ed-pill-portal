@@ -157,4 +157,20 @@
     @apply w-full mx-auto px-4 sm:px-6 lg:px-8;
     max-width: 1280px;
   }
+
+  /* Animations */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fadeIn {
+    animation: fadeIn 0.3s ease-out;
+  }
 }

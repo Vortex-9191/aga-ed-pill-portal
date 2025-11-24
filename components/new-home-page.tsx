@@ -1,0 +1,642 @@
+"use client"
+
+import React, { useState } from 'react'
+import Link from 'next/link'
+import {
+  Search,
+  MapPin,
+  ChevronRight,
+  Menu,
+  X,
+  TrendingUp,
+  CheckCircle2,
+  ArrowRight,
+  HelpCircle,
+  AlertCircle,
+  Smartphone,
+  Stethoscope,
+  Map,
+  Navigation,
+  CreditCard,
+} from 'lucide-react'
+
+export function NewHomePage() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [activeTab, setActiveTab] = useState('comprehensive')
+  const [diagnosisStep, setDiagnosisStep] = useState(0)
+
+  // 構造化データ (JSON-LD): WebSite
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "AGA治療.com",
+    "url": "https://aga治療.com/",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://aga治療.com/search?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  }
+
+  // 簡易診断ウィジェット用データ (FV用)
+  const diagnosisQuestions = [
+    {
+      question: "気になる症状は？",
+      options: ["生え際の後退", "頭頂部の薄毛", "全体的なボリューム減", "抜け毛が増えた"]
+    },
+    {
+      question: "ご予算の目安は？",
+      options: ["まずは安く予防したい", "しっかり発毛させたい", "費用は気にしない", "わからない"]
+    }
+  ]
+
+  // モックデータ：オンラインクリニック情報
+  const clinics = [
+    {
+      id: 1,
+      name: "スマートAGAクリニック オンライン",
+      price: "1,800",
+      tags: ["初診料0円", "オンライン完結", "全額返金保証"],
+      features: ["最短当日発送", "顔出し不要OK"],
+      image: "bg-slate-100",
+      category: "comprehensive"
+    },
+    {
+      id: 2,
+      name: "クラウドAGAケア",
+      price: "1,600",
+      tags: ["業界最安級", "定期配送割引", "24時間予約可"],
+      features: ["維持費が安い", "国内承認薬のみ"],
+      image: "bg-teal-50",
+      category: "price"
+    },
+    {
+      id: 3,
+      name: "e-クリニックExpress",
+      price: "2,200",
+      tags: ["当日発送", "ポスト投函", "アプリで管理"],
+      features: ["バイク便対応(都内)", "チャット相談無料"],
+      image: "bg-blue-50",
+      category: "speed"
+    }
+  ]
+
+  // エリアデータ定義
+  const areaGroups = [
+    {
+      region: "関東",
+      prefs: [
+        { name: "東京", slug: "tokyo" },
+        { name: "神奈川", slug: "kanagawa" },
+        { name: "埼玉", slug: "saitama" },
+        { name: "千葉", slug: "chiba" },
+        { name: "茨城", slug: "ibaraki" },
+        { name: "栃木", slug: "tochigi" },
+        { name: "群馬", slug: "gunma" }
+      ]
+    },
+    {
+      region: "関西",
+      prefs: [
+        { name: "大阪", slug: "osaka" },
+        { name: "兵庫", slug: "hyogo" },
+        { name: "京都", slug: "kyoto" },
+        { name: "滋賀", slug: "shiga" },
+        { name: "奈良", slug: "nara" },
+        { name: "和歌山", slug: "wakayama" }
+      ]
+    },
+    {
+      region: "北海道・東北",
+      prefs: [
+        { name: "北海道", slug: "hokkaido" },
+        { name: "宮城", slug: "miyagi" },
+        { name: "青森", slug: "aomori" },
+        { name: "岩手", slug: "iwate" },
+        { name: "秋田", slug: "akita" },
+        { name: "山形", slug: "yamagata" },
+        { name: "福島", slug: "fukushima" }
+      ]
+    },
+    {
+      region: "中部・北陸",
+      prefs: [
+        { name: "愛知", slug: "aichi" },
+        { name: "静岡", slug: "shizuoka" },
+        { name: "新潟", slug: "niigata" },
+        { name: "山梨", slug: "yamanashi" },
+        { name: "長野", slug: "nagano" },
+        { name: "石川", slug: "ishikawa" },
+        { name: "富山", slug: "toyama" },
+        { name: "福井", slug: "fukui" },
+        { name: "岐阜", slug: "gifu" }
+      ]
+    },
+    {
+      region: "中国・四国",
+      prefs: [
+        { name: "広島", slug: "hiroshima" },
+        { name: "岡山", slug: "okayama" },
+        { name: "山口", slug: "yamaguchi" },
+        { name: "島根", slug: "shimane" },
+        { name: "鳥取", slug: "tottori" },
+        { name: "香川", slug: "kagawa" },
+        { name: "愛媛", slug: "ehime" },
+        { name: "徳島", slug: "tokushima" },
+        { name: "高知", slug: "kochi" }
+      ]
+    },
+    {
+      region: "九州・沖縄",
+      prefs: [
+        { name: "福岡", slug: "fukuoka" },
+        { name: "佐賀", slug: "saga" },
+        { name: "長崎", slug: "nagasaki" },
+        { name: "熊本", slug: "kumamoto" },
+        { name: "大分", slug: "oita" },
+        { name: "宮崎", slug: "miyazaki" },
+        { name: "鹿児島", slug: "kagoshima" },
+        { name: "沖縄", slug: "okinawa" }
+      ]
+    }
+  ]
+
+  return (
+    <div className="min-h-screen bg-slate-50 font-sans text-slate-800">
+      {/* --- JSON-LD Injection --- */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+
+      {/* --- Header --- */}
+      <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md shadow-sm border-b border-slate-100">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            {/* Logo */}
+            <Link href="/" className="flex items-center gap-2 group cursor-pointer">
+              <div className="bg-slate-900 text-teal-400 p-1.5 rounded-lg group-hover:bg-slate-800 transition">
+                <TrendingUp size={20} />
+              </div>
+              <span className="text-xl font-bold tracking-tight text-slate-900">AGA治療.com</span>
+            </Link>
+
+            {/* Desktop Nav */}
+            <nav className="hidden md:flex space-x-8 text-sm font-bold text-slate-500">
+              <Link href="#" className="hover:text-teal-600 transition py-2 border-b-2 border-transparent hover:border-teal-600">AGAとは</Link>
+              <Link href="/areas" className="hover:text-teal-600 transition py-2 border-b-2 border-transparent hover:border-teal-600">クリニック検索</Link>
+              <Link href="#" className="hover:text-teal-600 transition py-2 border-b-2 border-transparent hover:border-teal-600">治療薬・費用</Link>
+              <Link href="#" className="hover:text-teal-600 transition py-2 border-b-2 border-transparent hover:border-teal-600">体験談</Link>
+            </nav>
+
+            {/* CTA Button (Desktop) */}
+            <div className="hidden md:flex items-center gap-4">
+              <button className="text-slate-600 hover:text-slate-900 font-bold text-sm">ログイン</button>
+              <button className="bg-teal-600 hover:bg-teal-700 text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-lg shadow-teal-600/20 transition transform hover:-translate-y-0.5">
+                無料カウンセリング
+              </button>
+            </div>
+
+            {/* Mobile Menu Button */}
+            <button
+              className="md:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-lg transition"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+            >
+              {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          </div>
+        </div>
+
+        {/* Mobile Nav Dropdown */}
+        {isMenuOpen && (
+          <div className="md:hidden bg-white border-t border-slate-100 p-4 space-y-2 shadow-xl absolute w-full left-0 z-50">
+            <Link href="#" className="block px-4 py-3 rounded-lg hover:bg-slate-50 text-slate-700 font-bold">AGAとは</Link>
+            <Link href="/areas" className="block px-4 py-3 rounded-lg hover:bg-slate-50 text-slate-700 font-bold">クリニック検索</Link>
+            <Link href="#" className="block px-4 py-3 rounded-lg hover:bg-slate-50 text-slate-700 font-bold">治療薬・費用</Link>
+            <div className="pt-4 border-t border-slate-100 mt-2">
+              <button className="w-full bg-teal-600 text-white py-3 rounded-lg font-bold shadow-md">
+                無料カウンセリング予約
+              </button>
+            </div>
+          </div>
+        )}
+      </header>
+
+      {/* --- Hero Section --- */}
+      <section className="relative bg-slate-900 text-white overflow-hidden pb-12">
+        <div className="absolute top-0 right-0 w-3/4 h-full bg-slate-800/50 transform skew-x-12 translate-x-1/4"></div>
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-teal-500/20 rounded-full filter blur-[100px]"></div>
+
+        <div className="max-w-6xl mx-auto px-4 py-16 sm:py-20 relative z-10 flex flex-col md:flex-row items-center gap-16">
+
+          {/* Hero Content */}
+          <div className="flex-1 text-center md:text-left space-y-8">
+            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/10 rounded-full px-4 py-1.5 text-xs font-bold text-teal-300 tracking-wide uppercase">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-teal-400"></span>
+              </span>
+              科学的根拠に基づいた治療ガイド
+            </div>
+
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight">
+              未来の髪は、<br/>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-300 to-teal-500">正しい選択</span>で作る。
+            </h1>
+            <p className="text-slate-300 text-lg leading-relaxed max-w-xl mx-auto md:mx-0">
+              科学的根拠に基づいたAGA治療で、1日約55円から。<br className="hidden sm:block"/>
+              あなたに最適なクリニックと治療法が見つかります。
+            </p>
+
+            {/* Search Box */}
+            <div className="bg-white p-2 rounded-2xl shadow-2xl shadow-slate-950/50 max-w-md mx-auto md:mx-0 flex flex-col sm:flex-row gap-2">
+              <div className="flex-1 flex items-center px-4 h-14 bg-slate-50 rounded-xl border border-transparent focus-within:border-teal-500 focus-within:bg-white transition group">
+                <MapPin className="text-slate-400 group-focus-within:text-teal-500 transition mr-3" size={20} />
+                <input
+                  type="text"
+                  placeholder="エリア・駅名 (例: 新宿)"
+                  className="bg-transparent w-full outline-none text-slate-800 placeholder-slate-400 font-medium"
+                />
+              </div>
+              <Link href="/search">
+                <button className="bg-teal-600 hover:bg-teal-700 text-white px-8 h-14 rounded-xl font-bold flex items-center justify-center gap-2 transition shadow-lg shadow-teal-600/20 w-full sm:w-auto">
+                  <Search size={20} />
+                  検索
+                </button>
+              </Link>
+            </div>
+
+            {/* Mobile Only Diagnosis Button */}
+            <div className="md:hidden pt-4">
+              <button className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold py-4 rounded-xl shadow-lg flex items-center justify-center gap-2 animate-pulse">
+                <AlertCircle size={20} />
+                30秒で完了！AGAリスク診断スタート
+              </button>
+            </div>
+
+            <div className="hidden md:flex items-center justify-center md:justify-start gap-6 text-sm font-medium text-slate-400">
+              <button className="flex items-center gap-1 hover:text-teal-300 transition group">
+                <MapPin size={14} /> 現在地から探す
+              </button>
+              <button className="flex items-center gap-1 hover:text-teal-300 transition group">
+                <Smartphone size={14} /> オンライン診療
+              </button>
+            </div>
+          </div>
+
+          {/* Hero Visual - Interactive Diagnosis Widget (PC) */}
+          <div className="hidden md:block flex-1 relative perspective-1000">
+            <div className="bg-white/95 backdrop-blur text-slate-800 p-8 rounded-3xl shadow-2xl shadow-black/20 max-w-sm mx-auto border border-white/20 relative z-10">
+
+              {/* Header */}
+              <div className="flex items-center justify-between mb-6 border-b border-slate-100 pb-4">
+                <div>
+                  <div className="text-xs font-bold text-teal-600 mb-1">SELF CHECK</div>
+                  <div className="text-xl font-bold text-slate-900">AGAリスク診断</div>
+                </div>
+                <div className="w-10 h-10 bg-teal-50 rounded-full flex items-center justify-center text-teal-600">
+                  <HelpCircle size={24} />
+                </div>
+              </div>
+
+              {/* Diagnosis Question */}
+              {diagnosisStep < diagnosisQuestions.length ? (
+                <div className="animate-fadeIn">
+                  <p className="font-bold text-lg mb-4 text-slate-800">
+                    Q{diagnosisStep + 1}. {diagnosisQuestions[diagnosisStep].question}
+                  </p>
+                  <div className="space-y-3">
+                    {diagnosisQuestions[diagnosisStep].options.map((option, i) => (
+                      <button
+                        key={i}
+                        onClick={() => setDiagnosisStep(prev => prev + 1)}
+                        className="w-full text-left px-4 py-3 rounded-xl border-2 border-slate-100 hover:border-teal-500 hover:bg-teal-50 text-slate-600 hover:text-teal-800 font-bold transition duration-200 flex items-center justify-between group"
+                      >
+                        {option}
+                        <ChevronRight size={16} className="text-slate-300 group-hover:text-teal-500 transition" />
+                      </button>
+                    ))}
+                  </div>
+                  <div className="mt-6 flex justify-center gap-2">
+                     <div className={`h-1.5 w-8 rounded-full transition ${diagnosisStep === 0 ? 'bg-teal-500' : 'bg-slate-200'}`}></div>
+                     <div className={`h-1.5 w-8 rounded-full transition ${diagnosisStep === 1 ? 'bg-teal-500' : 'bg-slate-200'}`}></div>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-6 animate-fadeIn">
+                  <div className="w-16 h-16 bg-teal-100 text-teal-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <CheckCircle2 size={32} />
+                  </div>
+                  <h3 className="text-xl font-bold mb-2">診断完了！</h3>
+                  <p className="text-sm text-slate-500 mb-6">あなたに最適な治療法と<br/>おすすめクリニックを表示します。</p>
+                  <Link href="/search">
+                    <button className="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 rounded-xl shadow-lg transition">
+                      診断結果を見る
+                    </button>
+                  </Link>
+                  <button
+                    onClick={() => setDiagnosisStep(0)}
+                    className="mt-4 text-xs text-slate-400 hover:text-slate-600 underline"
+                  >
+                    もう一度やり直す
+                  </button>
+                </div>
+              )}
+
+            </div>
+
+            {/* Background Element for depth */}
+            <div className="absolute top-6 left-6 w-full h-full bg-slate-800 rounded-3xl opacity-50 -z-10 transform rotate-3"></div>
+          </div>
+        </div>
+      </section>
+
+      {/* --- Purpose Navigation --- */}
+      <section className="py-16 bg-slate-50 relative z-20">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="text-center mb-10">
+            <h2 className="text-2xl font-bold text-slate-900 mb-2">何から始めればいい？</h2>
+            <p className="text-slate-500 text-sm">現在の状況に合わせて、最適な情報へご案内します</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              {
+                icon: <Stethoscope size={28} />,
+                title: "まずは現状を知りたい",
+                desc: "30秒で完了！ハゲのリスク診断",
+                link: "セルフチェックへ",
+                href: "#"
+              },
+              {
+                icon: <CreditCard size={28} />,
+                title: "費用が心配",
+                desc: "月額1,000円台〜のクリニック特集",
+                link: "相場を見る",
+                href: "/search"
+              },
+              {
+                icon: <Smartphone size={28} />,
+                title: "通院は面倒くさい",
+                desc: "スマホで完結！オンライン診療",
+                link: "オンライン特集へ",
+                href: "/search"
+              },
+            ].map((item, idx) => (
+              <Link key={idx} href={item.href}>
+                <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 hover:border-teal-200 hover:shadow-lg hover:shadow-teal-900/5 transition cursor-pointer group flex flex-col items-center text-center h-full">
+                  <div className="mb-5 w-16 h-16 rounded-2xl bg-slate-50 text-slate-600 group-hover:bg-teal-50 group-hover:text-teal-600 flex items-center justify-center transition duration-300">
+                    {item.icon}
+                  </div>
+                  <h3 className="text-lg font-bold mb-2 text-slate-900">{item.title}</h3>
+                  <p className="text-sm text-slate-500 mb-6 font-medium">{item.desc}</p>
+                  <span className="text-xs font-bold text-teal-600 flex items-center gap-1 group-hover:gap-2 transition-all mt-auto bg-teal-50 px-4 py-2 rounded-full">
+                    {item.link} <ChevronRight size={14} />
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* --- Online Recommended Section --- */}
+      <section className="py-16 px-4 bg-white">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
+            <div>
+              <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2">オンラインのおすすめクリニック</h2>
+              <p className="text-slate-500 text-sm font-medium">通院不要で自宅に届く。独自調査に基づいた厳選リスト</p>
+            </div>
+            {/* Tabs */}
+            <div className="flex bg-slate-100 p-1 rounded-xl overflow-x-auto">
+              {[
+                { id: 'comprehensive', label: '総合おすすめ' },
+                { id: 'price', label: '価格重視' },
+                { id: 'speed', label: '即日発送' }
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`px-4 py-2 rounded-lg text-xs sm:text-sm font-bold whitespace-nowrap transition-all ${
+                    activeTab === tab.id
+                      ? 'bg-white text-slate-900 shadow-sm'
+                      : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Clinic List */}
+          <div className="space-y-6">
+            {clinics.map((clinic, idx) => (
+              <div key={clinic.id} className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 hover:border-teal-500 hover:shadow-md transition group relative overflow-hidden">
+                {/* Number Badge */}
+                <div className="absolute top-0 left-0 bg-slate-900 text-white text-xs font-bold px-3 py-1 rounded-br-lg z-10">
+                  {idx + 1}位
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-6">
+                  {/* Image Placeholder */}
+                  <div className={`w-full sm:w-48 h-36 ${clinic.image} rounded-xl flex-shrink-0 flex items-center justify-center text-slate-400 font-bold text-xs border border-slate-100`}>
+                    <div className="text-center">
+                      <div className="mx-auto mb-2 w-8 h-8 rounded-full bg-white/50 flex items-center justify-center">📷</div>
+                      NO IMAGE
+                    </div>
+                  </div>
+
+                  {/* Content */}
+                  <div className="flex-1 flex flex-col justify-between">
+                    <div>
+                      <div className="flex justify-between items-start mb-2">
+                        <h3 className="text-lg font-bold text-slate-900 group-hover:text-teal-700 transition">{clinic.name}</h3>
+                        <div className="flex items-center gap-2">
+                           <span className="text-[10px] bg-teal-50 text-teal-700 px-2 py-0.5 rounded border border-teal-100 font-bold">オンライン対応</span>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {clinic.tags.map((tag, i) => (
+                          <span key={i} className="text-[10px] sm:text-xs font-medium bg-slate-100 text-slate-600 px-2 py-1 rounded border border-slate-200">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+
+                      {/* Features List */}
+                      <div className="flex gap-3 mb-2">
+                        {clinic.features.map((feature, i) => (
+                          <div key={i} className="flex items-center gap-1.5 text-xs text-slate-600">
+                            <CheckCircle2 size={14} className="text-teal-500" />
+                            {feature}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="flex items-end justify-between pt-4 border-t border-slate-100">
+                      <div>
+                        <span className="text-xs text-slate-400 block mb-0.5">予防プラン目安</span>
+                        <div className="text-slate-900 font-bold text-xl tracking-tight">
+                          <span className="text-sm text-slate-500 mr-1 font-normal">月額</span>
+                          ¥{clinic.price}
+                          <span className="text-xs text-slate-500 font-normal ml-1">~</span>
+                        </div>
+                      </div>
+                      <button className="bg-slate-900 hover:bg-teal-600 text-white text-sm font-bold px-6 py-2.5 rounded-lg transition shadow-lg shadow-slate-900/10 flex items-center gap-2 group-hover:bg-teal-600">
+                        詳細を見る <ChevronRight size={16} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-10 text-center">
+             <button className="text-slate-500 font-bold text-sm border-b border-slate-300 hover:border-slate-900 hover:text-slate-900 pb-1 transition">
+               ランキングをもっと見る
+             </button>
+          </div>
+        </div>
+      </section>
+
+      {/* --- Area/Prefecture List Section --- */}
+      <section className="py-16 bg-slate-50">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="flex justify-between items-end mb-10">
+            <div>
+              <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+                <Map size={28} className="text-teal-600" />
+                都道府県からAGAクリニックを探す
+              </h2>
+              <p className="text-sm text-slate-500 mt-2">
+                お住まいの地域や、職場の近くのクリニックを検索できます。
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {areaGroups.map((group, idx) => (
+              <div key={idx} className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2 border-b border-slate-100 pb-2">
+                  <Navigation size={16} className="text-teal-500" />
+                  {group.region}
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {group.prefs.map((pref, i) => (
+                    <Link
+                      key={i}
+                      href={`/areas/${pref.slug}`}
+                      className="text-sm text-slate-600 hover:text-teal-600 hover:bg-teal-50 px-3 py-1.5 rounded-lg transition duration-200 bg-slate-50 font-medium"
+                    >
+                      {pref.name}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-8 bg-teal-900 text-white p-6 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-6">
+            <div>
+              <h3 className="font-bold text-lg mb-1">近くにクリニックがない場合は？</h3>
+              <p className="text-teal-200 text-sm">
+                通院不要の「オンライン診療」なら、全国どこからでも受診可能です。
+              </p>
+            </div>
+            <button className="bg-white text-teal-900 font-bold px-6 py-3 rounded-xl hover:bg-teal-50 transition shadow-lg whitespace-nowrap flex items-center gap-2">
+              オンライン診療特集を見る <ArrowRight size={16} />
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* --- FAQ Section --- */}
+      <section className="py-16 bg-white border-t border-slate-100">
+        <div className="max-w-3xl mx-auto px-4">
+          <div className="text-center mb-10">
+            <h2 className="text-2xl font-bold text-slate-900">よくある質問</h2>
+            <p className="text-slate-500 text-sm mt-2">治療を始める前の不安を解消します</p>
+          </div>
+
+          <div className="space-y-4">
+            {[
+              { q: "保険は適用されますか？", a: "AGA治療は基本的に「自由診療」となり、健康保険の適用外です。ただし、一部の皮膚疾患が原因の場合は適用されることもあります。" },
+              { q: "治療をやめるとどうなりますか？", a: "治療を中止すると、再び進行が始まる可能性が高いです。満足いく状態になった後は、維持するための安価なプランへ移行するのが一般的です。" },
+              { q: "オンライン診療でも薬はもらえますか？", a: "はい、可能です。ビデオ通話などで医師の診察を受けた後、配送にて自宅やコンビニで薬を受け取ることができます。" }
+            ].map((item, idx) => (
+              <div key={idx} className="bg-slate-50 rounded-2xl p-6 md:p-8 hover:bg-slate-100 transition duration-300">
+                <p className="font-bold text-slate-900 mb-3 flex items-start gap-4 text-lg">
+                  <span className="bg-teal-600 text-white rounded-lg w-7 h-7 flex items-center justify-center text-sm font-bold flex-shrink-0 mt-0.5 shadow-md shadow-teal-600/20">Q</span>
+                  {item.q}
+                </p>
+                <p className="text-slate-600 text-sm pl-11 leading-relaxed">
+                  {item.a}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* --- Footer --- */}
+      <footer className="bg-slate-900 text-slate-400 py-16 text-sm">
+        <div className="max-w-6xl mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-10 md:gap-8">
+          <div className="col-span-1 md:col-span-1">
+            <div className="flex items-center gap-2 text-white font-bold text-xl mb-6">
+              <div className="bg-teal-600 p-1.5 rounded-lg">
+                <TrendingUp size={20} />
+              </div>
+              AGA治療.com
+            </div>
+            <p className="text-xs leading-relaxed opacity-70 mb-6">
+              AGA治療.comは、薄毛・抜け毛に悩む男性のための総合情報ポータルサイトです。<br/>
+              公平な視点と科学的根拠に基づいた情報発信に努めています。
+            </p>
+            <div className="flex gap-4">
+              <div className="w-8 h-8 bg-slate-800 rounded-full flex items-center justify-center hover:bg-teal-600 transition cursor-pointer">X</div>
+              <div className="w-8 h-8 bg-slate-800 rounded-full flex items-center justify-center hover:bg-teal-600 transition cursor-pointer">in</div>
+            </div>
+          </div>
+
+          <div>
+            <h4 className="text-white font-bold mb-6 text-base">コンテンツ</h4>
+            <ul className="space-y-3">
+              <li><Link href="#" className="hover:text-teal-400 transition flex items-center gap-2"><ChevronRight size={12}/> AGA基礎知識</Link></li>
+              <li><Link href="/search" className="hover:text-teal-400 transition flex items-center gap-2"><ChevronRight size={12}/> クリニックランキング</Link></li>
+              <li><Link href="#" className="hover:text-teal-400 transition flex items-center gap-2"><ChevronRight size={12}/> 治療薬の種類</Link></li>
+              <li><Link href="#" className="hover:text-teal-400 transition flex items-center gap-2"><ChevronRight size={12}/> 体験談・口コミ</Link></li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="text-white font-bold mb-6 text-base">エリア検索</h4>
+            <ul className="space-y-3">
+              <li><Link href="/areas/tokyo" className="hover:text-teal-400 transition flex items-center gap-2"><ChevronRight size={12}/> 東京のAGAクリニック</Link></li>
+              <li><Link href="/areas/osaka" className="hover:text-teal-400 transition flex items-center gap-2"><ChevronRight size={12}/> 大阪のAGAクリニック</Link></li>
+              <li><Link href="/areas/aichi" className="hover:text-teal-400 transition flex items-center gap-2"><ChevronRight size={12}/> 名古屋のAGAクリニック</Link></li>
+              <li><Link href="/search" className="hover:text-teal-400 transition flex items-center gap-2"><ChevronRight size={12}/> オンライン診療</Link></li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="text-white font-bold mb-6 text-base">サイト情報</h4>
+            <ul className="space-y-3">
+              <li><Link href="#" className="hover:text-teal-400 transition flex items-center gap-2"><ChevronRight size={12}/> 運営会社</Link></li>
+              <li><Link href="/privacy" className="hover:text-teal-400 transition flex items-center gap-2"><ChevronRight size={12}/> プライバシーポリシー</Link></li>
+              <li><Link href="#" className="hover:text-teal-400 transition flex items-center gap-2"><ChevronRight size={12}/> 免責事項</Link></li>
+              <li><Link href="/contact" className="hover:text-teal-400 transition flex items-center gap-2"><ChevronRight size={12}/> お問い合わせ</Link></li>
+            </ul>
+          </div>
+        </div>
+        <div className="max-w-6xl mx-auto px-4 mt-16 pt-8 border-t border-slate-800 text-center text-xs opacity-40">
+          &copy; 2025 AGA治療.com. All Rights Reserved.
+        </div>
+      </footer>
+    </div>
+  )
+}
