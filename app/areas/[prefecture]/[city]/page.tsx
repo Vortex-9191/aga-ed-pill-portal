@@ -1,6 +1,7 @@
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
-import { ClinicCard } from "@/components/clinic-card"
+import { EnhancedClinicCard } from "@/components/enhanced-clinic-card"
+import { DiagnosisTool } from "@/components/diagnosis-tool"
 import Link from "next/link"
 import { ChevronRight, MapPin, Train } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -10,7 +11,6 @@ import { SearchFilters } from "@/components/search-filters"
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
 import { getStationSlug } from "@/lib/data/stations"
-import { ClinicFinderWrapper } from "@/components/clinic-finder-wrapper"
 
 // Prefecture slug to name mapping
 const prefectureMap: Record<string, string> = {
@@ -72,7 +72,7 @@ export default async function CityPage({
   // Get clinics for facet generation with current filters applied (except station filter)
   let facetQuery = supabase
     .from("clinics")
-    .select("featured_subjects, hours_saturday, hours_sunday, hours_monday, hours_tuesday, hours_wednesday, hours_thursday, hours_friday, director_name, features, stations")
+    .select("featured_subjects, 土曜, 日曜, 月曜, 火曜, 水曜, 木曜, 金曜, 特徴, stations")
     .eq("prefecture", prefectureName)
     .eq("municipalities", cityName)
 
@@ -82,21 +82,21 @@ export default async function CityPage({
   }
 
   if (searchParams.feature) {
-    facetQuery = facetQuery.ilike("features", `%${searchParams.feature}%`)
+    facetQuery = facetQuery.ilike("特徴", `%${searchParams.feature}%`)
   }
 
   if (searchParams.weekend) {
-    facetQuery = facetQuery.or("hours_saturday.not.is.null,hours_sunday.not.is.null")
+    facetQuery = facetQuery.or("土曜.not.is.null,日曜.not.is.null")
   }
 
   if (searchParams.evening) {
     facetQuery = facetQuery.or(
-      "hours_monday.ilike.%18:%,hours_monday.ilike.%19:%,hours_monday.ilike.%20:%,hours_tuesday.ilike.%18:%,hours_tuesday.ilike.%19:%,hours_tuesday.ilike.%20:%,hours_wednesday.ilike.%18:%,hours_wednesday.ilike.%19:%,hours_wednesday.ilike.%20:%,hours_thursday.ilike.%18:%,hours_thursday.ilike.%19:%,hours_thursday.ilike.%20:%,hours_friday.ilike.%18:%,hours_friday.ilike.%19:%,hours_friday.ilike.%20:%"
+      "月曜.ilike.%18:%,月曜.ilike.%19:%,月曜.ilike.%20:%,火曜.ilike.%18:%,火曜.ilike.%19:%,火曜.ilike.%20:%,水曜.ilike.%18:%,水曜.ilike.%19:%,水曜.ilike.%20:%,木曜.ilike.%18:%,木曜.ilike.%19:%,木曜.ilike.%20:%,金曜.ilike.%18:%,金曜.ilike.%19:%,金曜.ilike.%20:%"
     )
   }
 
   if (searchParams.director) {
-    facetQuery = facetQuery.not("director_name", "is", null)
+    facetQuery = facetQuery.not("院長名", "is", null)
   }
 
   const { data: allClinics } = await facetQuery
@@ -114,21 +114,21 @@ export default async function CityPage({
   }
 
   if (searchParams.feature) {
-    clinicsQuery = clinicsQuery.ilike("features", `%${searchParams.feature}%`)
+    clinicsQuery = clinicsQuery.ilike("特徴", `%${searchParams.feature}%`)
   }
 
   if (searchParams.weekend) {
-    clinicsQuery = clinicsQuery.or("hours_saturday.not.is.null,hours_sunday.not.is.null")
+    clinicsQuery = clinicsQuery.or("土曜.not.is.null,日曜.not.is.null")
   }
 
   if (searchParams.evening) {
     clinicsQuery = clinicsQuery.or(
-      "hours_monday.ilike.%18:%,hours_monday.ilike.%19:%,hours_monday.ilike.%20:%,hours_tuesday.ilike.%18:%,hours_tuesday.ilike.%19:%,hours_tuesday.ilike.%20:%,hours_wednesday.ilike.%18:%,hours_wednesday.ilike.%19:%,hours_wednesday.ilike.%20:%,hours_thursday.ilike.%18:%,hours_thursday.ilike.%19:%,hours_thursday.ilike.%20:%,hours_friday.ilike.%18:%,hours_friday.ilike.%19:%,hours_friday.ilike.%20:%"
+      "月曜.ilike.%18:%,月曜.ilike.%19:%,月曜.ilike.%20:%,火曜.ilike.%18:%,火曜.ilike.%19:%,火曜.ilike.%20:%,水曜.ilike.%18:%,水曜.ilike.%19:%,水曜.ilike.%20:%,木曜.ilike.%18:%,木曜.ilike.%19:%,木曜.ilike.%20:%,金曜.ilike.%18:%,金曜.ilike.%19:%,金曜.ilike.%20:%"
     )
   }
 
   if (searchParams.director) {
-    clinicsQuery = clinicsQuery.not("director_name", "is", null)
+    clinicsQuery = clinicsQuery.not("院長名", "is", null)
   }
 
   if (searchParams.station) {
@@ -171,8 +171,8 @@ export default async function CityPage({
     }
 
     // Features
-    if (clinic.features) {
-      clinic.features.split(",").forEach((f: string) => {
+    if (clinic.特徴) {
+      clinic.特徴.split(",").forEach((f: string) => {
         const feature = f.trim()
         if (feature && feature !== "-") {
           featureMap.set(feature, (featureMap.get(feature) || 0) + 1)
@@ -181,24 +181,24 @@ export default async function CityPage({
     }
 
     // Weekend
-    if (clinic.hours_saturday || clinic.hours_sunday) {
+    if (clinic.土曜 || clinic.日曜) {
       weekendCount++
     }
 
     // Evening (18:00以降)
     const hasEvening = [
-      clinic.hours_monday,
-      clinic.hours_tuesday,
-      clinic.hours_wednesday,
-      clinic.hours_thursday,
-      clinic.hours_friday,
+      clinic.月曜,
+      clinic.火曜,
+      clinic.水曜,
+      clinic.木曜,
+      clinic.金曜,
     ].some((hours) => hours && (hours.includes("18:") || hours.includes("19:") || hours.includes("20:")))
     if (hasEvening) {
       eveningCount++
     }
 
     // Director
-    if (clinic.director_name) {
+    if (clinic.院長名) {
       directorCount++
     }
   })
@@ -241,39 +241,53 @@ export default async function CityPage({
     .sort((a, b) => b.count - a.count) // Sort by clinic count
     .slice(0, 10) // Limit to top 10
 
-  // Transform data
-  const clinicCards =
-    clinics?.map((clinic) => {
-      const weekdays = [
-        { en: "hours_monday", jp: "月曜" },
-        { en: "hours_tuesday", jp: "火曜" },
-        { en: "hours_wednesday", jp: "水曜" },
-        { en: "hours_thursday", jp: "木曜" },
-        { en: "hours_friday", jp: "金曜" },
-        { en: "hours_saturday", jp: "土曜" },
-        { en: "hours_sunday", jp: "日曜" },
-      ]
-      const firstHours = weekdays.find((day) => clinic[day.en] && clinic[day.en] !== "-")
-      const hoursPreview = firstHours ? `${firstHours.jp}: ${clinic[firstHours.en]}` : null
+  // No need to transform data - pass clinic objects directly to EnhancedClinicCard
 
-      return {
-        id: clinic.id,
-        name: clinic.clinic_name,
-        slug: clinic.slug,
-        address: clinic.address,
-        station: clinic.stations || "",
-        specialties: clinic.featured_subjects ? clinic.featured_subjects.split(", ") : [],
-        phone: clinic.corp_tel,
-        prefecture: clinic.prefecture,
-        city: clinic.municipalities,
-        hours: hoursPreview,
-        directorName: clinic.director_name,
+  // Generate JSON-LD structured data
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "numberOfItems": totalCount || 0,
+    "itemListElement": clinics?.map((clinic, index) => ({
+      "@type": "ListItem",
+      "position": from + index + 1,
+      "item": {
+        "@type": "MedicalClinic",
+        "@id": `https://aga治療.com/clinics/${clinic.slug}`,
+        "name": clinic.clinic_name,
+        "url": clinic.url || `https://aga治療.com/clinics/${clinic.slug}`,
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": clinic.address,
+          "addressRegion": clinic.prefecture,
+          "addressLocality": clinic.municipalities || "",
+          "addressCountry": "JP"
+        },
+        "telephone": clinic.corp_tel || "",
+        ...(clinic.rating && {
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": clinic.rating,
+            "reviewCount": clinic.review_count || 0,
+            "bestRating": 5,
+            "worstRating": 1
+          }
+        }),
+        "medicalSpecialty": clinic.clinic_spec || "AGA治療"
       }
-    }) || []
+    })) || []
+  }
 
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
+
+      {/* JSON-LD Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+
       <main className="flex-1">
         {/* Breadcrumb */}
         <div className="border-b border-border bg-muted/30">
@@ -302,7 +316,7 @@ export default async function CityPage({
             <div className="flex items-center gap-3 mb-4">
               <MapPin className="h-8 w-8 text-accent" />
               <h1 className="text-3xl font-bold text-foreground md:text-4xl">
-                {cityName}のクリニック
+                {prefectureName}{cityName}のAGA治療クリニック
               </h1>
             </div>
             <p className="text-lg text-muted-foreground">{totalCount || 0}件のクリニック</p>
@@ -320,8 +334,8 @@ export default async function CityPage({
 
             {/* Clinic List */}
             <div>
-              {/* Clinic Finder Wizard */}
-              <ClinicFinderWrapper />
+              {/* Diagnosis Tool */}
+              <DiagnosisTool />
 
               <div className="mb-6 flex items-center justify-between">
                 <p className="text-sm text-muted-foreground">
@@ -330,8 +344,14 @@ export default async function CityPage({
               </div>
 
               <div className="space-y-4">
-                {clinicCards.length > 0 ? (
-                  clinicCards.map((clinic) => <ClinicCard key={clinic.id} clinic={clinic} />)
+                {clinics && clinics.length > 0 ? (
+                  clinics.map((clinic, index) => (
+                    <EnhancedClinicCard
+                      key={clinic.id}
+                      clinic={clinic}
+                      position={from + index + 1}
+                    />
+                  ))
                 ) : (
                   <div className="text-center py-12">
                     <p className="text-muted-foreground">クリニックが見つかりませんでした。</p>
@@ -394,6 +414,20 @@ export default async function CityPage({
               </CardContent>
             </Card>
           )}
+
+          {/* SEO Content Section */}
+          <div className="mt-12 prose prose-sm max-w-none">
+            <h2 className="text-2xl font-bold mb-4">{prefectureName}{cityName}のAGA治療について</h2>
+            <p className="text-muted-foreground mb-6">
+              {prefectureName}{cityName}には、AGA（男性型脱毛症）治療を専門とするクリニックが{totalCount || 0}件あります。
+              当サイトでは、各クリニックの診療時間、住所、アクセス情報、取扱治療薬、口コミ評価などの詳細情報を掲載しています。
+            </p>
+            <p className="text-muted-foreground mb-6">
+              AGA治療は早期発見・早期治療が重要です。薄毛や抜け毛が気になり始めたら、
+              まずは専門クリニックでの無料カウンセリングを受けることをおすすめします。
+              多くのクリニックでは初診料無料、オンライン診療対応など、気軽に相談できる体制を整えています。
+            </p>
+          </div>
         </div>
       </main>
       <Footer />
