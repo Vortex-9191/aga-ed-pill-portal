@@ -1,11 +1,21 @@
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
-import { EnhancedClinicCard } from "@/components/enhanced-clinic-card"
 import { DiagnosisTool } from "@/components/diagnosis-tool"
 import Link from "next/link"
-import { ChevronRight, MapPin, Train } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import {
+  ChevronRight,
+  MapPin,
+  Train,
+  CreditCard,
+  CheckCircle2,
+  Wallet,
+  User,
+  Phone,
+  TrendingUp,
+  Filter,
+  HelpCircle,
+  AlertTriangle
+} from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
 import { SearchFilters } from "@/components/search-filters"
 import { notFound } from "next/navigation"
@@ -217,7 +227,7 @@ export default async function CityPage({
   })
 
   const facetData = {
-    prefectures: [], // Not needed for city page
+    prefectures: [],
     stations: Array.from(stationFacetMap.entries())
       .map(([name, count]) => ({ name, count }))
       .sort((a, b) => b.count - a.count)
@@ -238,10 +248,8 @@ export default async function CityPage({
   // Use the same station data for the stations section at bottom (top 10)
   const relatedStations = Array.from(stationFacetMap.entries())
     .map(([name, count]) => ({ name, count }))
-    .sort((a, b) => b.count - a.count) // Sort by clinic count
-    .slice(0, 10) // Limit to top 10
-
-  // No need to transform data - pass clinic objects directly to EnhancedClinicCard
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 10)
 
   // Generate JSON-LD structured data
   const structuredData = {
@@ -278,158 +286,464 @@ export default async function CityPage({
     })) || []
   }
 
-  return (
-    <div className="flex min-h-screen flex-col">
-      <Header />
+  // Extract opening hours for each clinic
+  const getOpeningHours = (clinic: any) => {
+    const days = ['月曜', '火曜', '水曜', '木曜', '金曜', '土曜', '日曜']
+    const hours: string[] = []
+    days.forEach(day => {
+      if (clinic[day] && clinic[day] !== '-') {
+        hours.push(`${day}: ${clinic[day]}`)
+      }
+    })
+    return hours.length > 0 ? hours.join(', ') : '要確認'
+  }
 
-      {/* JSON-LD Structured Data */}
+  // Get first station from stations list
+  const getFirstStation = (stations: string | null) => {
+    if (!stations || stations === '-') return '駅情報なし'
+    const stationList = stations.split(',')
+    return stationList[0]?.trim() || '駅情報なし'
+  }
+
+  // Get features as array
+  const getFeatures = (clinic: any) => {
+    const features: string[] = []
+    if (clinic.特徴 && clinic.特徴 !== '-') {
+      const featureList = clinic.特徴.split(',').map((f: string) => f.trim()).filter(Boolean)
+      features.push(...featureList.slice(0, 3))
+    }
+    // Add online if specified
+    if (clinic.online_consultation) {
+      features.unshift('オンライン診療')
+    }
+    return features
+  }
+
+  // Get nearby cities - simplified version
+  const nearbyCities = [
+    "渋谷区", "中野区", "豊島区", "港区", "千代田区",
+    "中央区", "文京区", "世田谷区", "杉並区", "練馬区", "目黒区", "品川区"
+  ].filter(city => city !== cityName).slice(0, 12)
+
+  return (
+    <div className="min-h-screen bg-slate-50 font-sans text-slate-800">
+      {/* JSON-LD Injection */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
 
-      <main className="flex-1">
-        {/* Breadcrumb */}
-        <div className="border-b border-border bg-muted/30">
-          <div className="container py-4">
-            <nav className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Link href="/" className="hover:text-foreground transition-colors">
-                ホーム
-              </Link>
-              <ChevronRight className="h-4 w-4" />
-              <Link href="/areas" className="hover:text-foreground transition-colors">
-                エリア一覧
-              </Link>
-              <ChevronRight className="h-4 w-4" />
-              <Link href={`/areas/${params.prefecture}`} className="hover:text-foreground transition-colors">
-                {prefectureName}
-              </Link>
-              <ChevronRight className="h-4 w-4" />
-              <span className="text-foreground font-medium">{cityName}</span>
-            </nav>
-          </div>
-        </div>
+      <Header />
 
-        {/* Page Header */}
-        <div className="border-b border-border bg-secondary/20">
-          <div className="container py-12">
-            <div className="flex items-center gap-3 mb-4">
-              <MapPin className="h-8 w-8 text-accent" />
-              <h1 className="text-3xl font-bold text-foreground md:text-4xl">
-                {prefectureName}{cityName}のAGA治療クリニック
-              </h1>
+      {/* Breadcrumbs */}
+      <div className="bg-white border-b border-slate-100">
+        <div className="max-w-6xl mx-auto px-4 py-3">
+          <nav className="flex items-center text-xs text-slate-500 overflow-x-auto whitespace-nowrap">
+            <Link href="/" className="hover:text-teal-600 transition">TOP</Link>
+            <ChevronRight size={12} className="mx-2 flex-shrink-0" />
+            <Link href="/areas" className="hover:text-teal-600 transition">エリア一覧</Link>
+            <ChevronRight size={12} className="mx-2 flex-shrink-0" />
+            <Link href={`/areas/${params.prefecture}`} className="hover:text-teal-600 transition">{prefectureName}</Link>
+            <ChevronRight size={12} className="mx-2 flex-shrink-0" />
+            <span className="font-bold text-slate-900">{cityName}のAGAクリニック</span>
+          </nav>
+        </div>
+      </div>
+
+      <div className="max-w-6xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+        {/* Main Content */}
+        <main className="lg:col-span-8">
+
+          {/* Area Title & Intro */}
+          <div className="mb-8">
+            <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 mb-4 leading-tight">
+              {cityName}のおすすめAGAクリニック一覧
+              <span className="ml-3 inline-flex items-center bg-teal-50 text-teal-700 text-base px-3 py-1 rounded-full align-middle font-bold">
+                {totalCount || 0}件掲載
+              </span>
+            </h1>
+            <div className="text-sm text-slate-600 leading-relaxed bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+              <p>
+                {prefectureName}{cityName}には、AGA（男性型脱毛症）治療を専門とするクリニックが{totalCount || 0}件あります。
+                当サイトでは、各クリニックの診療時間、住所、アクセス情報、取扱治療薬、口コミ評価などの詳細情報を掲載しています。
+              </p>
             </div>
-            <p className="text-lg text-muted-foreground">{totalCount || 0}件のクリニック</p>
           </div>
-        </div>
 
-        <div className="container py-12">
-          <div className="grid gap-8 lg:grid-cols-[280px_1fr]">
-            {/* Facet Sidebar */}
-            <aside className="hidden lg:block">
-              <div className="sticky top-24">
-                <SearchFilters facets={facetData} />
-              </div>
-            </aside>
+          {/* Diagnosis Tool */}
+          <div className="mb-10">
+            <DiagnosisTool />
+          </div>
 
-            {/* Clinic List */}
-            <div>
-              {/* Diagnosis Tool */}
-              <DiagnosisTool />
+          {/* Clinic List */}
+          <div className="space-y-8">
+            {clinics && clinics.length > 0 ? (
+              clinics.map((clinic, index) => (
+                <div key={clinic.id} className="bg-white rounded-2xl p-5 md:p-6 shadow-sm border border-slate-200 hover:border-slate-400 transition group">
 
-              <div className="mb-6 flex items-center justify-between">
-                <p className="text-sm text-muted-foreground">
-                  {totalCount || 0}件中 {from + 1}〜{Math.min(to + 1, totalCount || 0)}件を表示
-                </p>
-              </div>
+                  {/* PR Label - only show for highly rated clinics */}
+                  {clinic.rating && clinic.rating >= 4.5 && (
+                    <div className="text-[10px] font-bold text-slate-400 mb-2 flex items-center justify-between">
+                      <span>おすすめPICKUP</span>
+                    </div>
+                  )}
 
-              <div className="space-y-4">
-                {clinics && clinics.length > 0 ? (
-                  clinics.map((clinic, index) => (
-                    <EnhancedClinicCard
-                      key={clinic.id}
-                      clinic={clinic}
-                      position={from + index + 1}
-                    />
-                  ))
-                ) : (
-                  <div className="text-center py-12">
-                    <p className="text-muted-foreground">クリニックが見つかりませんでした。</p>
+                  <div className="flex flex-col sm:flex-row gap-6">
+                    {/* Thumbnail */}
+                    <div className="sm:w-56 flex-shrink-0">
+                      <div className="w-full h-40 bg-slate-200 rounded-xl mb-3 relative overflow-hidden border border-slate-100">
+                        <div className="absolute top-2 left-2 bg-white/90 backdrop-blur px-2 py-1 rounded text-[10px] font-bold shadow-sm text-slate-800">
+                          外観写真
+                        </div>
+                        <div className="flex items-center justify-center h-full text-slate-400 text-xs font-bold">NO IMAGE</div>
+                      </div>
+                      {/* PC Button */}
+                      <div className="hidden sm:block">
+                        <Link href={`/clinics/${clinic.slug}`}>
+                          <button className="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold text-sm py-3 rounded-lg shadow-md shadow-teal-600/20 transition transform active:scale-95">
+                            詳細ページを見る
+                          </button>
+                        </Link>
+                        {clinic.url && (
+                          <a href={clinic.url} target="_blank" rel="noopener noreferrer">
+                            <button className="w-full mt-2 text-teal-600 font-bold text-xs hover:bg-teal-50 py-2 rounded transition">
+                              公式サイトへ
+                            </button>
+                          </a>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Info */}
+                    <div className="flex-1 flex flex-col h-full">
+                      {/* Header Info */}
+                      <div>
+                        <h2 className="text-xl font-bold text-slate-900 leading-tight group-hover:text-teal-700 transition mb-2">
+                          {clinic.clinic_name}
+                        </h2>
+
+                        {/* Catchphrase */}
+                        {clinic.catchphrase && (
+                          <p className="text-teal-600 font-bold text-sm mb-3 flex items-start gap-1.5">
+                            <CheckCircle2 size={16} className="mt-0.5 flex-shrink-0" />
+                            {clinic.catchphrase}
+                          </p>
+                        )}
+
+                        {/* Description */}
+                        {clinic.description && (
+                          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed mb-4 bg-slate-50/50 p-3 rounded lg:bg-transparent lg:p-0">
+                            {clinic.description}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Features Tags */}
+                      <div className="flex flex-wrap gap-2 mb-5">
+                        {getFeatures(clinic).map((feature, i) => (
+                          <span key={i} className="text-xs font-medium px-2 py-1 bg-slate-100 text-slate-600 rounded border border-slate-200">
+                            {feature}
+                          </span>
+                        ))}
+                      </div>
+
+                      {/* Detailed Info Grid */}
+                      <div className="mt-auto bg-slate-50 rounded-xl border border-slate-100 overflow-hidden text-sm">
+                        {/* Row 1: Rating & Access */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 border-b border-slate-100">
+                          <div className="p-4 flex items-start gap-3 border-b md:border-b-0 border-slate-100 md:border-r">
+                            <TrendingUp size={18} className="text-teal-600 mt-0.5 flex-shrink-0" />
+                            <div>
+                              <p className="text-[10px] text-slate-500 font-bold mb-1">評価</p>
+                              {clinic.rating ? (
+                                <p className="text-lg font-bold text-slate-900 leading-none">
+                                  ★{clinic.rating.toFixed(1)}
+                                  {clinic.review_count && (
+                                    <span className="text-xs text-slate-500 font-normal ml-1">({clinic.review_count}件)</span>
+                                  )}
+                                </p>
+                              ) : (
+                                <p className="text-sm text-slate-500">評価なし</p>
+                              )}
+                            </div>
+                          </div>
+                          <div className="p-4 flex items-start gap-3">
+                            <Train size={18} className="text-teal-600 mt-0.5 flex-shrink-0" />
+                            <div>
+                              <p className="text-[10px] text-slate-500 font-bold mb-1">アクセス</p>
+                              <p className="text-sm text-slate-800 font-medium leading-tight">{getFirstStation(clinic.stations)}</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Row 2: Opening Hours & Director */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 border-b border-slate-100 bg-white md:bg-slate-50">
+                          <div className="p-3 px-4 flex items-start gap-3 border-b md:border-b-0 border-slate-100 md:border-r">
+                            <CheckCircle2 size={16} className="text-slate-400 mt-0.5 flex-shrink-0" />
+                            <div>
+                              <p className="text-[10px] text-slate-500 font-bold">診療時間</p>
+                              <p className="text-xs text-slate-600 mt-0.5 line-clamp-2">{getOpeningHours(clinic)}</p>
+                            </div>
+                          </div>
+                          {clinic.院長名 && (
+                            <div className="p-3 px-4 flex items-start gap-3">
+                              <User size={16} className="text-slate-400 mt-0.5 flex-shrink-0" />
+                              <div>
+                                <p className="text-[10px] text-slate-500 font-bold">院長・医師</p>
+                                <p className="text-xs text-slate-600 mt-0.5">{clinic.院長名}</p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Row 3: Address & Phone */}
+                        <div className="p-3 px-4 flex flex-col md:flex-row md:items-center gap-3 md:gap-6 bg-slate-100/50">
+                          <div className="flex items-center gap-2">
+                            <MapPin size={14} className="text-slate-400 flex-shrink-0" />
+                            <span className="text-xs text-slate-500">{clinic.address}</span>
+                          </div>
+                          {clinic.corp_tel && (
+                            <div className="flex items-center gap-2 md:ml-auto">
+                              <Phone size={14} className="text-slate-400 flex-shrink-0" />
+                              <span className="text-xs font-bold text-slate-600">{clinic.corp_tel}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Mobile Button */}
+                      <div className="sm:hidden mt-4">
+                        <Link href={`/clinics/${clinic.slug}`}>
+                          <button className="w-full bg-teal-600 text-white font-bold py-3 rounded-lg shadow-md">
+                            詳細ページを見る
+                          </button>
+                        </Link>
+                      </div>
+
+                    </div>
                   </div>
-                )}
-              </div>
-
-              {/* Pagination */}
-              {totalPages > 1 && (
-                <div className="mt-8 flex items-center justify-center gap-2">
-                  {currentPage > 1 && (
-                    <Link href={`/areas/${params.prefecture}/${params.city}?page=${currentPage - 1}`}>
-                      <Button variant="outline">前へ</Button>
-                    </Link>
-                  )}
-                  <span className="text-sm text-muted-foreground">
-                    {currentPage} / {totalPages}
-                  </span>
-                  {currentPage < totalPages && (
-                    <Link href={`/areas/${params.prefecture}/${params.city}?page=${currentPage + 1}`}>
-                      <Button variant="outline">次へ</Button>
-                    </Link>
-                  )}
                 </div>
+              ))
+            ) : (
+              <div className="text-center py-12 bg-white rounded-2xl border border-slate-200">
+                <p className="text-slate-500">クリニックが見つかりませんでした。</p>
+              </div>
+            )}
+          </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="mt-10 flex justify-center gap-2">
+              {currentPage > 1 && (
+                <Link href={`/areas/${params.prefecture}/${params.city}?page=${currentPage - 1}`}>
+                  <button className="px-5 py-2.5 rounded-lg bg-white text-slate-600 hover:bg-slate-100 font-medium border border-slate-200 transition">
+                    前へ
+                  </button>
+                </Link>
+              )}
+              <div className="flex items-center px-4 py-2.5 rounded-lg bg-slate-900 text-white font-bold shadow-md">
+                {currentPage} / {totalPages}
+              </div>
+              {currentPage < totalPages && (
+                <Link href={`/areas/${params.prefecture}/${params.city}?page=${currentPage + 1}`}>
+                  <button className="px-5 py-2.5 rounded-lg bg-white text-slate-600 hover:bg-slate-100 font-medium border border-slate-200 transition">
+                    次へ
+                  </button>
+                </Link>
               )}
             </div>
-          </div>
-
-          {/* Related Stations Section */}
-          {relatedStations.length > 0 && (
-            <Card className="mt-8">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Train className="h-5 w-5" />
-                  {cityName}のクリニック最寄り駅
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-                  {relatedStations.map((station) => {
-                    const stationSlug = getStationSlug(station.name)
-
-                    return (
-                      <Link
-                        key={station.name}
-                        href={`/stations/${stationSlug}`}
-                        className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-accent hover:border-coral transition-colors group"
-                      >
-                        <div className="flex items-center gap-3">
-                          <Train className="h-4 w-4 text-muted-foreground group-hover:text-coral flex-shrink-0 transition-colors" />
-                          <span className="text-sm font-medium group-hover:text-coral transition-colors">{station.name}</span>
-                        </div>
-                        <span className="text-xs text-muted-foreground bg-muted group-hover:bg-coral/10 px-2 py-1 rounded transition-colors">
-                          {station.count}件
-                        </span>
-                      </Link>
-                    )
-                  })}
-                </div>
-              </CardContent>
-            </Card>
           )}
 
-          {/* SEO Content Section */}
-          <div className="mt-12 prose prose-sm max-w-none">
-            <h2 className="text-2xl font-bold mb-4">{prefectureName}{cityName}のAGA治療について</h2>
-            <p className="text-muted-foreground mb-6">
-              {prefectureName}{cityName}には、AGA（男性型脱毛症）治療を専門とするクリニックが{totalCount || 0}件あります。
-              当サイトでは、各クリニックの診療時間、住所、アクセス情報、取扱治療薬、口コミ評価などの詳細情報を掲載しています。
-            </p>
-            <p className="text-muted-foreground mb-6">
-              AGA治療は早期発見・早期治療が重要です。薄毛や抜け毛が気になり始めたら、
-              まずは専門クリニックでの無料カウンセリングを受けることをおすすめします。
-              多くのクリニックでは初診料無料、オンライン診療対応など、気軽に相談できる体制を整えています。
-            </p>
+          {/* SEO Content: Clinic Guide */}
+          <section className="mt-20 bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+            <div className="bg-slate-900 text-white p-6 md:p-8">
+              <h2 className="text-xl md:text-2xl font-bold flex items-center gap-3">
+                <HelpCircle className="text-teal-400" />
+                {cityName}でのAGAクリニックの選び方
+              </h2>
+              <p className="text-slate-300 text-sm mt-2 opacity-90">
+                後悔しないためにチェックすべき3つのポイントを解説します。
+              </p>
+            </div>
+
+            <div className="p-6 md:p-8 space-y-10">
+              {/* Point 1 */}
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-3">
+                  <span className="bg-teal-100 text-teal-700 w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm">01</span>
+                  「維持費（ランニングコスト）」の総額で比較する
+                </h3>
+                <div className="pl-11 space-y-3 text-sm text-slate-600 leading-relaxed">
+                  <p>
+                    AGA治療は継続が前提です。初回キャンペーン価格（例: 初月0円）だけで選んでしまうと、2ヶ月目以降の料金が高額で続けられなくなるケースがあります。
+                  </p>
+                  <div className="bg-slate-50 p-4 rounded-lg border border-slate-100">
+                    <p className="font-bold text-slate-800 mb-2 text-xs">チェックポイント</p>
+                    <ul className="space-y-2">
+                      <li className="flex items-start gap-2">
+                        <CheckCircle2 size={14} className="text-teal-500 mt-0.5 flex-shrink-0" />
+                        <span>診察料や血液検査代は毎回かかるか？（無料のクリニックも多い）</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle2 size={14} className="text-teal-500 mt-0.5 flex-shrink-0" />
+                        <span>2ヶ月目以降の薬代は予算内か？（月額5,000円〜15,000円が相場）</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              {/* Point 2 */}
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-3">
+                  <span className="bg-teal-100 text-teal-700 w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm">02</span>
+                  「通いやすさ」か「オンライン」かを決める
+                </h3>
+                <div className="pl-11 space-y-3 text-sm text-slate-600 leading-relaxed">
+                  <p>
+                    {cityName}エリアは駅周辺にクリニックが集中していますが、忙しい方は「オンライン診療」も検討しましょう。
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                    <div className="border border-slate-200 rounded-lg p-4">
+                      <p className="font-bold text-slate-900 mb-1">🏥 通院するメリット</p>
+                      <p className="text-xs text-slate-500">マイクロスコープでの頭皮診断や、注入治療（メソセラピー）など高度な施術が受けられる。</p>
+                    </div>
+                    <div className="border border-slate-200 rounded-lg p-4">
+                      <p className="font-bold text-slate-900 mb-1">📱 オンラインのメリット</p>
+                      <p className="text-xs text-slate-500">通院時間ゼロ。薬は自宅配送。誰にも会わずに治療でき、料金も安く抑えられる傾向がある。</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Point 3 */}
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-3">
+                  <span className="bg-teal-100 text-teal-700 w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm">03</span>
+                  治療実績とプランの豊富さ
+                </h3>
+                <div className="pl-11 space-y-3 text-sm text-slate-600 leading-relaxed">
+                  <p>
+                    進行度によって適切な治療は異なります。「予防したいだけ」なら薬のみでOKですが、「かなり進行している」場合は内服薬・外用薬・注入治療などを組み合わせる提案力が必要です。
+                  </p>
+                  <p className="flex items-center gap-2 text-xs font-bold text-orange-600 bg-orange-50 p-2 rounded inline-block">
+                    <AlertTriangle size={14} />
+                    安すぎるプランは「成分濃度」が低い場合もあるので注意が必要です。
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+        </main>
+
+        {/* Sidebar */}
+        <aside className="lg:col-span-4 space-y-8">
+
+          {/* Detailed Search Box */}
+          <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+            <div className="flex items-center gap-2 mb-4 text-slate-900 font-bold">
+              <Filter size={18} />
+              <span>条件で絞り込む</span>
+            </div>
+
+            <SearchFilters facets={facetData} />
           </div>
-        </div>
-      </main>
+
+          {/* Nearby Areas */}
+          {nearbyCities.length > 0 && (
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+              <div className="flex items-center gap-2 mb-4 text-slate-900 font-bold">
+                <MapPin size={18} />
+                <span>近隣エリアから探す</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {nearbyCities.map((area, i) => (
+                  <Link
+                    key={i}
+                    href={`/areas/${params.prefecture}/${encodeURIComponent(area)}`}
+                    className="px-3 py-1.5 bg-slate-50 hover:bg-teal-50 hover:text-teal-700 hover:border-teal-200 border border-slate-200 rounded text-xs font-medium text-slate-600 transition"
+                  >
+                    {area}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* FAQ Widget */}
+          <div className="bg-teal-900 text-white p-6 rounded-2xl shadow-lg relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-teal-500 rounded-full filter blur-3xl opacity-20 -translate-y-1/2 translate-x-1/2"></div>
+            <h3 className="font-bold text-lg mb-3 relative z-10">初めての方へ</h3>
+            <p className="text-teal-100 text-sm mb-4 relative z-10 leading-relaxed">
+              クリニック選びで失敗しないためのポイントを医師が解説。
+            </p>
+            <Link href="/help" className="inline-flex items-center gap-1 text-sm font-bold text-white border-b border-teal-400 pb-0.5 hover:text-teal-200 transition relative z-10">
+              失敗しない選び方ガイド <ChevronRight size={14} />
+            </Link>
+          </div>
+
+        </aside>
+
+      </div>
+
+      {/* Related Stations Section */}
+      {relatedStations.length > 0 && (
+        <section className="border-t border-slate-200 bg-white py-12 mt-8">
+          <div className="max-w-6xl mx-auto px-4">
+            <h3 className="font-bold text-slate-900 mb-4 text-lg flex items-center gap-2">
+              <Train size={18} className="text-teal-600" />
+              {cityName}のクリニック最寄り駅
+            </h3>
+            <div className="grid gap-3 grid-cols-2 md:grid-cols-4 lg:grid-cols-5">
+              {relatedStations.map((station) => {
+                const stationSlug = getStationSlug(station.name)
+                return (
+                  <Link
+                    key={station.name}
+                    href={`/stations/${stationSlug}`}
+                    className="flex items-center justify-between p-4 rounded-lg border border-slate-200 hover:bg-teal-50 hover:border-teal-300 transition-colors group"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Train className="h-4 w-4 text-slate-400 group-hover:text-teal-600 flex-shrink-0 transition-colors" />
+                      <span className="text-sm font-medium group-hover:text-teal-700 transition-colors">{station.name}</span>
+                    </div>
+                    <span className="text-xs text-slate-400 bg-slate-50 group-hover:bg-teal-100 px-2 py-1 rounded transition-colors">
+                      {station.count}件
+                    </span>
+                  </Link>
+                )
+              })}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Nearby Areas Links (SEO Footer Navigation) */}
+      {nearbyCities.length > 0 && (
+        <section className="border-t border-slate-200 bg-white py-12">
+          <div className="max-w-6xl mx-auto px-4">
+            <h3 className="font-bold text-slate-900 mb-4 text-lg flex items-center gap-2">
+              <MapPin size={18} className="text-teal-600" />
+              {cityName}周辺のエリアからAGAクリニックを探す
+            </h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-y-3 gap-x-4">
+              {nearbyCities.map((area, i) => (
+                <Link
+                  key={i}
+                  href={`/areas/${params.prefecture}/${encodeURIComponent(area)}`}
+                  className="text-sm text-slate-500 hover:text-teal-600 hover:underline flex items-center gap-1 transition group"
+                >
+                  <ChevronRight size={12} className="text-slate-300 group-hover:text-teal-400" />
+                  {area}
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       <Footer />
     </div>
   )
