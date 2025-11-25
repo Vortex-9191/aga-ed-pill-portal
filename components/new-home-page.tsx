@@ -24,6 +24,7 @@ export function NewHomePage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [activeTab, setActiveTab] = useState('comprehensive')
   const [diagnosisStep, setDiagnosisStep] = useState(0)
+  const [selectedPurpose, setSelectedPurpose] = useState('comprehensive')
 
   // 構造化データ (JSON-LD): WebSite
   const structuredData = {
@@ -50,34 +51,88 @@ export function NewHomePage() {
     }
   ]
 
-  // モックデータ：オンラインクリニック情報
+  // モックデータ：クリニック情報
   const clinics = [
     {
       id: 1,
-      name: "スマートAGAクリニック オンライン",
-      price: "1,800",
-      tags: ["初診料0円", "オンライン完結", "全額返金保証"],
-      features: ["最短当日発送", "顔出し不要OK"],
+      name: "AGAスキンクリニック",
+      price: "3,700",
+      tags: ["全国展開", "実績豊富", "オリジナル治療"],
+      features: ["発毛実感率99.4%", "無料カウンセリング"],
       image: "bg-slate-100",
       category: "comprehensive"
     },
     {
       id: 2,
-      name: "クラウドAGAケア",
+      name: "湘南美容クリニック AGA",
+      price: "3,000",
+      tags: ["症例数No.1", "全額返金保証", "オンライン対応"],
+      features: ["全国90院以上", "初診から薬処方可"],
+      image: "bg-blue-50",
+      category: "comprehensive"
+    },
+    {
+      id: 3,
+      name: "銀座総合美容クリニック",
+      price: "2,000",
+      tags: ["都内人気", "明朗会計", "カウンセリング充実"],
+      features: ["185万人の実績", "オリジナル治療"],
+      image: "bg-slate-100",
+      category: "comprehensive"
+    },
+    {
+      id: 4,
+      name: "eLife（イーライフ）",
       price: "1,600",
-      tags: ["業界最安級", "定期配送割引", "24時間予約可"],
+      tags: ["業界最安級", "オンライン完結", "定期配送割引"],
       features: ["維持費が安い", "国内承認薬のみ"],
       image: "bg-teal-50",
       category: "price"
     },
     {
-      id: 3,
-      name: "e-クリニックExpress",
-      price: "2,200",
-      tags: ["当日発送", "ポスト投函", "アプリで管理"],
-      features: ["バイク便対応(都内)", "チャット相談無料"],
+      id: 5,
+      name: "CLINIC FOR（クリニックフォア）",
+      price: "1,760",
+      tags: ["初診から薬発送", "最短翌日到着", "定期15%OFF"],
+      features: ["スマホ診療完結", "予約から決済まで簡単"],
       image: "bg-blue-50",
-      category: "speed"
+      category: "price"
+    },
+    {
+      id: 6,
+      name: "AGAヘアクリニック",
+      price: "1,800",
+      tags: ["初診料0円", "明朗会計", "オンライン実績"],
+      features: ["累計15万件の実績", "毎月の費用が明確"],
+      image: "bg-slate-100",
+      category: "price"
+    },
+    {
+      id: 7,
+      name: "DMMオンラインクリニック",
+      price: "2,838",
+      tags: ["オンライン専門", "最短当日発送", "DMMポイント使える"],
+      features: ["診察料0円", "24時間予約可"],
+      image: "bg-slate-100",
+      category: "online"
+    },
+    {
+      id: 8,
+      name: "CLINIC FOR（クリニックフォア）",
+      price: "1,760",
+      tags: ["オンライン完結", "最短翌日到着", "アプリ管理"],
+      features: ["スマホ診療完結", "定期配送で割引"],
+      image: "bg-blue-50",
+      category: "online"
+    },
+    {
+      id: 9,
+      name: "AGAヘアクリニック",
+      price: "1,800",
+      tags: ["テレビ電話診察", "通院不要", "実績15万件"],
+      features: ["診察料無料", "育毛サプリも処方"],
+      image: "bg-teal-50",
+      category: "online"
     }
   ]
 
@@ -297,69 +352,26 @@ export function NewHomePage() {
             </div>
           </div>
 
-          {/* Hero Visual - Interactive Diagnosis Widget (PC) */}
-          <div className="hidden md:block flex-1 relative perspective-1000">
-            <div className="bg-white/95 backdrop-blur text-slate-800 p-8 rounded-3xl shadow-2xl shadow-black/20 max-w-sm mx-auto border border-white/20 relative z-10">
-
-              {/* Header */}
-              <div className="flex items-center justify-between mb-6 border-b border-slate-100 pb-4">
-                <div>
-                  <div className="text-xs font-bold text-teal-600 mb-1">SELF CHECK</div>
-                  <div className="text-xl font-bold text-slate-900">AGAリスク診断</div>
-                </div>
-                <div className="w-10 h-10 bg-teal-50 rounded-full flex items-center justify-center text-teal-600">
-                  <HelpCircle size={24} />
-                </div>
+          {/* Hero Visual - Stats/Trust Indicators (PC) */}
+          <div className="hidden md:flex flex-1 items-center justify-center">
+            <div className="grid grid-cols-2 gap-6 max-w-md">
+              <div className="bg-white/10 backdrop-blur border border-white/20 rounded-2xl p-6 text-center">
+                <div className="text-4xl font-extrabold text-white mb-2">13,000+</div>
+                <div className="text-teal-300 text-sm font-bold">全国のクリニック</div>
               </div>
-
-              {/* Diagnosis Question */}
-              {diagnosisStep < diagnosisQuestions.length ? (
-                <div className="animate-fadeIn">
-                  <p className="font-bold text-lg mb-4 text-slate-800">
-                    Q{diagnosisStep + 1}. {diagnosisQuestions[diagnosisStep].question}
-                  </p>
-                  <div className="space-y-3">
-                    {diagnosisQuestions[diagnosisStep].options.map((option, i) => (
-                      <button
-                        key={i}
-                        onClick={() => setDiagnosisStep(prev => prev + 1)}
-                        className="w-full text-left px-4 py-3 rounded-xl border-2 border-slate-100 hover:border-teal-500 hover:bg-teal-50 text-slate-600 hover:text-teal-800 font-bold transition duration-200 flex items-center justify-between group"
-                      >
-                        {option}
-                        <ChevronRight size={16} className="text-slate-300 group-hover:text-teal-500 transition" />
-                      </button>
-                    ))}
-                  </div>
-                  <div className="mt-6 flex justify-center gap-2">
-                     <div className={`h-1.5 w-8 rounded-full transition ${diagnosisStep === 0 ? 'bg-teal-500' : 'bg-slate-200'}`}></div>
-                     <div className={`h-1.5 w-8 rounded-full transition ${diagnosisStep === 1 ? 'bg-teal-500' : 'bg-slate-200'}`}></div>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center py-6 animate-fadeIn">
-                  <div className="w-16 h-16 bg-teal-100 text-teal-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <CheckCircle2 size={32} />
-                  </div>
-                  <h3 className="text-xl font-bold mb-2">診断完了！</h3>
-                  <p className="text-sm text-slate-500 mb-6">あなたに最適な治療法と<br/>おすすめクリニックを表示します。</p>
-                  <Link href="/search">
-                    <button className="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 rounded-xl shadow-lg transition">
-                      診断結果を見る
-                    </button>
-                  </Link>
-                  <button
-                    onClick={() => setDiagnosisStep(0)}
-                    className="mt-4 text-xs text-slate-400 hover:text-slate-600 underline"
-                  >
-                    もう一度やり直す
-                  </button>
-                </div>
-              )}
-
+              <div className="bg-white/10 backdrop-blur border border-white/20 rounded-2xl p-6 text-center">
+                <div className="text-4xl font-extrabold text-white mb-2">¥1,800~</div>
+                <div className="text-teal-300 text-sm font-bold">月額最安値</div>
+              </div>
+              <div className="bg-white/10 backdrop-blur border border-white/20 rounded-2xl p-6 text-center">
+                <div className="text-4xl font-extrabold text-white mb-2">47</div>
+                <div className="text-teal-300 text-sm font-bold">全都道府県対応</div>
+              </div>
+              <div className="bg-white/10 backdrop-blur border border-white/20 rounded-2xl p-6 text-center">
+                <div className="text-4xl font-extrabold text-white mb-2">24H</div>
+                <div className="text-teal-300 text-sm font-bold">オンライン診療</div>
+              </div>
             </div>
-
-            {/* Background Element for depth */}
-            <div className="absolute top-6 left-6 w-full h-full bg-slate-800 rounded-3xl opacity-50 -z-10 transform rotate-3"></div>
           </div>
         </div>
       </section>
@@ -375,77 +387,77 @@ export function NewHomePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
               {
+                id: 'comprehensive',
                 icon: <Stethoscope size={28} />,
-                title: "まずは現状を知りたい",
-                desc: "30秒で完了！ハゲのリスク診断",
-                link: "セルフチェックへ",
-                href: "#"
+                title: "総合的におすすめ",
+                desc: "実績・評判・コスパを総合評価",
+                link: "ランキングを見る"
               },
               {
+                id: 'price',
                 icon: <CreditCard size={28} />,
-                title: "費用が心配",
+                title: "費用を抑えたい",
                 desc: "月額1,000円台〜のクリニック特集",
-                link: "相場を見る",
-                href: "/search"
+                link: "安いランキングを見る"
               },
               {
+                id: 'online',
                 icon: <Smartphone size={28} />,
                 title: "通院は面倒くさい",
                 desc: "スマホで完結！オンライン診療",
-                link: "オンライン特集へ",
-                href: "/search"
+                link: "オンライン特集を見る"
               },
             ].map((item, idx) => (
-              <Link key={idx} href={item.href}>
-                <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 hover:border-teal-200 hover:shadow-lg hover:shadow-teal-900/5 transition cursor-pointer group flex flex-col items-center text-center h-full">
-                  <div className="mb-5 w-16 h-16 rounded-2xl bg-slate-50 text-slate-600 group-hover:bg-teal-50 group-hover:text-teal-600 flex items-center justify-center transition duration-300">
-                    {item.icon}
-                  </div>
-                  <h3 className="text-xl font-bold mb-3 text-slate-900 leading-tight tracking-tight">{item.title}</h3>
-                  <p className="text-sm text-slate-600 mb-6 leading-relaxed">{item.desc}</p>
-                  <span className="text-xs font-bold text-teal-600 flex items-center gap-1 group-hover:gap-2 transition-all mt-auto bg-teal-50 px-4 py-2 rounded-full">
-                    {item.link} <ChevronRight size={14} />
-                  </span>
+              <button
+                key={idx}
+                onClick={() => setSelectedPurpose(item.id)}
+                className={`bg-white p-8 rounded-2xl shadow-sm border-2 transition cursor-pointer group flex flex-col items-center text-center h-full ${
+                  selectedPurpose === item.id
+                    ? 'border-teal-500 shadow-lg shadow-teal-900/10 scale-105'
+                    : 'border-slate-100 hover:border-teal-200 hover:shadow-lg hover:shadow-teal-900/5'
+                }`}
+              >
+                <div className={`mb-5 w-16 h-16 rounded-2xl transition duration-300 flex items-center justify-center ${
+                  selectedPurpose === item.id
+                    ? 'bg-teal-50 text-teal-600'
+                    : 'bg-slate-50 text-slate-600 group-hover:bg-teal-50 group-hover:text-teal-600'
+                }`}>
+                  {item.icon}
                 </div>
-              </Link>
+                <h3 className="text-xl font-bold mb-3 text-slate-900 leading-tight tracking-tight">{item.title}</h3>
+                <p className="text-sm text-slate-600 mb-6 leading-relaxed">{item.desc}</p>
+                <span className={`text-xs font-bold flex items-center gap-1 group-hover:gap-2 transition-all mt-auto px-4 py-2 rounded-full ${
+                  selectedPurpose === item.id
+                    ? 'bg-teal-100 text-teal-700'
+                    : 'bg-teal-50 text-teal-600'
+                }`}>
+                  {item.link} <ChevronRight size={14} />
+                </span>
+              </button>
             ))}
           </div>
         </div>
       </section>
 
-      {/* --- Online Recommended Section --- */}
+      {/* --- Recommended Clinics Ranking --- */}
       <section className="py-20 px-4 bg-white">
         <div className="max-w-4xl mx-auto">
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
-            <div className="space-y-3">
-              <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 leading-tight tracking-tight">オンラインのおすすめクリニック</h2>
-              <p className="text-slate-600 text-base leading-relaxed">通院不要で自宅に届く。独自調査に基づいた厳選リスト</p>
-            </div>
-            {/* Tabs */}
-            <div className="flex bg-slate-100 p-1 rounded-xl overflow-x-auto">
-              {[
-                { id: 'comprehensive', label: '総合おすすめ' },
-                { id: 'price', label: '価格重視' },
-                { id: 'speed', label: '即日発送' }
-              ].map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`px-4 py-2 rounded-lg text-xs sm:text-sm font-bold whitespace-nowrap transition-all ${
-                    activeTab === tab.id
-                      ? 'bg-white text-slate-900 shadow-sm'
-                      : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
+          <div className="text-center mb-12 space-y-3">
+            <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 leading-tight tracking-tight">
+              {selectedPurpose === 'comprehensive' && 'おすすめクリニックランキング'}
+              {selectedPurpose === 'price' && '安いクリニックランキング'}
+              {selectedPurpose === 'online' && 'オンライン診療おすすめランキング'}
+            </h2>
+            <p className="text-slate-600 text-base leading-relaxed">
+              {selectedPurpose === 'comprehensive' && '実績・評判・コスパを総合的に評価した厳選リスト'}
+              {selectedPurpose === 'price' && '月額費用が安い順にランキング。予算重視の方におすすめ'}
+              {selectedPurpose === 'online' && '通院不要で自宅に届く。独自調査に基づいた厳選リスト'}
+            </p>
           </div>
 
           {/* Clinic List */}
           <div className="space-y-6">
-            {clinics.map((clinic, idx) => (
+            {clinics.filter(clinic => clinic.category === selectedPurpose || selectedPurpose === 'comprehensive').map((clinic, idx) => (
               <div key={clinic.id} className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 hover:border-teal-500 hover:shadow-md transition group relative overflow-hidden">
                 {/* Number Badge */}
                 <div className="absolute top-0 left-0 bg-slate-900 text-white text-xs font-bold px-3 py-1 rounded-br-lg z-10">
