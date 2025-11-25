@@ -112,10 +112,12 @@ export default function AreasPage() {
         .select('prefecture')
 
       if (error) {
-        console.error('Error fetching prefecture counts:', error)
+        console.error('❌ Error fetching prefecture counts:', error)
         setLoading(false)
         return
       }
+
+      console.log('✅ Fetched data:', data?.length, 'clinics')
 
       const prefectureCounts: Record<string, number> = {}
       data.forEach((item: { prefecture: string }) => {
@@ -124,6 +126,7 @@ export default function AreasPage() {
         }
       })
 
+      console.log('📊 Prefecture counts:', prefectureCounts)
       setCounts(prefectureCounts)
       setLoading(false)
     }
