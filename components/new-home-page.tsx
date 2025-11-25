@@ -352,26 +352,69 @@ export function NewHomePage() {
             </div>
           </div>
 
-          {/* Hero Visual - Stats/Trust Indicators (PC) */}
-          <div className="hidden md:flex flex-1 items-center justify-center">
-            <div className="grid grid-cols-2 gap-6 max-w-md">
-              <div className="bg-white/10 backdrop-blur border border-white/20 rounded-2xl p-6 text-center">
-                <div className="text-4xl font-extrabold text-white mb-2">13,000+</div>
-                <div className="text-teal-300 text-sm font-bold">全国のクリニック</div>
+          {/* Hero Visual - Interactive Diagnosis Widget (PC) */}
+          <div className="hidden md:block flex-1 relative perspective-1000">
+            <div className="bg-white/95 backdrop-blur text-slate-800 p-8 rounded-3xl shadow-2xl shadow-black/20 max-w-sm mx-auto border border-white/20 relative z-10">
+
+              {/* Header */}
+              <div className="flex items-center justify-between mb-6 border-b border-slate-100 pb-4">
+                <div>
+                  <div className="text-xs font-bold text-teal-600 mb-1">SELF CHECK</div>
+                  <div className="text-xl font-extrabold text-slate-900 leading-tight tracking-tight">AGAリスク診断</div>
+                </div>
+                <div className="w-10 h-10 bg-teal-50 rounded-full flex items-center justify-center text-teal-600">
+                  <HelpCircle size={24} />
+                </div>
               </div>
-              <div className="bg-white/10 backdrop-blur border border-white/20 rounded-2xl p-6 text-center">
-                <div className="text-4xl font-extrabold text-white mb-2">¥1,800~</div>
-                <div className="text-teal-300 text-sm font-bold">月額最安値</div>
-              </div>
-              <div className="bg-white/10 backdrop-blur border border-white/20 rounded-2xl p-6 text-center">
-                <div className="text-4xl font-extrabold text-white mb-2">47</div>
-                <div className="text-teal-300 text-sm font-bold">全都道府県対応</div>
-              </div>
-              <div className="bg-white/10 backdrop-blur border border-white/20 rounded-2xl p-6 text-center">
-                <div className="text-4xl font-extrabold text-white mb-2">24H</div>
-                <div className="text-teal-300 text-sm font-bold">オンライン診療</div>
-              </div>
+
+              {/* Diagnosis Question */}
+              {diagnosisStep < diagnosisQuestions.length ? (
+                <div className="animate-fadeIn">
+                  <p className="font-bold text-lg mb-4 text-slate-800 leading-tight tracking-tight">
+                    Q{diagnosisStep + 1}. {diagnosisQuestions[diagnosisStep].question}
+                  </p>
+                  <div className="space-y-3">
+                    {diagnosisQuestions[diagnosisStep].options.map((option, i) => (
+                      <button
+                        key={i}
+                        onClick={() => setDiagnosisStep(prev => prev + 1)}
+                        className="w-full text-left px-4 py-3 rounded-xl border-2 border-slate-100 hover:border-teal-500 hover:bg-teal-50 text-slate-600 hover:text-teal-800 font-bold transition duration-200 flex items-center justify-between group"
+                      >
+                        {option}
+                        <ChevronRight size={16} className="text-slate-300 group-hover:text-teal-500 transition" />
+                      </button>
+                    ))}
+                  </div>
+                  <div className="mt-6 flex justify-center gap-2">
+                     <div className={`h-1.5 w-8 rounded-full transition ${diagnosisStep === 0 ? 'bg-teal-500' : 'bg-slate-200'}`}></div>
+                     <div className={`h-1.5 w-8 rounded-full transition ${diagnosisStep === 1 ? 'bg-teal-500' : 'bg-slate-200'}`}></div>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-6 animate-fadeIn">
+                  <div className="w-16 h-16 bg-teal-100 text-teal-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <CheckCircle2 size={32} />
+                  </div>
+                  <h3 className="text-xl font-bold mb-2 leading-tight tracking-tight">診断完了！</h3>
+                  <p className="text-sm text-slate-600 mb-6 leading-relaxed">あなたに最適な治療法と<br/>おすすめクリニックを表示します。</p>
+                  <Link href="/search">
+                    <button className="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 rounded-xl shadow-lg transition">
+                      診断結果を見る
+                    </button>
+                  </Link>
+                  <button
+                    onClick={() => setDiagnosisStep(0)}
+                    className="mt-4 text-xs text-slate-400 hover:text-slate-600 underline"
+                  >
+                    もう一度やり直す
+                  </button>
+                </div>
+              )}
+
             </div>
+
+            {/* Background Element for depth */}
+            <div className="absolute top-6 left-6 w-full h-full bg-slate-800 rounded-3xl opacity-50 -z-10 transform rotate-3"></div>
           </div>
         </div>
       </section>
