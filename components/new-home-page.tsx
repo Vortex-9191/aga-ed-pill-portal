@@ -365,11 +365,11 @@ export function NewHomePage() {
       </section>
 
       {/* --- Purpose Navigation --- */}
-      <section className="py-16 bg-slate-50 relative z-20">
+      <section className="py-20 bg-slate-50 relative z-20">
         <div className="max-w-6xl mx-auto px-4">
-          <div className="text-center mb-10">
-            <h2 className="text-2xl font-bold text-slate-900 mb-2">何から始めればいい？</h2>
-            <p className="text-slate-500 text-sm">現在の状況に合わせて、最適な情報へご案内します</p>
+          <div className="text-center mb-12 space-y-3">
+            <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 leading-tight tracking-tight">何から始めればいい？</h2>
+            <p className="text-slate-600 text-base leading-relaxed max-w-2xl mx-auto">現在の状況に合わせて、最適な情報へご案内します</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -401,8 +401,8 @@ export function NewHomePage() {
                   <div className="mb-5 w-16 h-16 rounded-2xl bg-slate-50 text-slate-600 group-hover:bg-teal-50 group-hover:text-teal-600 flex items-center justify-center transition duration-300">
                     {item.icon}
                   </div>
-                  <h3 className="text-lg font-bold mb-2 text-slate-900">{item.title}</h3>
-                  <p className="text-sm text-slate-500 mb-6 font-medium">{item.desc}</p>
+                  <h3 className="text-xl font-bold mb-3 text-slate-900 leading-tight tracking-tight">{item.title}</h3>
+                  <p className="text-sm text-slate-600 mb-6 leading-relaxed">{item.desc}</p>
                   <span className="text-xs font-bold text-teal-600 flex items-center gap-1 group-hover:gap-2 transition-all mt-auto bg-teal-50 px-4 py-2 rounded-full">
                     {item.link} <ChevronRight size={14} />
                   </span>
@@ -414,12 +414,12 @@ export function NewHomePage() {
       </section>
 
       {/* --- Online Recommended Section --- */}
-      <section className="py-16 px-4 bg-white">
+      <section className="py-20 px-4 bg-white">
         <div className="max-w-4xl mx-auto">
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
-            <div>
-              <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2">オンラインのおすすめクリニック</h2>
-              <p className="text-slate-500 text-sm font-medium">通院不要で自宅に届く。独自調査に基づいた厳選リスト</p>
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+            <div className="space-y-3">
+              <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 leading-tight tracking-tight">オンラインのおすすめクリニック</h2>
+              <p className="text-slate-600 text-base leading-relaxed">通院不要で自宅に届く。独自調査に基づいた厳選リスト</p>
             </div>
             {/* Tabs */}
             <div className="flex bg-slate-100 p-1 rounded-xl overflow-x-auto">
@@ -465,7 +465,7 @@ export function NewHomePage() {
                   <div className="flex-1 flex flex-col justify-between">
                     <div>
                       <div className="flex justify-between items-start mb-2">
-                        <h3 className="text-lg font-bold text-slate-900 group-hover:text-teal-700 transition">{clinic.name}</h3>
+                        <h3 className="text-xl font-extrabold text-slate-900 group-hover:text-teal-700 transition leading-tight tracking-tight">{clinic.name}</h3>
                         <div className="flex items-center gap-2">
                            <span className="text-[10px] bg-teal-50 text-teal-700 px-2 py-0.5 rounded border border-teal-100 font-bold">オンライン対応</span>
                         </div>
@@ -518,15 +518,15 @@ export function NewHomePage() {
       </section>
 
       {/* --- Area/Prefecture List Section --- */}
-      <section className="py-16 bg-slate-50">
+      <section className="py-20 bg-slate-50">
         <div className="max-w-6xl mx-auto px-4">
-          <div className="flex justify-between items-end mb-10">
-            <div>
-              <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-                <Map size={28} className="text-teal-600" />
+          <div className="flex justify-between items-end mb-12">
+            <div className="space-y-3">
+              <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 flex items-center gap-3 leading-tight tracking-tight">
+                <Map size={32} className="text-teal-600" />
                 都道府県からAGAクリニックを探す
               </h2>
-              <p className="text-sm text-slate-500 mt-2">
+              <p className="text-base text-slate-600 leading-relaxed">
                 お住まいの地域や、職場の近くのクリニックを検索できます。
               </p>
             </div>
@@ -535,8 +535,8 @@ export function NewHomePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {areaGroups.map((group, idx) => (
               <div key={idx} className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-                <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2 border-b border-slate-100 pb-2">
-                  <Navigation size={16} className="text-teal-500" />
+                <h3 className="font-extrabold text-lg text-slate-900 mb-4 flex items-center gap-2 border-b border-slate-100 pb-2 leading-tight tracking-tight">
+                  <Navigation size={18} className="text-teal-500" />
                   {group.region}
                 </h3>
                 <div className="flex flex-wrap gap-2">
@@ -554,10 +554,10 @@ export function NewHomePage() {
             ))}
           </div>
 
-          <div className="mt-8 bg-teal-900 text-white p-6 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-6">
-            <div>
-              <h3 className="font-bold text-lg mb-1">近くにクリニックがない場合は？</h3>
-              <p className="text-teal-200 text-sm">
+          <div className="mt-8 bg-teal-900 text-white p-8 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="space-y-2">
+              <h3 className="font-extrabold text-xl mb-2 leading-tight tracking-tight">近くにクリニックがない場合は？</h3>
+              <p className="text-teal-200 text-base leading-relaxed">
                 通院不要の「オンライン診療」なら、全国どこからでも受診可能です。
               </p>
             </div>
@@ -569,11 +569,11 @@ export function NewHomePage() {
       </section>
 
       {/* --- FAQ Section --- */}
-      <section className="py-16 bg-white border-t border-slate-100">
+      <section className="py-20 bg-white border-t border-slate-100">
         <div className="max-w-3xl mx-auto px-4">
-          <div className="text-center mb-10">
-            <h2 className="text-2xl font-bold text-slate-900">よくある質問</h2>
-            <p className="text-slate-500 text-sm mt-2">治療を始める前の不安を解消します</p>
+          <div className="text-center mb-12 space-y-3">
+            <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 leading-tight tracking-tight">よくある質問</h2>
+            <p className="text-slate-600 text-base leading-relaxed">治療を始める前の不安を解消します</p>
           </div>
 
           <div className="space-y-4">
