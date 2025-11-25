@@ -22,17 +22,17 @@ export function ClinicHeaderCard({ clinic }: ClinicHeaderCardProps) {
   const allTags = [...featureTags, ...responseTags]
 
   return (
-    <div className="bg-card rounded-2xl shadow-sm border border-border overflow-hidden mb-8">
+    <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition border border-slate-200 overflow-hidden mb-8">
       {/* メイン画像エリア */}
-      <div className="relative h-48 sm:h-72 bg-muted group">
-        <div className="absolute inset-0 flex items-center justify-center text-muted-foreground font-bold">
+      <div className="relative h-48 sm:h-72 bg-slate-100 group">
+        <div className="absolute inset-0 flex items-center justify-center text-slate-400 font-bold">
           <span className="flex flex-col items-center gap-2">
             <span className="text-4xl">🏥</span>
-            CLINIC IMAGE
+            <span className="text-sm">CLINIC IMAGE</span>
           </span>
         </div>
         <div className="absolute top-4 left-4 flex gap-2">
-          <span className="bg-primary text-primary-foreground text-xs font-bold px-3 py-1 rounded-full shadow-sm">
+          <span className="bg-primary text-primary-foreground text-xs font-bold px-4 py-2 rounded-full shadow-lg">
             おすすめPICKUP
           </span>
         </div>
@@ -49,7 +49,7 @@ export function ClinicHeaderCard({ clinic }: ClinicHeaderCardProps) {
             {allTags.map((tag, i) => (
               <span
                 key={i}
-                className="text-xs font-bold bg-muted text-muted-foreground px-3 py-1.5 rounded border border-border"
+                className="text-xs font-bold bg-primary/10 text-primary px-3 py-1.5 rounded-lg border border-primary/20 hover:bg-primary/20 transition"
               >
                 {tag}
               </span>
@@ -94,13 +94,13 @@ export function ClinicHeaderCard({ clinic }: ClinicHeaderCardProps) {
         </div>
 
         {/* ポイント & CTA */}
-        <div className="bg-accent border border-border rounded-xl p-5 flex flex-col md:flex-row md:items-center gap-4">
+        <div className="bg-primary/5 border border-primary/20 rounded-xl p-6 flex flex-col md:flex-row md:items-center gap-4 shadow-sm">
           <div className="flex-1">
-            <p className="text-primary font-bold text-sm mb-1 flex items-center gap-2">
-              <CheckCircle2 size={16} />
+            <p className="text-primary font-bold text-sm mb-2 flex items-center gap-2">
+              <CheckCircle2 size={18} />
               ここがポイント！
             </p>
-            <p className="text-foreground text-sm font-medium leading-relaxed">
+            <p className="text-slate-700 text-sm font-medium leading-relaxed">
               {clinic.notes || clinic.clinic_spec || "詳細はお問い合わせください"}
             </p>
           </div>
@@ -109,7 +109,7 @@ export function ClinicHeaderCard({ clinic }: ClinicHeaderCardProps) {
               href={clinic.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-primary hover:opacity-90 text-primary-foreground font-bold px-8 py-3 rounded-lg shadow-lg transition flex items-center justify-center gap-2 whitespace-nowrap"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-8 py-3.5 rounded-xl shadow-lg hover:shadow-xl transition transform hover:scale-105 flex items-center justify-center gap-2 whitespace-nowrap"
             >
               公式サイトを見る <ExternalLink size={16} />
             </a>

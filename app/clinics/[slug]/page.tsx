@@ -108,18 +108,22 @@ export default async function ClinicDetailPage({ params }: { params: { slug: str
   const structuredData = generateClinicStructuredData(clinicWithPrices)
 
   return (
-    <div className="min-h-screen bg-background font-sans text-foreground pb-24 lg:pb-0">
+    <div className="min-h-screen bg-slate-50 font-sans text-foreground pb-24 lg:pb-0">
       {/* 構造化データ */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
 
       <Header />
 
       {/* パンくずリスト */}
-      <ClinicBreadcrumbs
-        prefecture={clinic.prefecture}
-        municipalities={clinic.municipalities}
-        clinicName={clinic.clinic_name}
-      />
+      <div className="bg-white border-b border-slate-100">
+        <div className="max-w-5xl mx-auto px-4 py-4">
+          <ClinicBreadcrumbs
+            prefecture={clinic.prefecture}
+            municipalities={clinic.municipalities}
+            clinicName={clinic.clinic_name}
+          />
+        </div>
+      </div>
 
       <main className="max-w-5xl mx-auto px-4 py-8">
         {/* クリニックヘッダー */}
@@ -137,27 +141,28 @@ export default async function ClinicDetailPage({ params }: { params: { slug: str
 
         {/* 診療時間 */}
         {businessHours.length > 0 && (
-          <Card className="mb-10">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 border-l-4 border-primary pl-3">
+          <Card className="mb-10 shadow-md hover:shadow-lg transition border-slate-200">
+            <CardHeader className="bg-slate-50 border-b border-slate-100">
+              <CardTitle className="flex items-center gap-3">
+                <div className="w-1 h-6 bg-primary rounded-full"></div>
                 <Clock className="h-5 w-5 text-primary" />
-                診療時間
+                <span>診療時間</span>
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-6">
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b bg-muted">
-                      <th className="text-left py-3 px-4 font-medium text-foreground rounded-tl-lg">曜日</th>
-                      <th className="text-left py-3 px-4 font-medium text-foreground rounded-tr-lg">診療時間</th>
+                    <tr className="border-b border-slate-200 bg-slate-50">
+                      <th className="text-left py-3 px-4 font-bold text-slate-700">曜日</th>
+                      <th className="text-left py-3 px-4 font-bold text-slate-700">診療時間</th>
                     </tr>
                   </thead>
                   <tbody>
                     {businessHours.map(({ day, hours }) => (
-                      <tr key={day} className="border-b last:border-0 hover:bg-muted transition">
-                        <td className="py-3 px-4 font-medium text-foreground">{day}</td>
-                        <td className="py-3 px-4 text-muted-foreground">{hours}</td>
+                      <tr key={day} className="border-b border-slate-100 last:border-0 hover:bg-primary/5 transition">
+                        <td className="py-3 px-4 font-medium text-slate-900">{day}</td>
+                        <td className="py-3 px-4 text-slate-600">{hours}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -169,14 +174,15 @@ export default async function ClinicDetailPage({ params }: { params: { slug: str
 
         {/* 専門的な情報 */}
         {(specialists.length > 0 || diseases.length > 0 || treatments.length > 0) && (
-          <Card className="mb-10">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 border-l-4 border-primary pl-3">
+          <Card className="mb-10 shadow-md hover:shadow-lg transition border-slate-200">
+            <CardHeader className="bg-slate-50 border-b border-slate-100">
+              <CardTitle className="flex items-center gap-3">
+                <div className="w-1 h-6 bg-primary rounded-full"></div>
                 <Stethoscope className="h-5 w-5 text-primary" />
-                専門的な情報
+                <span>専門的な情報</span>
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-6 p-6">
               {specialists.length > 0 && (
                 <div>
                   <h4 className="text-sm font-medium text-foreground mb-2">専門医</h4>
@@ -219,15 +225,16 @@ export default async function ClinicDetailPage({ params }: { params: { slug: str
 
         {/* クリニックの特徴 */}
         {clinic.features && clinic.features !== "-" && (
-          <Card className="mb-10">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 border-l-4 border-primary pl-3">
+          <Card className="mb-10 shadow-md hover:shadow-lg transition border-slate-200">
+            <CardHeader className="bg-slate-50 border-b border-slate-100">
+              <CardTitle className="flex items-center gap-3">
+                <div className="w-1 h-6 bg-primary rounded-full"></div>
                 <Heart className="h-5 w-5 text-primary" />
-                クリニックの特徴
+                <span>クリニックの特徴</span>
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap">{clinic.features}</p>
+            <CardContent className="p-6">
+              <p className="text-slate-600 leading-relaxed whitespace-pre-wrap">{clinic.features}</p>
             </CardContent>
           </Card>
         )}
@@ -237,9 +244,10 @@ export default async function ClinicDetailPage({ params }: { params: { slug: str
 
         {/* Google Maps */}
         {clinic.address && (
-          <section className="mb-20 bg-card rounded-2xl shadow-sm border border-border overflow-hidden">
-            <div className="bg-muted px-6 py-4 border-b border-border">
-              <h2 className="font-bold text-foreground flex items-center gap-2">
+          <section className="mb-20 bg-white rounded-xl shadow-md hover:shadow-lg transition border border-slate-200 overflow-hidden">
+            <div className="bg-slate-50 px-6 py-4 border-b border-slate-100">
+              <h2 className="font-bold text-slate-900 flex items-center gap-3">
+                <div className="w-1 h-6 bg-primary rounded-full"></div>
                 <MapPin size={18} className="text-primary" />
                 アクセスマップ
               </h2>
