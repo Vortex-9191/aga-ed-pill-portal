@@ -239,19 +239,9 @@ export function NewHomePage() {
 
             {/* Desktop Nav */}
             <nav className="hidden md:flex space-x-8 text-sm font-bold text-slate-500">
-              <Link href="#" className="hover:text-teal-600 transition py-2 border-b-2 border-transparent hover:border-teal-600">AGAとは</Link>
-              <Link href="/areas" className="hover:text-teal-600 transition py-2 border-b-2 border-transparent hover:border-teal-600">クリニック検索</Link>
-              <Link href="#" className="hover:text-teal-600 transition py-2 border-b-2 border-transparent hover:border-teal-600">治療薬・費用</Link>
-              <Link href="#" className="hover:text-teal-600 transition py-2 border-b-2 border-transparent hover:border-teal-600">体験談</Link>
+              <Link href="/areas" className="hover:text-teal-600 transition py-2 border-b-2 border-transparent hover:border-teal-600">エリアから探す</Link>
+              <Link href="/stations" className="hover:text-teal-600 transition py-2 border-b-2 border-transparent hover:border-teal-600">駅から探す</Link>
             </nav>
-
-            {/* CTA Button (Desktop) */}
-            <div className="hidden md:flex items-center gap-4">
-              <button className="text-slate-600 hover:text-slate-900 font-bold text-sm">ログイン</button>
-              <button className="bg-teal-600 hover:bg-teal-700 text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-lg shadow-teal-600/20 transition transform hover:-translate-y-0.5">
-                無料カウンセリング
-              </button>
-            </div>
 
             {/* Mobile Menu Button */}
             <button
@@ -266,14 +256,8 @@ export function NewHomePage() {
         {/* Mobile Nav Dropdown */}
         {isMenuOpen && (
           <div className="md:hidden bg-white border-t border-slate-100 p-4 space-y-2 shadow-xl absolute w-full left-0 z-50">
-            <Link href="#" className="block px-4 py-3 rounded-lg hover:bg-slate-50 text-slate-700 font-bold">AGAとは</Link>
-            <Link href="/areas" className="block px-4 py-3 rounded-lg hover:bg-slate-50 text-slate-700 font-bold">クリニック検索</Link>
-            <Link href="#" className="block px-4 py-3 rounded-lg hover:bg-slate-50 text-slate-700 font-bold">治療薬・費用</Link>
-            <div className="pt-4 border-t border-slate-100 mt-2">
-              <button className="w-full bg-teal-600 text-white py-3 rounded-lg font-bold shadow-md">
-                無料カウンセリング予約
-              </button>
-            </div>
+            <Link href="/areas" className="block px-4 py-3 rounded-lg hover:bg-slate-50 text-slate-700 font-bold">エリアから探す</Link>
+            <Link href="/stations" className="block px-4 py-3 rounded-lg hover:bg-slate-50 text-slate-700 font-bold">駅から探す</Link>
           </div>
         )}
       </header>
