@@ -18,6 +18,7 @@ import {
   Map,
   Navigation,
   CreditCard,
+  Train,
 } from 'lucide-react'
 
 export function NewHomePage() {
