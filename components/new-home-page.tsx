@@ -296,57 +296,23 @@ export function NewHomePage() {
 
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight">
               未来の髪は、<br/>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-300 to-teal-500">正しい選択</span>で作る。
+              <span className="text-teal-400">正しい選択</span>で作る。
             </h1>
             <p className="text-slate-300 text-lg leading-relaxed max-w-xl mx-auto md:mx-0">
               科学的根拠に基づいたAGA治療で、1日約55円から。<br className="hidden sm:block"/>
               あなたに最適なクリニックと治療法が見つかります。
             </p>
 
-            {/* Search Box */}
-            <div className="bg-white p-2 rounded-2xl shadow-2xl shadow-slate-950/50 max-w-md mx-auto md:mx-0 flex flex-col sm:flex-row gap-2">
-              <div className="flex-1 flex items-center px-4 h-14 bg-slate-50 rounded-xl border border-transparent focus-within:border-teal-500 focus-within:bg-white transition group">
-                <MapPin className="text-slate-400 group-focus-within:text-teal-500 transition mr-3" size={20} />
-                <input
-                  type="text"
-                  placeholder="エリア・駅名 (例: 新宿)"
-                  className="bg-transparent w-full outline-none text-slate-800 placeholder-slate-400 font-medium"
-                />
-              </div>
-              <Link href="/search">
-                <button className="bg-teal-600 hover:bg-teal-700 text-white px-8 h-14 rounded-xl font-bold flex items-center justify-center gap-2 transition shadow-lg shadow-teal-600/20 w-full sm:w-auto">
-                  <Search size={20} />
-                  検索
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+              <Link href="/areas">
+                <button className="bg-teal-600 hover:bg-teal-700 text-white px-8 py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition shadow-lg shadow-teal-600/20 w-full sm:w-auto">
+                  <Map size={20} /> エリアから探す
                 </button>
               </Link>
-            </div>
-
-            {/* Mobile Only Diagnosis Button */}
-            <div className="md:hidden pt-4">
-              <button className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold py-4 rounded-xl shadow-lg flex items-center justify-center gap-2 animate-pulse">
-                <AlertCircle size={20} />
-                30秒で完了！AGAリスク診断スタート
-              </button>
-            </div>
-
-            {/* Search Options */}
-            <div className="flex flex-col sm:flex-row gap-3 pt-4">
-              <Link href="/areas" className="flex-1">
-                <button className="w-full bg-white hover:bg-slate-50 text-slate-800 px-6 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition shadow-md border border-slate-200 hover:border-teal-500">
-                  <Map size={18} className="text-teal-600" />
-                  エリアから探す
-                </button>
-              </Link>
-              <Link href="/map" className="flex-1">
-                <button className="w-full bg-white hover:bg-slate-50 text-slate-800 px-6 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition shadow-md border border-slate-200 hover:border-teal-500">
-                  <Navigation size={18} className="text-teal-600" />
-                  現在地から探す
-                </button>
-              </Link>
-              <Link href="/search?online=true" className="flex-1">
-                <button className="w-full bg-white hover:bg-slate-50 text-slate-800 px-6 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition shadow-md border border-slate-200 hover:border-teal-500">
-                  <Smartphone size={18} className="text-teal-600" />
-                  オンライン診療
+              <Link href="/stations">
+                <button className="bg-white text-slate-900 hover:bg-slate-50 px-8 py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition shadow-lg w-full sm:w-auto">
+                  <Train size={20} /> 駅から探す
                 </button>
               </Link>
             </div>
