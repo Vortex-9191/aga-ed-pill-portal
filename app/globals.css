@@ -148,8 +148,18 @@
   * {
     @apply border-border outline-ring/50;
   }
+
+  html {
+    font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "ヒラギノ角ゴ ProN W3", "Yu Gothic", "YuGothic", "Meiryo", sans-serif;
+  }
+
   body {
     @apply bg-background text-foreground;
+    font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "ヒラギノ角ゴ ProN W3", "Yu Gothic", "YuGothic", "Meiryo", sans-serif;
+  }
+
+  /* すべての要素に明示的にフォントを適用 */
+  button, input, textarea, select, div, span, p, h1, h2, h3, h4, h5, h6, a, li, label {
     font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "ヒラギノ角ゴ ProN W3", "Yu Gothic", "YuGothic", "Meiryo", sans-serif;
   }
 
