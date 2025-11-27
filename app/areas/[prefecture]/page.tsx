@@ -15,7 +15,11 @@ import {
   TrendingUp,
   Filter,
   HelpCircle,
-  AlertTriangle
+  AlertTriangle,
+  Car,
+  CreditCard,
+  Users,
+  Clock
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { notFound, useParams, useSearchParams } from "next/navigation"
@@ -257,17 +261,39 @@ export default function PrefecturePage() {
     return stationList[0]?.trim() || '駅情報なし'
   }
 
-  // Get features as array
-  const getFeatures = (clinic: any) => {
-    const features: string[] = []
+  // Get features as array with icons
+  const getFeatureBadges = (clinic: any) => {
+    const badges: Array<{ text: string; icon: string; color: string }> = []
+
+    // 駐車場
+    if (clinic.parking && clinic.parking !== '-') {
+      badges.push({ text: '駐車場あり', icon: 'car', color: 'blue' })
+    }
+
+    // 支払い方法
+    if (clinic.payment_methods && clinic.payment_methods.includes('クレジット')) {
+      badges.push({ text: 'カード可', icon: 'credit', color: 'green' })
+    }
+
+    // 女性対応
+    if (clinic.female_treatment && clinic.female_treatment !== '-' && clinic.female_treatment.includes('対応')) {
+      badges.push({ text: '女性対応', icon: 'users', color: 'pink' })
+    }
+
+    // 土日診療
+    if ((clinic.hours_saturday && clinic.hours_saturday !== '-') || (clinic.hours_sunday && clinic.hours_sunday !== '-')) {
+      badges.push({ text: '土日診療', icon: 'clock', color: 'orange' })
+    }
+
+    // 既存のfeatures
     if (clinic.features && clinic.features !== '-') {
       const featureList = clinic.features.split(',').map((f: string) => f.trim()).filter(Boolean)
-      features.push(...featureList.slice(0, 3))
+      featureList.slice(0, 2).forEach((f: string) => {
+        badges.push({ text: f, icon: 'check', color: 'slate' })
+      })
     }
-    if (clinic.online_consultation) {
-      features.unshift('オンライン診療')
-    }
-    return features
+
+    return badges.slice(0, 5)
   }
 
   const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE)
@@ -360,57 +386,43 @@ export default function PrefecturePage() {
                     </div>
                   )}
 
-                  <div className="flex flex-col sm:flex-row gap-6">
-                    <div className="sm:w-56 flex-shrink-0">
-                      <div className="w-full h-40 bg-slate-200 rounded-xl mb-3 relative overflow-hidden border border-slate-100">
-                        <div className="absolute top-2 left-2 bg-white/90 backdrop-blur px-2 py-1 rounded text-[10px] font-bold shadow-sm text-slate-800">
-                          外観写真
-                        </div>
-                        <div className="flex items-center justify-center h-full text-slate-400 text-xs font-bold">NO IMAGE</div>
-                      </div>
-                      <div className="hidden sm:block">
-                        <Link href={`/clinics/${clinic.slug}`}>
-                          <button className="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold text-sm py-3 rounded-lg shadow-md shadow-teal-600/20 transition transform active:scale-95">
-                            詳細ページを見る
-                          </button>
-                        </Link>
-                        {clinic.url && (
-                          <a href={clinic.url} target="_blank" rel="noopener noreferrer">
-                            <button className="w-full mt-2 text-teal-600 font-bold text-xs hover:bg-teal-50 py-2 rounded transition">
-                              公式サイトへ
-                            </button>
-                          </a>
-                        )}
-                      </div>
-                    </div>
+                  <div className="flex flex-col gap-5">
+                    {/* Header with title and badges */}
+                    <div>
+                      <h2 className="text-xl font-bold text-slate-900 leading-tight group-hover:text-teal-700 transition mb-3">
+                        {clinic.clinic_name}
+                      </h2>
 
-                    <div className="flex-1 flex flex-col h-full">
-                      <div>
-                        <h2 className="text-xl font-bold text-slate-900 leading-tight group-hover:text-teal-700 transition mb-2">
-                          {clinic.clinic_name}
-                        </h2>
-
-                        {clinic.catchphrase && (
-                          <p className="text-teal-600 font-bold text-sm mb-3 flex items-start gap-1.5">
-                            <CheckCircle2 size={16} className="mt-0.5 flex-shrink-0" />
-                            {clinic.catchphrase}
-                          </p>
-                        )}
-
-                        {clinic.description && (
-                          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed mb-4 bg-slate-50/50 p-3 rounded lg:bg-transparent lg:p-0">
-                            {clinic.description}
-                          </p>
-                        )}
-                      </div>
-
-                      <div className="flex flex-wrap gap-2 mb-5">
-                        {getFeatures(clinic).map((feature, i) => (
-                          <span key={i} className="text-xs font-medium px-2 py-1 bg-slate-100 text-slate-600 rounded border border-slate-200">
-                            {feature}
+                      {/* Feature Badges */}
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {getFeatureBadges(clinic).map((badge, i) => (
+                          <span
+                            key={i}
+                            className={`inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1.5 rounded-lg border ${
+                              badge.color === 'blue' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                              badge.color === 'green' ? 'bg-green-50 text-green-700 border-green-200' :
+                              badge.color === 'pink' ? 'bg-pink-50 text-pink-700 border-pink-200' :
+                              badge.color === 'orange' ? 'bg-orange-50 text-orange-700 border-orange-200' :
+                              'bg-slate-100 text-slate-600 border-slate-200'
+                            }`}
+                          >
+                            {badge.icon === 'car' && <Car size={12} />}
+                            {badge.icon === 'credit' && <CreditCard size={12} />}
+                            {badge.icon === 'users' && <Users size={12} />}
+                            {badge.icon === 'clock' && <Clock size={12} />}
+                            {badge.icon === 'check' && <CheckCircle2 size={12} />}
+                            {badge.text}
                           </span>
                         ))}
                       </div>
+
+                      {clinic.recommended_points && (
+                        <p className="text-teal-600 font-bold text-sm mb-3 flex items-start gap-1.5">
+                          <CheckCircle2 size={16} className="mt-0.5 flex-shrink-0" />
+                          {clinic.recommended_points}
+                        </p>
+                      )}
+                    </div>
 
                       <div className="mt-auto bg-slate-50 rounded-xl border border-slate-100 overflow-hidden text-sm">
                         <div className="grid grid-cols-1 md:grid-cols-2 border-b border-slate-100">
@@ -472,14 +484,20 @@ export default function PrefecturePage() {
                         </div>
                       </div>
 
-                      <div className="sm:hidden mt-4">
-                        <Link href={`/clinics/${clinic.slug}`}>
-                          <button className="w-full bg-teal-600 text-white font-bold py-3 rounded-lg shadow-md">
-                            詳細ページを見る
+                    {/* Actions */}
+                    <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                      <Link href={`/clinics/${clinic.slug}`} className="flex-1">
+                        <button className="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold text-sm py-3 rounded-lg shadow-md shadow-teal-600/20 transition transform active:scale-95">
+                          詳細ページを見る
+                        </button>
+                      </Link>
+                      {clinic.url && (
+                        <a href={clinic.url} target="_blank" rel="noopener noreferrer" className="flex-1 sm:flex-none">
+                          <button className="w-full sm:w-auto px-6 text-teal-600 font-bold text-sm py-3 rounded-lg border border-teal-200 hover:bg-teal-50 transition">
+                            公式サイトへ
                           </button>
-                        </Link>
-                      </div>
-
+                        </a>
+                      )}
                     </div>
                   </div>
                 </div>

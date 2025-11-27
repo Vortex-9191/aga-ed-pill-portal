@@ -68,3 +68,30 @@ export interface ClinicCardData {
   prefecture: string
   city: string
 }
+
+export interface FeaturedClinic {
+  featured_id: string
+  display_order: number
+  section: 'top' | 'pickup' | 'recommended'
+  label: string | null
+  custom_description: string | null
+  is_active: boolean
+  // Clinic fields
+  id: string
+  clinic_name: string
+  slug: string
+  address: string
+  prefecture: string
+  municipalities: string | null
+  stations: string | null
+  url: string | null
+  featured_subjects: string | null
+  corp_tel: string | null
+  rating: number | null
+  review_count: number
+  features: string | null
+  parking: string | null
+  payment_methods: string | null
+  female_treatment: string | null
+  business_hours: string | null
+}

@@ -13,10 +13,10 @@ env_path = os.path.join(project_root, '.env.local')
 load_dotenv(env_path)
 
 SUPABASE_URL = os.environ.get('NEXT_PUBLIC_SUPABASE_URL')
-SUPABASE_KEY = os.environ.get('SUPABASE_SERVICE_ROLE_KEY')
+SUPABASE_KEY = os.environ.get('SUPABASE_SERVICE_ROLE_KEY') or os.environ.get('NEXT_PUBLIC_SUPABASE_ANON_KEY')
 
 if not SUPABASE_URL or not SUPABASE_KEY:
-    print("[Error] SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set")
+    print("[Error] SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY (or ANON_KEY) must be set")
     exit(1)
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)

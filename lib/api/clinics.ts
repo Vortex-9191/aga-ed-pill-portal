@@ -108,3 +108,34 @@ export async function getPrefectureCounts() {
   })
   return counts
 }
+
+export async function getFeaturedClinics(section: 'top' | 'pickup' | 'recommended' = 'top', limit: number = 5) {
+  const supabase = await createClient()
+
+  // featured_clinics_viewが存在する場合はそれを使用
+  // 存在しない場合はclinicsテーブルから評価順で取得
+  const { data, error } = await supabase
+    .from('featured_clinics_view')
+    .select('*')
+    .eq('section', section)
+    .limit(limit)
+
+  if (error) {
+    // ビューが存在しない場合のフォールバック
+    console.log('Featured clinics view not found, falling back to clinics table')
+    const { data: fallbackData, error: fallbackError } = await supabase
+      .from('clinics')
+      .select('*')
+      .order('rating', { ascending: false, nullsLast: true })
+      .limit(limit)
+
+    if (fallbackError) {
+      console.error('Error fetching fallback clinics:', fallbackError)
+      return []
+    }
+
+    return fallbackData || []
+  }
+
+  return data || []
+}
