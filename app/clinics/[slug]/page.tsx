@@ -6,7 +6,6 @@ import { ClinicPriceTable } from "@/components/clinic-price-table"
 import { ClinicDoctorInfo } from "@/components/clinic-doctor-info"
 import { ClinicDetailTable } from "@/components/clinic-detail-table"
 import { ClinicStickyCTA } from "@/components/clinic-sticky-cta"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { createClient } from "@/lib/supabase/server"
 import { generateClinicStructuredData } from "@/lib/structured-data"
@@ -140,55 +139,98 @@ export default async function ClinicDetailPage({ params }: { params: { slug: str
         )}
 
         {/* 診療時間 */}
-        {businessHours.length > 0 && (
-          <Card className="mb-10 shadow-md hover:shadow-lg transition border-slate-200">
-            <CardHeader className="bg-slate-50 border-b border-slate-100">
-              <CardTitle className="flex items-center gap-3">
+        {(businessHours.length > 0 || clinic.business_hours) && (
+          <section className="mb-10 bg-white rounded-xl shadow-md hover:shadow-lg transition border border-slate-200 overflow-hidden">
+            <div className="bg-slate-50 px-6 py-4 border-b border-slate-100">
+              <h2 className="font-bold text-slate-900 flex items-center gap-3">
                 <div className="w-1 h-6 bg-primary rounded-full"></div>
-                <Clock className="h-5 w-5 text-primary" />
-                <span>診療時間</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-6">
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-slate-200 bg-slate-50">
-                      <th className="text-left py-3 px-4 font-bold text-slate-700">曜日</th>
-                      <th className="text-left py-3 px-4 font-bold text-slate-700">診療時間</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {businessHours.map(({ day, hours }) => (
-                      <tr key={day} className="border-b border-slate-100 last:border-0 hover:bg-primary/5 transition">
-                        <td className="py-3 px-4 font-medium text-slate-900">{day}</td>
-                        <td className="py-3 px-4 text-slate-600">{hours}</td>
+                <Clock size={18} className="text-primary" />
+                診療時間
+              </h2>
+            </div>
+            <div className="p-6">
+              {/* サマリー表示 */}
+              {clinic.business_hours && (
+                <div className="mb-6 p-4 bg-primary/5 border border-primary/20 rounded-lg">
+                  <p className="text-sm font-medium text-slate-700">{clinic.business_hours}</p>
+                </div>
+              )}
+
+              {/* 曜日別テーブル */}
+              {businessHours.length > 0 && (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="bg-slate-50">
+                        <th className="text-center py-3 px-2 font-bold text-slate-700 border-b border-slate-200 w-16">月</th>
+                        <th className="text-center py-3 px-2 font-bold text-slate-700 border-b border-slate-200 w-16">火</th>
+                        <th className="text-center py-3 px-2 font-bold text-slate-700 border-b border-slate-200 w-16">水</th>
+                        <th className="text-center py-3 px-2 font-bold text-slate-700 border-b border-slate-200 w-16">木</th>
+                        <th className="text-center py-3 px-2 font-bold text-slate-700 border-b border-slate-200 w-16">金</th>
+                        <th className="text-center py-3 px-2 font-bold text-slate-700 border-b border-slate-200 bg-blue-50 w-16">土</th>
+                        <th className="text-center py-3 px-2 font-bold text-slate-700 border-b border-slate-200 bg-red-50 w-16">日</th>
+                        <th className="text-center py-3 px-2 font-bold text-slate-700 border-b border-slate-200 bg-red-50 w-16">祝</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </CardContent>
-          </Card>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        {[
+                          { field: "hours_monday", isClosed: clinic.hours_monday === "-" || !clinic.hours_monday },
+                          { field: "hours_tuesday", isClosed: clinic.hours_tuesday === "-" || !clinic.hours_tuesday },
+                          { field: "hours_wednesday", isClosed: clinic.hours_wednesday === "-" || !clinic.hours_wednesday },
+                          { field: "hours_thursday", isClosed: clinic.hours_thursday === "-" || !clinic.hours_thursday },
+                          { field: "hours_friday", isClosed: clinic.hours_friday === "-" || !clinic.hours_friday },
+                          { field: "hours_saturday", isClosed: clinic.hours_saturday === "-" || !clinic.hours_saturday, isWeekend: true, isSat: true },
+                          { field: "hours_sunday", isClosed: clinic.hours_sunday === "-" || !clinic.hours_sunday, isWeekend: true },
+                          { field: "hours_holiday", isClosed: clinic.hours_holiday === "-" || !clinic.hours_holiday, isWeekend: true },
+                        ].map(({ field, isClosed, isWeekend, isSat }, idx) => (
+                          <td
+                            key={field}
+                            className={`text-center py-4 px-2 border-b border-slate-100 ${
+                              isClosed ? "text-slate-400" : "text-slate-700 font-medium"
+                            } ${isWeekend ? (isSat ? "bg-blue-50/50" : "bg-red-50/50") : ""}`}
+                          >
+                            {isClosed ? (
+                              <span className="text-xs">休</span>
+                            ) : (
+                              <span className="text-xs text-primary font-bold">●</span>
+                            )}
+                          </td>
+                        ))}
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              {/* 休診日 */}
+              {clinic.closed_days && clinic.closed_days !== "-" && (
+                <div className="mt-4 text-sm text-slate-600">
+                  <span className="font-medium">休診日：</span>
+                  {clinic.closed_days}
+                </div>
+              )}
+            </div>
+          </section>
         )}
 
         {/* 専門的な情報 */}
         {(specialists.length > 0 || diseases.length > 0 || treatments.length > 0) && (
-          <Card className="mb-10 shadow-md hover:shadow-lg transition border-slate-200">
-            <CardHeader className="bg-slate-50 border-b border-slate-100">
-              <CardTitle className="flex items-center gap-3">
+          <section className="mb-10 bg-white rounded-xl shadow-md hover:shadow-lg transition border border-slate-200 overflow-hidden">
+            <div className="bg-slate-50 px-6 py-4 border-b border-slate-100">
+              <h2 className="font-bold text-slate-900 flex items-center gap-3">
                 <div className="w-1 h-6 bg-primary rounded-full"></div>
-                <Stethoscope className="h-5 w-5 text-primary" />
-                <span>専門的な情報</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6 p-6">
+                <Stethoscope size={18} className="text-primary" />
+                専門的な情報
+              </h2>
+            </div>
+            <div className="p-6 space-y-6">
               {specialists.length > 0 && (
                 <div>
-                  <h4 className="text-sm font-medium text-foreground mb-2">専門医</h4>
+                  <h4 className="text-xs font-bold text-slate-500 mb-2">専門医</h4>
                   <div className="flex flex-wrap gap-2">
                     {specialists.map((specialist, i) => (
-                      <Badge key={i} variant="outline">
+                      <Badge key={i} variant="outline" className="text-slate-700">
                         {specialist}
                       </Badge>
                     ))}
@@ -197,10 +239,10 @@ export default async function ClinicDetailPage({ params }: { params: { slug: str
               )}
               {diseases.length > 0 && (
                 <div>
-                  <h4 className="text-sm font-medium text-foreground mb-2">対応可能な疾患</h4>
+                  <h4 className="text-xs font-bold text-slate-500 mb-2">対応可能な疾患</h4>
                   <div className="flex flex-wrap gap-2">
                     {diseases.map((disease, i) => (
-                      <Badge key={i} variant="secondary">
+                      <Badge key={i} variant="secondary" className="bg-slate-100 text-slate-700">
                         {disease}
                       </Badge>
                     ))}
@@ -209,34 +251,43 @@ export default async function ClinicDetailPage({ params }: { params: { slug: str
               )}
               {treatments.length > 0 && (
                 <div>
-                  <h4 className="text-sm font-medium text-foreground mb-2">専門的な治療</h4>
+                  <h4 className="text-xs font-bold text-slate-500 mb-2">専門的な治療</h4>
                   <div className="flex flex-wrap gap-2">
                     {treatments.map((treatment, i) => (
-                      <Badge key={i} variant="secondary">
+                      <Badge key={i} variant="secondary" className="bg-slate-100 text-slate-700">
                         {treatment}
                       </Badge>
                     ))}
                   </div>
                 </div>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </section>
         )}
 
         {/* クリニックの特徴 */}
         {clinic.features && clinic.features !== "-" && (
-          <Card className="mb-10 shadow-md hover:shadow-lg transition border-slate-200">
-            <CardHeader className="bg-slate-50 border-b border-slate-100">
-              <CardTitle className="flex items-center gap-3">
+          <section className="mb-10 bg-white rounded-xl shadow-md hover:shadow-lg transition border border-slate-200 overflow-hidden">
+            <div className="bg-slate-50 px-6 py-4 border-b border-slate-100">
+              <h2 className="font-bold text-slate-900 flex items-center gap-3">
                 <div className="w-1 h-6 bg-primary rounded-full"></div>
-                <Heart className="h-5 w-5 text-primary" />
-                <span>クリニックの特徴</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-6">
-              <p className="text-slate-600 leading-relaxed whitespace-pre-wrap">{clinic.features}</p>
-            </CardContent>
-          </Card>
+                <Heart size={18} className="text-primary" />
+                クリニックの特徴
+              </h2>
+            </div>
+            <div className="p-6">
+              <div className="flex flex-wrap gap-2">
+                {clinic.features.split(",").map((feature, i) => (
+                  <span
+                    key={i}
+                    className="text-sm bg-primary/10 text-primary px-3 py-1.5 rounded-lg border border-primary/20"
+                  >
+                    {feature.trim()}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </section>
         )}
 
         {/* 詳細情報テーブル */}

@@ -81,131 +81,129 @@ const regions = [
 
 export function Footer() {
   return (
-    <footer className="border-t border-primary/10 bg-gradient-to-b from-white to-primary/5">
-      <div className="container py-16 md:py-20">
+    <footer className="bg-slate-900 text-slate-400 py-16 text-sm">
+      <div className="max-w-6xl mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-10 md:gap-8">
         {/* Main Footer Content */}
-        <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-4 mb-12">
-          <div className="lg:col-span-1">
-            <h3 className="mb-5 text-lg font-bold text-primary">aga治療.com</h3>
-            <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-              全国のAGA治療専門クリニックを地域・駅・条件で検索できる総合ポータルサイトです。
-            </p>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              信頼できる医療機関のみを厳選して掲載しています。
-            </p>
-          </div>
-
-          <div>
-            <h3 className="mb-5 text-sm font-bold text-foreground/80 uppercase tracking-wider">クリニックを探す</h3>
-            <ul className="space-y-3 text-sm">
-              <li>
-                <Link href="/search" className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-2">
-                  <span className="text-primary">▸</span> クリニック検索
-                </Link>
-              </li>
-              <li>
-                <Link href="/areas" className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-2">
-                  <span className="text-primary">▸</span> エリアから探す
-                </Link>
-              </li>
-              <li>
-                <Link href="/stations" className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-2">
-                  <span className="text-primary">▸</span> 駅から探す
-                </Link>
-              </li>
-              <li>
-                <Link href="/map" className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-2">
-                  <span className="text-primary">▸</span> 地図から探す
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="mb-5 text-sm font-bold text-foreground/80 uppercase tracking-wider">サポート</h3>
-            <ul className="space-y-3 text-sm">
-              <li>
-                <Link href="/help" className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-2">
-                  <span className="text-primary">▸</span> よくある質問
-                </Link>
-              </li>
-              <li>
-                <Link href="/contact" className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-2">
-                  <span className="text-primary">▸</span> お問い合わせ
-                </Link>
-              </li>
-              <li>
-                <Link href="/sitemap-page" className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-2">
-                  <span className="text-primary">▸</span> サイトマップ
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="mb-5 text-sm font-bold text-foreground/80 uppercase tracking-wider">ポリシー</h3>
-            <ul className="space-y-3 text-sm">
-              <li>
-                <Link href="/privacy" className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-2">
-                  <span className="text-primary">▸</span> プライバシーポリシー
-                </Link>
-              </li>
-              <li>
-                <Link href="/terms" className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-2">
-                  <span className="text-primary">▸</span> 利用規約
-                </Link>
-              </li>
-              <li>
-                <Link href="/review-guidelines" className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-2">
-                  <span className="text-primary">▸</span> 口コミガイドライン
-                </Link>
-              </li>
-            </ul>
-          </div>
+        <div className="col-span-1">
+          <h3 className="text-white font-bold text-xl mb-6">AGA治療.com</h3>
+          <p className="text-xs leading-relaxed opacity-70 mb-4">
+            全国のAGA治療専門クリニックを地域・駅・条件で検索できる総合ポータルサイトです。
+          </p>
+          <p className="text-xs text-slate-400 leading-relaxed">
+            信頼できる医療機関のみを厳選して掲載しています。
+          </p>
         </div>
 
-        {/* All Prefectures Section */}
-        <div className="mt-8 pt-8 border-t border-primary/10">
-          <div className="mb-6 flex items-center justify-between">
-            <h4 className="text-sm font-semibold text-foreground">都道府県・市区町村から探す</h4>
-            <Link
-              href="/areas"
-              className="text-xs text-primary hover:underline"
-            >
-              すべて見る →
-            </Link>
-          </div>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {regions.map((region) => (
-              <div key={region.name}>
-                <h5 className="mb-2 text-xs font-semibold text-foreground">{region.name}</h5>
-                <div className="flex flex-wrap gap-x-3 gap-y-1">
-                  {region.prefectures.map((prefecture) => (
-                    <Link
-                      key={prefecture.slug}
-                      href={`/areas/${prefecture.slug}`}
-                      className="text-xs text-muted-foreground hover:text-primary hover:underline"
-                    >
-                      {prefecture.name}
-                    </Link>
-                  ))}
-                </div>
+        <div>
+          <h3 className="mb-5 text-sm font-bold text-white uppercase tracking-wider">クリニックを探す</h3>
+          <ul className="space-y-3 text-sm">
+            <li>
+              <Link href="/search" className="text-slate-400 hover:text-teal-400 transition-colors flex items-center gap-2">
+                <span className="text-teal-400">▸</span> クリニック検索
+              </Link>
+            </li>
+            <li>
+              <Link href="/areas" className="text-slate-400 hover:text-teal-400 transition-colors flex items-center gap-2">
+                <span className="text-teal-400">▸</span> エリアから探す
+              </Link>
+            </li>
+            <li>
+              <Link href="/stations" className="text-slate-400 hover:text-teal-400 transition-colors flex items-center gap-2">
+                <span className="text-teal-400">▸</span> 駅から探す
+              </Link>
+            </li>
+            <li>
+              <Link href="/map" className="text-slate-400 hover:text-teal-400 transition-colors flex items-center gap-2">
+                <span className="text-teal-400">▸</span> 地図から探す
+              </Link>
+            </li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 className="mb-5 text-sm font-bold text-white uppercase tracking-wider">サポート</h3>
+          <ul className="space-y-3 text-sm">
+            <li>
+              <Link href="/help" className="text-slate-400 hover:text-teal-400 transition-colors flex items-center gap-2">
+                <span className="text-teal-400">▸</span> よくある質問
+              </Link>
+            </li>
+            <li>
+              <Link href="/contact" className="text-slate-400 hover:text-teal-400 transition-colors flex items-center gap-2">
+                <span className="text-teal-400">▸</span> お問い合わせ
+              </Link>
+            </li>
+            <li>
+              <Link href="/sitemap-page" className="text-slate-400 hover:text-teal-400 transition-colors flex items-center gap-2">
+                <span className="text-teal-400">▸</span> サイトマップ
+              </Link>
+            </li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 className="mb-5 text-sm font-bold text-white uppercase tracking-wider">ポリシー</h3>
+          <ul className="space-y-3 text-sm">
+            <li>
+              <Link href="/privacy" className="text-slate-400 hover:text-teal-400 transition-colors flex items-center gap-2">
+                <span className="text-teal-400">▸</span> プライバシーポリシー
+              </Link>
+            </li>
+            <li>
+              <Link href="/terms" className="text-slate-400 hover:text-teal-400 transition-colors flex items-center gap-2">
+                <span className="text-teal-400">▸</span> 利用規約
+              </Link>
+            </li>
+            <li>
+              <Link href="/review-guidelines" className="text-slate-400 hover:text-teal-400 transition-colors flex items-center gap-2">
+                <span className="text-teal-400">▸</span> 口コミガイドライン
+              </Link>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      {/* All Prefectures Section */}
+      <div className="max-w-6xl mx-auto px-4 mt-8 pt-8 border-t border-slate-700">
+        <div className="mb-6 flex items-center justify-between">
+          <h4 className="text-sm font-semibold text-white">都道府県・市区町村から探す</h4>
+          <Link
+            href="/areas"
+            className="text-xs text-teal-400 hover:underline"
+          >
+            すべて見る →
+          </Link>
+        </div>
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {regions.map((region) => (
+            <div key={region.name}>
+              <h5 className="mb-2 text-xs font-semibold text-white">{region.name}</h5>
+              <div className="flex flex-wrap gap-x-3 gap-y-1">
+                {region.prefectures.map((prefecture) => (
+                  <Link
+                    key={prefecture.slug}
+                    href={`/areas/${prefecture.slug}`}
+                    className="text-xs text-slate-400 hover:text-teal-400 hover:underline"
+                  >
+                    {prefecture.name}
+                  </Link>
+                ))}
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
 
         {/* Quick Links to Stations */}
         <div className="mt-6 flex flex-wrap gap-4 text-xs">
           <Link
             href="/stations"
-            className="text-muted-foreground hover:text-primary hover:underline"
+            className="text-slate-400 hover:text-teal-400 hover:underline"
           >
             駅名一覧 →
           </Link>
         </div>
 
-        <div className="mt-8 border-t border-primary/10 pt-8 text-center text-xs text-muted-foreground">
+        <div className="mt-8 border-t border-slate-700 pt-8 text-center text-xs text-slate-500">
           <p>&copy; 2025 aga治療.com All rights reserved.</p>
         </div>
       </div>

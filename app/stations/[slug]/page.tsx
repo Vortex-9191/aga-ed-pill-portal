@@ -1,5 +1,7 @@
 "use client"
 
+import { Header } from "@/components/header"
+import { Footer } from "@/components/footer"
 import { DiagnosisTool } from "@/components/diagnosis-tool"
 import Link from "next/link"
 import { useEffect, useState } from "react"
@@ -13,9 +15,7 @@ import {
   TrendingUp,
   Filter,
   HelpCircle,
-  AlertTriangle,
-  Menu,
-  X
+  AlertTriangle
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { notFound, useParams, useSearchParams } from "next/navigation"
@@ -42,7 +42,6 @@ const prefectureToSlug: Record<string, string> = {
 export default function StationPage() {
   const params = useParams()
   const searchParams = useSearchParams()
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [activeSort, setActiveSort] = useState('recommended')
   const [showMap, setShowMap] = useState(false)
   const [clinics, setClinics] = useState<any[]>([])
@@ -69,7 +68,7 @@ export default function StationPage() {
       // Get clinics for facet generation and prefecture
       let facetQuery = supabase
         .from("clinics")
-        .select("prefecture, municipalities, featured_subjects, 土曜, 日曜, 月曜, 火曜, 水曜, 木曜, 金曜, 院長名, 特徴")
+        .select("prefecture, municipalities, featured_subjects, hours_saturday, hours_sunday, hours_monday, hours_tuesday, hours_wednesday, hours_thursday, hours_friday, director_name, features")
         .ilike("stations", `%${stationName}%`)
 
       const { data: allClinics } = await facetQuery
@@ -186,16 +185,55 @@ export default function StationPage() {
     fetchData()
   }, [slug, stationName, currentPage])
 
-  // Extract opening hours for each clinic
+  // Extract opening hours for each clinic (improved display)
   const getOpeningHours = (clinic: any) => {
-    const days = ['月曜', '火曜', '水曜', '木曜', '金曜', '土曜', '日曜']
-    const hours: string[] = []
-    days.forEach(day => {
-      if (clinic[day] && clinic[day] !== '-') {
-        hours.push(`${day}: ${clinic[day]}`)
+    // If business_hours is available from CSV, use it directly
+    if (clinic.business_hours && clinic.business_hours !== '-') {
+      return clinic.business_hours
+    }
+
+    // Otherwise, construct from individual day columns
+    const days = [
+      { short: '月', en: 'hours_monday' },
+      { short: '火', en: 'hours_tuesday' },
+      { short: '水', en: 'hours_wednesday' },
+      { short: '木', en: 'hours_thursday' },
+      { short: '金', en: 'hours_friday' },
+      { short: '土', en: 'hours_saturday' },
+      { short: '日', en: 'hours_sunday' }
+    ]
+
+    // Group consecutive days with same hours
+    const groups: Array<{ days: string[], hours: string }> = []
+    let currentGroup: { days: string[], hours: string } | null = null
+
+    days.forEach(({ short, en }) => {
+      const hours = clinic[en] && clinic[en] !== '-' ? clinic[en] : '休診'
+
+      if (!currentGroup || currentGroup.hours !== hours) {
+        if (currentGroup) groups.push(currentGroup)
+        currentGroup = { days: [short], hours }
+      } else {
+        currentGroup.days.push(short)
       }
     })
-    return hours.length > 0 ? hours.join(', ') : '要確認'
+    if (currentGroup) groups.push(currentGroup)
+
+    // Format groups
+    const formatted = groups.map(group => {
+      const dayRange = group.days.length === 1
+        ? group.days[0]
+        : group.days.length === 7
+        ? '毎日'
+        : group.days.length === 5 && group.days[0] === '月'
+        ? '平日'
+        : group.days.length === 2 && group.days[0] === '土'
+        ? '土日'
+        : `${group.days[0]}-${group.days[group.days.length - 1]}`
+      return `${dayRange} ${group.hours}`
+    }).join(' / ')
+
+    return formatted || '要確認'
   }
 
   // Get first station from stations list
@@ -225,35 +263,7 @@ export default function StationPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-800">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md shadow-sm border-b border-slate-100">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <Link href="/" className="flex items-center gap-2 group cursor-pointer">
-              <div className="bg-slate-900 text-teal-400 p-1.5 rounded-lg">
-                <TrendingUp size={20} />
-              </div>
-              <span className="text-xl font-bold tracking-tight text-slate-900">AGAミライ</span>
-            </Link>
-            <nav className="hidden md:flex space-x-8 text-sm font-bold text-slate-500">
-              <Link href="#" className="hover:text-teal-600 transition">AGAとは</Link>
-              <Link href="/search" className="hover:text-teal-600 transition">クリニック検索</Link>
-              <Link href="#" className="hover:text-teal-600 transition">治療薬・費用</Link>
-            </nav>
-            <div className="flex items-center gap-4">
-              <button
-                className="md:hidden p-2 text-slate-600"
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-              >
-                {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-              </button>
-              <button className="hidden md:block bg-teal-600 hover:bg-teal-700 text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-lg shadow-teal-600/20 transition">
-                無料カウンセリング
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       {/* Breadcrumbs */}
       <div className="bg-white border-b border-slate-100">
@@ -638,18 +648,7 @@ export default function StationPage() {
 
       </div>
 
-      {/* Footer */}
-      <footer className="bg-slate-900 text-slate-400 py-12 text-sm">
-        <div className="max-w-6xl mx-auto px-4 text-center">
-          <div className="flex items-center justify-center gap-2 text-white font-bold text-lg mb-4">
-            <TrendingUp size={20} />
-            AGAミライ
-          </div>
-          <p className="opacity-50 text-xs">
-            &copy; 2025 AGA Mirai. All Rights Reserved.
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   )
 }

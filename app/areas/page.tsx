@@ -164,17 +164,17 @@ export default function AreasPage() {
         </div>
 
         {/* Page Header */}
-        <div className="border-b border-slate-200 bg-gradient-to-b from-primary/5 to-background">
+        <div className="border-b border-slate-200 bg-white">
           <div className="container py-16 md:py-20">
             <div className="text-center mb-8">
-              <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-1.5 rounded-full text-sm font-bold mb-4">
+              <div className="inline-flex items-center gap-2 bg-teal-50 text-teal-600 px-4 py-1.5 rounded-full text-sm font-bold mb-4">
                 <MapPin className="h-4 w-4" />
                 全国対応
               </div>
-              <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+              <h1 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4 leading-tight tracking-tight">
                 エリアからAGAクリニックを探す
               </h1>
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+              <p className="text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
                 お住まいの都道府県や、通勤・通学先の主要エリアから
                 <br className="hidden md:block" />
                 通いやすいAGAクリニック・病院を検索できます
@@ -184,7 +184,7 @@ export default function AreasPage() {
             {/* Search Bar */}
             <div className="max-w-2xl mx-auto">
               <div className="bg-white p-2 rounded-2xl shadow-xl border border-slate-200 flex flex-col sm:flex-row gap-2">
-                <div className="flex-1 flex items-center px-4 h-14 bg-slate-50 rounded-xl border border-transparent focus-within:border-primary focus-within:bg-white transition">
+                <div className="flex-1 flex items-center px-4 h-14 bg-slate-50 rounded-xl border border-transparent focus-within:border-teal-500 focus-within:bg-white transition">
                   <Search className="text-slate-400 mr-3" size={20} />
                   <input
                     type="text"
@@ -192,7 +192,7 @@ export default function AreasPage() {
                     className="bg-transparent w-full outline-none text-slate-800 placeholder-slate-400"
                   />
                 </div>
-                <button className="bg-slate-900 hover:bg-primary text-white px-8 h-14 rounded-xl font-bold transition shadow-md">
+                <button className="bg-teal-600 hover:bg-teal-700 text-white px-8 h-14 rounded-xl font-bold transition shadow-md">
                   検索
                 </button>
               </div>
@@ -208,7 +208,7 @@ export default function AreasPage() {
                 <button
                   key={region.id}
                   onClick={() => scrollToRegion(region.id)}
-                  className="px-4 py-2 bg-white hover:bg-primary/10 border border-slate-200 hover:border-primary text-slate-600 hover:text-primary rounded-full text-xs font-bold transition shadow-sm"
+                  className="px-4 py-2 bg-white hover:bg-teal-50 border border-slate-200 hover:border-teal-500 text-slate-600 hover:text-teal-600 rounded-full text-xs font-bold transition shadow-sm"
                 >
                   {region.name}
                 </button>
@@ -221,8 +221,8 @@ export default function AreasPage() {
           {/* Popular Areas */}
           <section className="mb-16">
             <div className="flex items-center gap-2 mb-6">
-              <div className="w-1 h-6 bg-primary rounded-full"></div>
-              <h2 className="text-xl font-bold text-foreground">人気のエリアから探す</h2>
+              <div className="w-1 h-6 bg-teal-600 rounded-full"></div>
+              <h2 className="text-xl font-bold text-slate-900 leading-tight tracking-tight">人気のエリアから探す</h2>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {POPULAR_AREAS.map((area, idx) => {
@@ -231,11 +231,11 @@ export default function AreasPage() {
                   <Link
                     key={idx}
                     href={`/areas/${prefSlug}`}
-                    className="bg-white hover:bg-primary/5 border border-slate-200 hover:border-primary/50 rounded-xl p-3 text-center transition group shadow-sm hover:shadow-md flex flex-col justify-center h-24"
+                    className="bg-white hover:bg-teal-50 border border-slate-200 hover:border-teal-500 rounded-xl p-3 text-center transition group shadow-sm hover:shadow-md flex flex-col justify-center h-24"
                   >
-                    <div className="text-xs text-muted-foreground mb-1">{area.prefecture}</div>
-                    <div className="text-sm font-bold text-foreground group-hover:text-primary">{area.name}</div>
-                    <div className="text-[10px] text-primary mt-1 opacity-0 group-hover:opacity-100 transition">
+                    <div className="text-xs text-slate-500 mb-1">{area.prefecture}</div>
+                    <div className="text-sm font-bold text-slate-900 group-hover:text-teal-600">{area.name}</div>
+                    <div className="text-[10px] text-teal-600 mt-1 opacity-0 group-hover:opacity-100 transition">
                       {counts[area.prefecture] || 0}件
                     </div>
                   </Link>
@@ -249,10 +249,10 @@ export default function AreasPage() {
             {REGIONS.map((region) => (
               <section key={region.id} id={region.id} className="scroll-mt-32">
                 <div className="flex items-center gap-3 mb-6 border-b-2 border-slate-200 pb-3">
-                  <div className="bg-slate-800 text-white p-2 rounded-lg">
+                  <div className="bg-slate-900 text-teal-400 p-2 rounded-lg">
                     <Compass size={20} />
                   </div>
-                  <h2 className="text-2xl font-bold text-foreground">{region.name}エリア</h2>
+                  <h2 className="text-2xl font-bold text-slate-900 leading-tight tracking-tight">{region.name}エリア</h2>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -267,7 +267,7 @@ export default function AreasPage() {
                           {/* Prefecture Header */}
                           <div className="flex items-center justify-between mb-4">
                             <Link href={`/areas/${prefSlug}`} className="flex items-center gap-3">
-                              <span className="text-lg font-bold text-foreground group-hover:text-primary group-hover:underline transition">
+                              <span className="text-lg font-bold text-slate-900 group-hover:text-teal-600 group-hover:underline transition">
                                 {prefName}
                               </span>
                               <span className="bg-slate-100 text-slate-600 text-xs font-bold px-2.5 py-1 rounded-full">
@@ -276,7 +276,7 @@ export default function AreasPage() {
                             </Link>
                             <Link
                               href={`/areas/${prefSlug}`}
-                              className="w-8 h-8 bg-slate-50 rounded-full flex items-center justify-center text-slate-400 group-hover:bg-primary/10 group-hover:text-primary transition"
+                              className="w-8 h-8 bg-slate-50 rounded-full flex items-center justify-center text-slate-400 group-hover:bg-teal-50 group-hover:text-teal-600 transition"
                             >
                               <ChevronRight size={16} />
                             </Link>
@@ -293,7 +293,7 @@ export default function AreasPage() {
                                   <Link
                                     key={cIdx}
                                     href={`/areas/${prefSlug}`}
-                                    className="text-xs font-medium text-slate-600 hover:text-primary bg-slate-50 hover:bg-primary/10 border border-slate-100 hover:border-primary/30 px-3 py-1.5 rounded-lg transition"
+                                    className="text-xs font-medium text-slate-600 hover:text-teal-600 bg-slate-50 hover:bg-teal-50 border border-slate-100 hover:border-teal-300 px-3 py-1.5 rounded-lg transition"
                                   >
                                     {city}
                                   </Link>
@@ -306,7 +306,7 @@ export default function AreasPage() {
                         {/* Card Footer */}
                         <Link
                           href={`/areas/${prefSlug}`}
-                          className="block bg-slate-50 border-t border-slate-100 py-3 text-center text-xs font-bold text-slate-500 hover:text-primary hover:bg-primary/5 transition"
+                          className="block bg-slate-50 border-t border-slate-100 py-3 text-center text-xs font-bold text-slate-500 hover:text-teal-600 hover:bg-teal-50 transition"
                         >
                           {prefName}のすべてのクリニックを見る
                         </Link>
@@ -320,15 +320,15 @@ export default function AreasPage() {
 
           {/* Online Clinic CTA */}
           <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-8 md:p-12 text-white relative overflow-hidden shadow-2xl mb-12">
-            <div className="absolute top-0 right-0 w-96 h-96 bg-primary rounded-full filter blur-[100px] opacity-20 translate-x-1/3 -translate-y-1/3"></div>
+            <div className="absolute top-0 right-0 w-96 h-96 bg-teal-600 rounded-full filter blur-[100px] opacity-20 translate-x-1/3 -translate-y-1/3"></div>
 
             <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
               <div className="flex-1">
-                <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1 text-xs font-bold text-primary mb-4">
+                <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1 text-xs font-bold text-teal-400 mb-4">
                   <Smartphone size={14} />
                   近くにクリニックがない方へ
                 </div>
-                <h2 className="text-2xl md:text-3xl font-bold mb-3">通院不要の「オンライン診療」</h2>
+                <h2 className="text-2xl md:text-3xl font-bold mb-3 leading-tight tracking-tight">通院不要の「オンライン診療」</h2>
                 <p className="text-slate-300 text-sm leading-relaxed mb-6">
                   地方にお住まいの方や、忙しくて通院できない方に最適。
                   <br className="hidden md:block" />
@@ -336,8 +336,8 @@ export default function AreasPage() {
                 </p>
                 <div className="flex flex-wrap gap-3">
                   {["通院時間ゼロ", "誰にも会わない", "お薬は郵送", "土日祝もOK"].map((tag, i) => (
-                    <span key={i} className="flex items-center gap-1 text-xs font-bold bg-slate-700/50 px-3 py-1.5 rounded-lg text-primary border border-slate-600">
-                      <CheckCircle2 size={12} className="text-primary" /> {tag}
+                    <span key={i} className="flex items-center gap-1 text-xs font-bold bg-slate-700/50 px-3 py-1.5 rounded-lg text-teal-400 border border-slate-600">
+                      <CheckCircle2 size={12} className="text-teal-400" /> {tag}
                     </span>
                   ))}
                 </div>
@@ -346,7 +346,7 @@ export default function AreasPage() {
               <div className="flex flex-col w-full md:w-auto">
                 <Link
                   href="/search?online=true"
-                  className="bg-primary hover:bg-primary/90 text-white font-bold py-4 px-10 rounded-xl shadow-lg transition flex items-center justify-center gap-2 transform hover:scale-105"
+                  className="bg-teal-600 hover:bg-teal-700 text-white font-bold py-4 px-10 rounded-xl shadow-lg transition flex items-center justify-center gap-2 transform hover:scale-105"
                 >
                   オンラインのおすすめを見る <ArrowRight size={18} />
                 </Link>
@@ -361,7 +361,7 @@ export default function AreasPage() {
           <div className="text-center">
             <Link
               href="/stations"
-              className="inline-flex items-center gap-2 text-slate-500 hover:text-primary font-bold border-b border-slate-300 hover:border-primary pb-1 transition"
+              className="inline-flex items-center gap-2 text-slate-500 hover:text-teal-600 font-bold border-b border-slate-300 hover:border-teal-600 pb-1 transition"
             >
               <Train size={16} />
               通勤・通学の路線や駅から探す方はこちら

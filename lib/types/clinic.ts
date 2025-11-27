@@ -33,6 +33,16 @@ export interface Clinic {
   hours_saturday: string | null
   hours_sunday: string | null
   hours_holiday: string | null
+  business_hours: string | null  // Raw営業時間 from CSV (e.g., "10:00〜19:00 (月,火,水,木,金,土,日,祝)")
+  // 追加項目（CSVからの拡充用）
+  parking: string | null          // 駐車場
+  payment_methods: string | null  // 支払い方法
+  staff_gender: string | null     // スタッフ性別
+  female_treatment: string | null // 女性治療対応
+  prescription_time: string | null // 処方までの時間
+  counseling_fee: string | null   // カウンセリング料金
+  consultation_fee: string | null // 診察料
+  recommended_points: string | null // おすすめポイント
 }
 
 export interface ClinicPrice {
